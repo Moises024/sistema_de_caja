@@ -210,7 +210,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>elimina.png</normaloff>elimina.png</iconset>
+         <normaloff>../img/elimina.png</normaloff>../img/elimina.png</iconset>
        </property>
        <property name="iconSize">
         <size>
