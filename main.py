@@ -49,8 +49,10 @@ class Ventana(QMainWindow):
         login.salir.triggered.connect(self.salir)
         login.btn_borrar.clicked.connect(lambda:self.borrar(login))
         
+        #Selección de los botones
         botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9]
-       
+        
+        #Acción de los botones
         botones[0].clicked.connect(lambda:self.teclado(0,login)) 
         botones[1].clicked.connect(lambda:self.teclado(1,login)) 
         botones[2].clicked.connect(lambda:self.teclado(2,login)) 
@@ -61,21 +63,23 @@ class Ventana(QMainWindow):
         botones[7].clicked.connect(lambda:self.teclado(7,login)) 
         botones[8].clicked.connect(lambda:self.teclado(8,login))  
         botones[9].clicked.connect(lambda:self.teclado9(9,login)) 
-        #label 
+
+        #fecha y tiempo
         tiempo = time.localtime()
         tiemp_locaL = time.strftime("%d-%m-%y    %H:%M:%S", tiempo)
         login.label_tiempo.setText(tiemp_locaL)
 
         
-        # event change
+        # Evento de cambio
         login.input_login.textChanged.connect(lambda:self.hide_password(login))
      
         self.current_window = login
     
+    #Salir del sistema
     def salir(self):
         sys.exit()
 
-        
+    #Alerta cuando deja el label vacio
     def userValidate(self,login,caja):
         valor =login.input_login.text()
         if valor == "":
@@ -83,6 +87,7 @@ class Ventana(QMainWindow):
             self.error.text = "Por favor escribe tu contraseña"
             self.sendMsjError(self.error)
             return
+        
         if self.password == password:
             self.password =""
             self.tecla["valor"] =""
@@ -90,6 +95,7 @@ class Ventana(QMainWindow):
             self.change_window(caja)
             return
         
+        #Alerta cuando la contraseña es incorrecta
         self.error.titulo ="Error"
         self.error.text = "Contraseña incorrecta"
         self.sendMsjError(self.error)
@@ -98,6 +104,7 @@ class Ventana(QMainWindow):
         login.input_login.setText("")
         login.input_login.setFocus()
         
+    #Función para convertir la contraseña en asteriscos
     def hide_password(self,login):
         valor = login.input_login.text()  
         lista = list(valor)
@@ -109,7 +116,8 @@ class Ventana(QMainWindow):
         for string in lista:
             nuevo_valor += "*"
         login.input_login.setText(nuevo_valor)
-         
+    
+    #Función para mandar las alertas de error
     def sendMsjError(self,msj):
             self.msj.setText(msj.text)
             self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
@@ -117,14 +125,20 @@ class Ventana(QMainWindow):
             self.msj.setWindowTitle(msj.titulo)
             self.msj.exec()
     
+    #Función para cambiar de ventanas
     def change_window(self,window):
             self.current_window.hide()
             window.showFullScreen() 
             self.current_window =window
+    
+    #Función donde se simula el teclado
     def teclado(self,number,login):
             input = login.input_login
             self.tecla["valor"] += str(number)
             input.setText(self.tecla["valor"])
+
+
+    #Función del boton para eliminar caracteres
     def borrar(self,login):
             input = login.input_login
             valor = input.text()
