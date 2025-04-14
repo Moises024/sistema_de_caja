@@ -3,16 +3,18 @@ from PyQt6.QtGui import QAction
 from PyQt6.uic import loadUi 
 import sys
 import time
+from component.login import conectar_acciones_login,conectar_botones_login
+from component.caja import conectar_acciones_caja,conectar_botones_caja
 
 password = "1203"
-class Error():
+class msj():
     titulo =""
     text =""
 
 class Ventana(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.error = Error()
+        self.tipo_msj = msj()
         self.tecla = {"valor":""}
         self.msj = QMessageBox()
         self.layout_ = QVBoxLayout()
@@ -40,29 +42,21 @@ class Ventana(QMainWindow):
         login = loadUi("./ui/login.ui")
         login.showFullScreen() 
 
-
-        #activar los botones
-        caja.actionSalir.triggered.connect(self.salir)
-        caja.btn_cerrar.clicked.connect( lambda:self.change_window(login))
-
-        login.btn_acceder.clicked.connect(lambda:self.userValidate(login,caja))
-        login.salir.triggered.connect(self.salir)
-        login.btn_borrar.clicked.connect(lambda:self.borrar(login))
-        
         #Selección de los botones
-        botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9]
+        botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9,login.btn_acceder,login.btn_borrar]
         
-        #Acción de los botones
-        botones[0].clicked.connect(lambda:self.teclado(0,login)) 
-        botones[1].clicked.connect(lambda:self.teclado(1,login)) 
-        botones[2].clicked.connect(lambda:self.teclado(2,login)) 
-        botones[3].clicked.connect(lambda:self.teclado(3,login)) 
-        botones[4].clicked.connect(lambda:self.teclado(4,login)) 
-        botones[5].clicked.connect(lambda:self.teclado(5,login)) 
-        botones[6].clicked.connect(lambda:self.teclado(6,login)) 
-        botones[7].clicked.connect(lambda:self.teclado(7,login)) 
-        botones[8].clicked.connect(lambda:self.teclado(8,login))  
-        botones[9].clicked.connect(lambda:self.teclado9(9,login)) 
+        #funciones de login 
+        conectar_botones_login(botones,login,self,caja)
+        conectar_acciones_login(login,self)
+
+        #variables de caja
+        botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual]
+        acciones_caja =[caja.actionSalir]
+
+        #funciones de caja
+        conectar_botones_caja(botones_caja,self,login,caja)
+        conectar_acciones_caja(acciones_caja,self)
+
 
         #fecha y tiempo
         tiempo = time.localtime()
@@ -72,8 +66,9 @@ class Ventana(QMainWindow):
         
         # Evento de cambio
         login.input_login.textChanged.connect(lambda:self.hide_password(login))
-     
         self.current_window = login
+        #Crear inputs a limpiar 
+        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total]
     
     #Salir del sistema
     def salir(self):
@@ -83,22 +78,22 @@ class Ventana(QMainWindow):
     def userValidate(self,login,caja):
         valor =login.input_login.text()
         if valor == "":
-            self.error.titulo ="Error"
-            self.error.text = "Por favor escribe tu contraseña"
-            self.sendMsjError(self.error)
+            self.tipo_msj.titulo ="Error"
+            self.tipo_msj.text = "Por favor escribe tu contraseña"
+            self.sendMsjError(self.tipo_msj)
             return
         
         if self.password == password:
             self.password =""
             self.tecla["valor"] =""
             login.input_login.setText("")
-            self.change_window(caja)
+            self.change_window(caja,1)
             return
         
         #Alerta cuando la contraseña es incorrecta
-        self.error.titulo ="Error"
-        self.error.text = "Contraseña incorrecta"
-        self.sendMsjError(self.error)
+        self.tipo_msj.titulo ="Error"
+        self.tipo_msj.text = "Contraseña incorrecta"
+        self.sendMsjError(self.tipo_msj)
         self.password=""
         self.tecla["valor"] =""
         login.input_login.setText("")
@@ -124,10 +119,28 @@ class Ventana(QMainWindow):
             self.msj.setIcon(QMessageBox.Icon.Critical)
             self.msj.setWindowTitle(msj.titulo)
             self.msj.exec()
-    
+            
+    def sendMsjWarning(self,msj):
+        self.msj.setText(msj.text)
+        self.msj.setStandardButtons(QMessageBox.StandardButton.Ok|QMessageBox.StandardButton.Cancel)
+        self.msj.setIcon(QMessageBox.Icon.Warning)
+        self.msj.setWindowTitle(msj.titulo)
+        res=self.msj.exec()
+        return res 
+         
     #Función para cambiar de ventanas
-    def change_window(self,window):
-            self.current_window.hide()
+    def change_window(self,window,id):
+            if id == 0:
+                self.tipo_msj.titulo ="Warning"
+                self.tipo_msj.text ="¿Deseas cerrar sesión?"
+                res = self.sendMsjWarning(self.tipo_msj)
+                if res == QMessageBox.StandardButton.Ok :
+                     pass
+                else:
+                    return 
+            self.clear_input(self.inputs)  
+            self.inputs[2].setText("1000")
+            self.current_window.hide()  
             window.showFullScreen() 
             self.current_window =window
     
@@ -148,7 +161,10 @@ class Ventana(QMainWindow):
             self.tecla["valor"] = new_valor_password
             
             input.setText(new_valor_hide)
-        
+    def clear_input(self,inputs):
+         for input in inputs:
+              input.setText("")
+         
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
