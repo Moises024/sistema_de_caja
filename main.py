@@ -4,7 +4,7 @@ from PyQt6.uic import loadUi
 import sys
 import time
 from component.login import conectar_acciones_login,conectar_botones_login
-from component.caja import conectar_acciones_caja,conectar_botones_caja
+from component.caja import conectar_acciones_caja,conectar_botones_caja,crear_modelo
 
 password = "1203"
 class msj():
@@ -42,6 +42,9 @@ class Ventana(QMainWindow):
         login = loadUi("./ui/login.ui")
         login.showFullScreen() 
 
+        #crear model
+        crear_modelo(caja,self)
+
         #Selección de los botones
         botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9,login.btn_acceder,login.btn_borrar]
         
@@ -50,7 +53,7 @@ class Ventana(QMainWindow):
         conectar_acciones_login(login,self)
 
         #variables de caja
-        botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual]
+        botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista]
         acciones_caja =[caja.actionSalir]
 
         #funciones de caja
