@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>mainWindow</class>
+ <widget class="QMainWindow" name="mainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -405,9 +405,9 @@ border: 1px solid black</string>
    <widget class="QLabel" name="pago">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>200</x>
       <y>550</y>
-      <width>61</width>
+      <width>71</width>
       <height>21</height>
      </rect>
     </property>
@@ -431,9 +431,9 @@ border: 1px solid black</string>
    <widget class="QLabel" name="total">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>200</x>
       <y>530</y>
-      <width>81</width>
+      <width>71</width>
       <height>21</height>
      </rect>
     </property>
@@ -498,10 +498,10 @@ border: 1px solid black</string>
    <widget class="QLabel" name="nombre_usuario">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>220</x>
       <y>130</y>
-      <width>71</width>
-      <height>16</height>
+      <width>191</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -513,22 +513,12 @@ border: 1px solid black</string>
      <rect>
       <x>220</x>
       <y>150</y>
-      <width>61</width>
-      <height>16</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QListView" name="lista_articulo">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>170</y>
-      <width>311</width>
-      <height>341</height>
-     </rect>
     </property>
    </widget>
    <widget class="QLabel" name="devuelta">
@@ -537,7 +527,7 @@ border: 1px solid black</string>
       <x>230</x>
       <y>570</y>
       <width>71</width>
-      <height>16</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -625,7 +615,7 @@ border: 1px solid black</string>
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>860</x>
+      <x>870</x>
       <y>190</y>
       <width>61</width>
       <height>31</height>
@@ -664,7 +654,7 @@ border: 1px solid black</string>
    <widget class="QLabel" name="monto_pagado">
     <property name="geometry">
      <rect>
-      <x>810</x>
+      <x>820</x>
       <y>220</y>
       <width>151</width>
       <height>41</height>
@@ -788,6 +778,16 @@ border: 1px solid black</string>
      <string>Eliminar</string>
     </property>
    </widget>
+   <widget class="QListWidget" name="lista_articulo">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>170</y>
+      <width>311</width>
+      <height>341</height>
+     </rect>
+    </property>
+   </widget>
    <zorder>label</zorder>
    <zorder>gridLayoutWidget</zorder>
    <zorder>label_2</zorder>
@@ -800,7 +800,6 @@ border: 1px solid black</string>
    <zorder>fecha</zorder>
    <zorder>nombre_usuario</zorder>
    <zorder>no_orden</zorder>
-   <zorder>lista_articulo</zorder>
    <zorder>devuelta</zorder>
    <zorder>label_7</zorder>
    <zorder>label_4</zorder>
@@ -815,6 +814,7 @@ border: 1px solid black</string>
    <zorder>input_buscar</zorder>
    <zorder>btn_buscar</zorder>
    <zorder>btn_eliminar_lista</zorder>
+   <zorder>lista_articulo</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
@@ -830,10 +830,16 @@ border: 1px solid black</string>
     <property name="title">
      <string>Archivo</string>
     </property>
+    <addaction name="actionAlmacen"/>
     <addaction name="actionSalir"/>
    </widget>
    <addaction name="menuArchivo"/>
   </widget>
+  <action name="actionAlmacen">
+   <property name="text">
+    <string>Almacén</string>
+   </property>
+  </action>
   <action name="actionSalir">
    <property name="text">
     <string>Salir</string>

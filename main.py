@@ -1,12 +1,12 @@
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QTableWidget,QSizePolicy,QHeaderView
 from PyQt6.QtGui import QAction
 from PyQt6.uic import loadUi 
 import sys
 import time
 from component.login import conectar_acciones_login,conectar_botones_login
-from component.caja import conectar_acciones_caja,conectar_botones_caja,crear_modelo
+from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista
 
-password = "1203"
+
 class msj():
     titulo =""
     text =""
@@ -18,7 +18,16 @@ class Ventana(QMainWindow):
         self.tecla = {"valor":""}
         self.msj = QMessageBox()
         self.layout_ = QVBoxLayout()
-        
+        self.cola_item = ""
+        self.tabla_row = 1
+        self.tabla_column = 3
+        self.tabla_pointer =0
+        self.articulos = []
+        self.usuario = {
+             "nombre":"Moises Zabala",
+             "pass":"1203"
+        }
+
         #menu crea el l;a instancia del menu
         self.menuBar = self.menuBar()
         self.password =""
@@ -37,14 +46,13 @@ class Ventana(QMainWindow):
         
         caja = loadUi("./ui/caja.ui")
         
-    
+        self.caja = caja
         #cargar el ui
         login = loadUi("./ui/login.ui")
         login.showFullScreen() 
 
-        #crear model
-        crear_modelo(caja,self)
-
+      
+        
         #Selección de los botones
         botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9,login.btn_acceder,login.btn_borrar]
         
@@ -70,8 +78,9 @@ class Ventana(QMainWindow):
         # Evento de cambio
         login.input_login.textChanged.connect(lambda:self.hide_password(login))
         self.current_window = login
+
         #Crear inputs a limpiar 
-        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total]
+        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total,caja.pago,caja.devuelta,caja.itbis,caja.input_buscar,caja.devuelta_2,caja.total,caja.nombre_usuario,caja.no_orden]
     
     #Salir del sistema
     def salir(self):
@@ -79,6 +88,7 @@ class Ventana(QMainWindow):
 
     #Alerta cuando deja el label vacio
     def userValidate(self,login,caja):
+        caja.nombre_usuario.setText("")
         valor =login.input_login.text()
         if valor == "":
             self.tipo_msj.titulo ="Error"
@@ -86,11 +96,12 @@ class Ventana(QMainWindow):
             self.sendMsjError(self.tipo_msj)
             return
         
-        if self.password == password:
+        if self.usuario["pass"] == self.password :
             self.password =""
             self.tecla["valor"] =""
             login.input_login.setText("")
             self.change_window(caja,1)
+            caja.nombre_usuario.setText(self.usuario["nombre"])
             return
         
         #Alerta cuando la contraseña es incorrecta
@@ -123,7 +134,7 @@ class Ventana(QMainWindow):
             self.msj.setWindowTitle(msj.titulo)
             self.msj.exec()
             
-    def sendMsjWarning(self,msj):
+    def sendMsjWarning(self,msj): 
         self.msj.setText(msj.text)
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok|QMessageBox.StandardButton.Cancel)
         self.msj.setIcon(QMessageBox.Icon.Warning)
@@ -142,10 +153,12 @@ class Ventana(QMainWindow):
                 else:
                     return 
             self.clear_input(self.inputs)  
-            self.inputs[2].setText("1000")
             self.current_window.hide()  
             window.showFullScreen() 
             self.current_window =window
+            self.password =""
+            self.tecla["valor"] = ""
+            
     
     #Función donde se simula el teclado
     def teclado(self,number,login):
@@ -167,7 +180,9 @@ class Ventana(QMainWindow):
     def clear_input(self,inputs):
          for input in inputs:
               input.setText("")
-         
+         if self.cola_item :
+            limpiar_lista(self.caja,self)
+            self.articulos =[]
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

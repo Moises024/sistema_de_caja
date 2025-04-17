@@ -1,8 +1,9 @@
-import json
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView
 
-array_almacen = [{"articulo":"arroz","ID":"1","pecio":"250"},{"articulo":"martillo","ID":"2","precio":"500"}, {"articulo":"plato","ID":"3","precio":"120"}, {"articulo":"Papas","ID":"4","precio":"80"},
-                 {"articulo":"Plátanos","ID":"5","precio":"20"}]
+#Almacén de productos
+array_almacen = [{"articulo":"arroz","ID":"1","precio":"250","cantidad":"1"},{"articulo":"martillo","ID":"2","precio":"500","cantidad":"1"}, {"articulo":"plato","ID":"3","precio":"120","cantidad":"1"}, {"articulo":"Papas","ID":"4","precio":"80","cantidad":"1"},
+                 {"articulo":"Plátanos","ID":"5","precio":"20","cantidad":"1"}]
+
 class tecla:
    valor=""
 keys = tecla()
@@ -20,6 +21,7 @@ def back(caja):
     keys.valor= keys.valor[:-1]
     caja.monto_pagado.setText(keys.valor)
 
+#Alerta de cuando no se ingresa el pago
 def devuelta(caja,padre):
    if caja.precio_total.text() == "" or caja.monto_pagado.text() == "":
         padre.tipo_msj.titulo = "Warning"
@@ -29,7 +31,8 @@ def devuelta(caja,padre):
    
    precio_total = int(caja.precio_total.text())
    monto_pagado = int(caja.monto_pagado.text())
-
+   keys.valor =""
+   #Alerta de cuando ingresamos un pago menor que el total
    if monto_pagado < precio_total:
         msj = precio_total - monto_pagado
         padre.tipo_msj.titulo = "Warning"
@@ -39,24 +42,88 @@ def devuelta(caja,padre):
    
    monto_devolver = (precio_total - monto_pagado ) * -1
    caja.devuelta_2.setText(str(monto_devolver))
-
+   caja.pago.setText(str(monto_pagado))
+   caja.devuelta.setText(str(monto_devolver))
+   
+#Aparición de los productos en la lista
 def buscar_item(caja,padre):
+    tabla_pointer=0
+    tabla_row =1
     informacion = caja.input_buscar.text()
-    item = ""
+    item = QListWidgetItem()
 
+    tabla = QTableWidget(tabla_row,padre.tabla_column)
+    tabla.resizeColumnsToContents()
+    tabla.setHorizontalHeaderLabels(["nombre","cantidad","precio"])
+    tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+    tabla.horizontalHeader().setStretchLastSection(True)
+    tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    tabla.setFixedHeight(caja.lista_articulo.height())
+    bandera = False
+    index=0
+    total =0 
+    numero_articulo =""
+    cuenta_articulo =1
+    #Buscar productos en el almacén
     for item_dic in array_almacen:
+        
+        #Si se encuentra en el almacén lo mandará a la lista
         if item_dic["articulo"] == informacion or informacion == item_dic["ID"]:
-            item = item_dic
+            id = is_already_exist(item_dic,padre)
             
-    if item == "":
+            if  id == "False":
+                padre.articulos.append(item_dic)
+            else:
+                numero_articulo = id
+
+            bandera =True
+
+    #Si no se encuentra no mandara nada       
+    if not bandera:
+        padre.tipo_msj.titulo ="Error"
+        padre.tipo_msj.text = "Artículo no encontrado"
+        padre.sendMsjError(padre.tipo_msj)
         return
-    item_json = json.dumps(item)
-    item_list = QStandardItem(item_json)
-    padre.model.appendRow(item_list)
+    
+    for i,articulo in enumerate(padre.articulos):
+        tabla.setRowCount(tabla_row)
+        
+        if numero_articulo == i:
+            cuenta_articulo = int(articulo["cantidad"]) +1
+            articulo["cantidad"] = cuenta_articulo
+            precio = cuenta_articulo * int(articulo["precio"])
+            tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["articulo"]))
+            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(str(articulo["cantidad"])))
+            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(str(precio)))
+        else:    
+            tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["articulo"]))
+            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(str(articulo["cantidad"])))
+            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(str(int(articulo["precio"])*int(articulo["cantidad"]))))
+        tabla_row +=1
+        tabla_pointer+=1 
+        index=0
+        total += int(articulo["precio"])*int(articulo["cantidad"])
+        
+    caja.total.setText(str(total))
+    padre.inputs[2].setText(str(total))
+
+    if(tabla_pointer >= 1 and padre.cola_item):
+        limpiar_lista(caja,padre)
+
+    item.setSizeHint(tabla.sizeHint())
+    caja.lista_articulo.addItem(item)
+    caja.lista_articulo.setItemWidget(item,tabla)
+    padre.cola_item = item
+#Eliminar productos de la lista
 def eliminar_item(caja):
     pass
+def is_already_exist(item,padre):
+    for i,articulo in enumerate(padre.articulos):
+        if articulo["ID"] == item["ID"]: 
+            return i
+    return "False"
 
-
+#Acciones de los botones
 def conectar_botones_caja(botones,padre,login,caja):
  botones[0].clicked.connect( lambda:padre.change_window(login,0))
  botones[1].clicked.connect(lambda:teclado(caja))
@@ -83,7 +150,13 @@ def conectar_botones_caja(botones,padre,login,caja):
 
 def conectar_acciones_caja(acciones,padre):
     acciones[0].triggered.connect(padre.salir)
+def limpiar_lista(caja,padre):
+             # 1. Remover el widget visual
+        caja.lista_articulo.removeItemWidget(padre.cola_item)
 
-def crear_modelo(caja,padre):
-    padre.model =  QStandardItemModel(padre)
-    caja.lista_articulo.setModel(padre.model)
+    # 2. Eliminar el item de la lista para que no quede ocupando espacio
+        fila = caja.lista_articulo.row(padre.cola_item)
+        caja.lista_articulo.takeItem(fila)
+
+
+   
