@@ -8,42 +8,72 @@ class tecla:
    valor=""
 keys = tecla()
 
+class varibles:
+    render=False
+    monto_total=0
+    mont_pagado=0
+    row_aliminada =""
+vari = varibles()
+
 def teclado(caja):
     valor = caja.sender().text()
     if int(valor) >= 50:
       keys.valor = valor
     else:
         keys.valor += valor
-
+    vari.mont_pagado = int(keys.valor)
     caja.monto_pagado.setText(keys.valor)
 
 def back(caja):
     keys.valor= keys.valor[:-1]
     caja.monto_pagado.setText(keys.valor)
+    caja.devuelta_2.setText("")
+    caja.devuelta.setText("")
+    caja.pago.setText("")
 
 #Alerta de cuando no se ingresa el pago
 def devuelta(caja,padre):
-   if caja.precio_total.text() == "" or caja.monto_pagado.text() == "":
+   if caja.precio_total.text() == "" or caja.monto_pagado.text() == "" and not vari.render:
         padre.tipo_msj.titulo = "Warning"
         padre.tipo_msj.text = f"No se puede hacer dicha operación"
-        padre.sendMsjWarning(padre.tipo_msj)
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        vari.render =False
+        caja.devuelta_2.setText("")
         return
-   
-   precio_total = int(caja.precio_total.text())
-   monto_pagado = int(caja.monto_pagado.text())
+   for articulo in padre.articulos:
+        vari.monto_total+= int(articulo["precio"])*int(articulo["cantidad"])
+       
+   vari.mont_pagado = int(vari.mont_pagado)
    keys.valor =""
    #Alerta de cuando ingresamos un pago menor que el total
-   if monto_pagado < precio_total:
-        msj = precio_total - monto_pagado
+   if vari.mont_pagado < vari.monto_total and not vari.render:
+        msj = vari.monto_total - vari.mont_pagado
         padre.tipo_msj.titulo = "Warning"
         padre.tipo_msj.text = f"Faltan {msj} pesos por cobrar"
-        padre.sendMsjWarning(padre.tipo_msj)
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        vari.render =False
+        vari.monto_total=0
+        caja.devuelta_2.setText("")
+        caja.pago.setText("")
+        caja.monto_pagado.setText("")
         return
    
-   monto_devolver = (precio_total - monto_pagado ) * -1
-   caja.devuelta_2.setText(str(monto_devolver))
-   caja.pago.setText(str(monto_pagado))
-   caja.devuelta.setText(str(monto_devolver))
+   monto_devolver = (vari.monto_total - vari.mont_pagado ) * -1
+   if not vari.render:
+        caja.devuelta_2.setText(str(monto_devolver))
+        caja.pago.setText(str(vari.mont_pagado))
+        caja.devuelta.setText(str(monto_devolver))
+        caja.monto_pagado.setText(str(vari.mont_pagado))
+   else:
+        caja.devuelta_2.setText("")
+        caja.devuelta.setText("")
+        caja.monto_pagado.setText("")
+        caja.pago.setText("")
+
+       
+   vari.render =False
+   vari.mont_pagado=0
+   vari.monto_total=0
    
 #Aparición de los productos en la lista
 def buscar_item(caja,padre):
@@ -54,7 +84,7 @@ def buscar_item(caja,padre):
 
     tabla = QTableWidget(tabla_row,padre.tabla_column)
     tabla.resizeColumnsToContents()
-    tabla.setHorizontalHeaderLabels(["nombre","cantidad","precio"])
+    tabla.setHorizontalHeaderLabels(["Nombre","Cantidad","Precio"])
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -68,17 +98,23 @@ def buscar_item(caja,padre):
     for item_dic in array_almacen:
         
         #Si se encuentra en el almacén lo mandará a la lista
-        if item_dic["articulo"] == informacion or informacion == item_dic["ID"]:
-            id = is_already_exist(item_dic,padre)
-            
-            if  id == "False":
-                padre.articulos.append(item_dic)
+        if item_dic["articulo"] == informacion or informacion == item_dic["ID"] or vari.render:
+            if vari.render:
+                vari.row_aliminada =""
+               
+                if(padre.cola_item):
+                    limpiar_lista(caja,padre)
             else:
-                numero_articulo = id
+                id = is_already_exist(item_dic,padre)
+
+                if  id == "False":
+                    padre.articulos.append(item_dic)
+                else:
+                    numero_articulo = id
 
             bandera =True
 
-    #Si no se encuentra no mandara nada       
+    #Si no se encuentra no mandará nada       
     if not bandera:
         padre.tipo_msj.titulo ="Error"
         padre.tipo_msj.text = "Artículo no encontrado"
@@ -91,19 +127,18 @@ def buscar_item(caja,padre):
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
-            precio = cuenta_articulo * int(articulo["precio"])
             tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["articulo"]))
-            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(str(articulo["cantidad"])))
-            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(str(precio)))
+            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{articulo["precio"]}"))
         else:    
             tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["articulo"]))
-            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(str(articulo["cantidad"])))
-            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(str(int(articulo["precio"])*int(articulo["cantidad"]))))
+            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{articulo["precio"]}"))
         tabla_row +=1
         tabla_pointer+=1 
         index=0
         total += int(articulo["precio"])*int(articulo["cantidad"])
-        
+    tabla.cellClicked.connect(celda_click)
     caja.total.setText(str(total))
     padre.inputs[2].setText(str(total))
 
@@ -114,9 +149,21 @@ def buscar_item(caja,padre):
     caja.lista_articulo.addItem(item)
     caja.lista_articulo.setItemWidget(item,tabla)
     padre.cola_item = item
+    
 #Eliminar productos de la lista
-def eliminar_item(caja):
-    pass
+def eliminar_item(caja,padre):
+    articulos = padre.articulos
+
+    if vari.row_aliminada == "":
+        return
+    if int(articulos[vari.row_aliminada]["cantidad"]) <=1:
+        del articulos[vari.row_aliminada]
+    else:
+        articulos[vari.row_aliminada]["cantidad"] = int(articulos[vari.row_aliminada]["cantidad"])-1
+    vari.render =True
+ 
+    buscar_item(caja,padre)
+    devuelta(caja,padre)
 def is_already_exist(item,padre):
     for i,articulo in enumerate(padre.articulos):
         if articulo["ID"] == item["ID"]: 
@@ -146,7 +193,7 @@ def conectar_botones_caja(botones,padre,login,caja):
  botones[18].clicked.connect(lambda:back(caja))
  botones[19].clicked.connect(lambda:devuelta(caja,padre))
  botones[20].clicked.connect(lambda:buscar_item(caja,padre))
- botones[21].clicked.connect(lambda:eliminar_item(caja))
+ botones[21].clicked.connect(lambda:eliminar_item(caja,padre))
 
 def conectar_acciones_caja(acciones,padre):
     acciones[0].triggered.connect(padre.salir)
@@ -159,4 +206,7 @@ def limpiar_lista(caja,padre):
         caja.lista_articulo.takeItem(fila)
 
 
+def celda_click(row,column):
+    vari.row_aliminada = row
    
+

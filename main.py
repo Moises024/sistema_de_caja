@@ -11,6 +11,7 @@ class msj():
     titulo =""
     text =""
 
+
 class Ventana(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -45,6 +46,7 @@ class Ventana(QMainWindow):
         archivo.addAction(salir_accion)
         
         caja = loadUi("./ui/caja.ui")
+        almacen = loadUi("./ui/almacen.ui")
         
         self.caja = caja
         #cargar el ui
@@ -141,7 +143,13 @@ class Ventana(QMainWindow):
         self.msj.setWindowTitle(msj.titulo)
         res=self.msj.exec()
         return res 
-         
+    def sendMsjWarningSingle(self,msj): 
+        self.msj.setText(msj.text)
+        self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
+        self.msj.setIcon(QMessageBox.Icon.Warning)
+        self.msj.setWindowTitle(msj.titulo)
+        res=self.msj.exec()
+        return res 
     #Función para cambiar de ventanas
     def change_window(self,window,id):
             if id == 0:
