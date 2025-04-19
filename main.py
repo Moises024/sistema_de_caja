@@ -5,7 +5,7 @@ import sys
 import time
 from component.login import conectar_acciones_login,conectar_botones_login
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista
-
+from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
 
 class msj():
     titulo =""
@@ -46,7 +46,7 @@ class Ventana(QMainWindow):
         archivo.addAction(salir_accion)
         
         caja = loadUi("./ui/caja.ui")
-        almacen = loadUi("./ui/almacen.ui")
+        self.almacen = loadUi("./ui/almacen.ui")
         
         self.caja = caja
         #cargar el ui
@@ -64,13 +64,20 @@ class Ventana(QMainWindow):
 
         #variables de caja
         botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista]
-        acciones_caja =[caja.actionSalir]
+        acciones_caja =[caja.actionSalir,caja.actionAlmacen]
 
         #funciones de caja
         conectar_botones_caja(botones_caja,self,login,caja)
         conectar_acciones_caja(acciones_caja,self)
 
+        #variables de almacen
+        botones_almacen = [self.almacen.btn_buscar,self.almacen.btn_agregar,self.almacen.btn_eliminar]
+        acciones_almacen = [self.almacen.actionCaja,self.almacen.actionSalir]
 
+        #Funciones de almacen
+        conectar_botones_almacen(botones_almacen, self )
+        conectar_acciones_almacen(acciones_almacen,self)
+ 
         #fecha y tiempo
         tiempo = time.localtime()
         tiemp_locaL = time.strftime("%d-%m-%y    %H:%M:%S", tiempo)
@@ -143,6 +150,7 @@ class Ventana(QMainWindow):
         self.msj.setWindowTitle(msj.titulo)
         res=self.msj.exec()
         return res 
+    
     def sendMsjWarningSingle(self,msj): 
         self.msj.setText(msj.text)
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
@@ -150,6 +158,7 @@ class Ventana(QMainWindow):
         self.msj.setWindowTitle(msj.titulo)
         res=self.msj.exec()
         return res 
+    
     #Función para cambiar de ventanas
     def change_window(self,window,id):
             if id == 0:
@@ -160,6 +169,7 @@ class Ventana(QMainWindow):
                      pass
                 else:
                     return 
+                
             self.clear_input(self.inputs)  
             self.current_window.hide()  
             window.showFullScreen() 
@@ -185,6 +195,7 @@ class Ventana(QMainWindow):
             self.tecla["valor"] = new_valor_password
             
             input.setText(new_valor_hide)
+
     def clear_input(self,inputs):
          for input in inputs:
               input.setText("")

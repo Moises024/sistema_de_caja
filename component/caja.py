@@ -8,6 +8,7 @@ class tecla:
    valor=""
 keys = tecla()
 
+#Clase para manejar variables globales del sistema de pagos
 class varibles:
     render=False
     monto_total=0
@@ -15,6 +16,7 @@ class varibles:
     row_aliminada =""
 vari = varibles()
 
+#Función para manejar la entrada del teclado
 def teclado(caja):
     valor = caja.sender().text()
     if int(valor) >= 50:
@@ -24,6 +26,7 @@ def teclado(caja):
     vari.mont_pagado = int(keys.valor)
     caja.monto_pagado.setText(keys.valor)
 
+#Función para eliminar el último carácter del valor ingresado
 def back(caja):
     keys.valor= keys.valor[:-1]
     caja.monto_pagado.setText(keys.valor)
@@ -40,11 +43,14 @@ def devuelta(caja,padre):
         vari.render =False
         caja.devuelta_2.setText("")
         return
+   
+   #Calcula el monto total a cobrar
    for articulo in padre.articulos:
         vari.monto_total+= int(articulo["precio"])*int(articulo["cantidad"])
        
    vari.mont_pagado = int(vari.mont_pagado)
    keys.valor =""
+
    #Alerta de cuando ingresamos un pago menor que el total
    if vari.mont_pagado < vari.monto_total and not vari.render:
         msj = vari.monto_total - vari.mont_pagado
@@ -58,6 +64,7 @@ def devuelta(caja,padre):
         caja.monto_pagado.setText("")
         return
    
+   #Calcula el monto a devolver
    monto_devolver = (vari.monto_total - vari.mont_pagado ) * -1
    if not vari.render:
         caja.devuelta_2.setText(str(monto_devolver))
@@ -82,9 +89,10 @@ def buscar_item(caja,padre):
     informacion = caja.input_buscar.text()
     item = QListWidgetItem()
 
+    #Crea una tabla para mostrar los artículos
     tabla = QTableWidget(tabla_row,padre.tabla_column)
     tabla.resizeColumnsToContents()
-    tabla.setHorizontalHeaderLabels(["Nombre","Cantidad","Precio"])
+    tabla.setHorizontalHeaderLabels(["NOMBRE","CANTIDAD","PRECIO"])
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -94,6 +102,7 @@ def buscar_item(caja,padre):
     total =0 
     numero_articulo =""
     cuenta_articulo =1
+
     #Buscar productos en el almacén
     for item_dic in array_almacen:
         
@@ -121,6 +130,7 @@ def buscar_item(caja,padre):
         padre.sendMsjError(padre.tipo_msj)
         return
     
+    #Actualiza la tabla con los artículos encontrados
     for i,articulo in enumerate(padre.articulos):
         tabla.setRowCount(tabla_row)
         
@@ -142,6 +152,7 @@ def buscar_item(caja,padre):
     caja.total.setText(str(total))
     padre.inputs[2].setText(str(total))
 
+    # Limpia la lista si hay artículos
     if(tabla_pointer >= 1 and padre.cola_item):
         limpiar_lista(caja,padre)
 
@@ -164,6 +175,8 @@ def eliminar_item(caja,padre):
  
     buscar_item(caja,padre)
     devuelta(caja,padre)
+
+#Función para verificar si un artículo ya existe en la lista
 def is_already_exist(item,padre):
     for i,articulo in enumerate(padre.articulos):
         if articulo["ID"] == item["ID"]: 
@@ -197,6 +210,8 @@ def conectar_botones_caja(botones,padre,login,caja):
 
 def conectar_acciones_caja(acciones,padre):
     acciones[0].triggered.connect(padre.salir)
+    acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,1))
+
 def limpiar_lista(caja,padre):
              # 1. Remover el widget visual
         caja.lista_articulo.removeItemWidget(padre.cola_item)
