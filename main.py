@@ -7,6 +7,7 @@ from component.login import conectar_acciones_login,conectar_botones_login
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
 
+
 class msj():
     titulo =""
     text =""
@@ -16,7 +17,7 @@ class Ventana(QMainWindow):
     def __init__(self):
         super().__init__()
         self.tipo_msj = msj()
-        self.tecla = {"valor":""}
+        self.tecla = {"valor":"","key":""}
         self.msj = QMessageBox()
         self.layout_ = QVBoxLayout()
         self.cola_item = ""
@@ -184,7 +185,6 @@ class Ventana(QMainWindow):
             self.tecla["valor"] += str(number)
             input.setText(self.tecla["valor"])
 
-
     #Función del boton para eliminar caracteres
     def borrar(self,login):
             input = login.input_login
@@ -208,3 +208,5 @@ if __name__ == "__main__":
     ventana = Ventana()
     ventana.hide()
     sys.exit(app.exec())
+         
+         

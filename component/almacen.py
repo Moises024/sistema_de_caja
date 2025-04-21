@@ -17,10 +17,24 @@ class item:
         self.cantidad = cantidad
 
     def generador_id(self):
-        id=0
-        for t in almacen.articulos:
-            id +=1
-        return id 
+        
+        guardar = ""
+
+        if len(almacen.articulos) == 0:
+            return 1
+
+        for i_j,t in enumerate(almacen.articulos):
+            valor = t
+            if guardar == "":
+                guardar = int(valor.id)
+
+            for i_i,z in enumerate(almacen.articulos):
+                if guardar < int(z.id):
+                    guardar = z.id
+
+        guardar += 1
+        return guardar 
+
 
 #Función para verificar si un valor es un entero    
 def isInt(valor):
@@ -111,16 +125,35 @@ def agregar(padre):
     precio = padre.almacen.precio_articulo.text()
     cantidad = padre.almacen.cantidad_articulo.text()
     
+
+    cantidad = cantidad.strip()
+    nombre = nombre.strip()
+    bandera = False
+
     #Verifica si los campos están vacíos
-    if nombre.strip() == '' or precio.strip() == "" or cantidad.strip() =="":
+    if nombre == '' or precio.strip() == "" or cantidad =="":
 
         padre.tipo_msj.titulo = "Warning"
         padre.tipo_msj.text = "Por favor rellena los campos"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
     new_item = item(nombre,precio,cantidad)
-    almacen.articulos.append(new_item)
+
+    for articulo in  almacen.articulos:
+        if articulo.nombre == nombre:
+            bandera = True
+            articulo.cantidad = str(int(cantidad) + int(articulo.cantidad))
+            articulo.precio = precio
+
+        
+
+    if bandera == True:
+        pass
+    else:
+        almacen.articulos.append(new_item)
+
     render_table(padre,1)
+
 
 #Función para eliminar un artículo del inventario
 def eliminar(padre):
@@ -129,6 +162,14 @@ def eliminar(padre):
         padre.tipo_msj.titulo ="Warning"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
+    
+    padre.tipo_msj.titulo = "Warning"
+    padre.tipo_msj.text = (f"Seguro que quieres eliminar el artículo {almacen.articulos[almacen.eliminadas].nombre}?")
+
+    if (padre.sendMsjWarning(padre.tipo_msj)) != 1024:
+        return
+
+    
     del almacen.articulos[int(almacen.eliminadas)]
     render_table(padre,1)
     almacen.eliminadas=""
