@@ -6,11 +6,36 @@ import time
 from component.login import conectar_acciones_login,conectar_botones_login
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
+from PyQt6.QtCore import Qt, QObject, QEvent
 
 
 class msj():
     titulo =""
     text =""
+
+class TeclaListener(QObject):
+   
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.key =""
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.KeyPress:
+                
+                if event.key() == Qt.Key.Key_Backspace and self.parent.release:
+                   self.parent.tecla["key"] = "back"
+                   self.parent.release= False
+                print(self.parent.release_enter)
+                if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return and self.parent.release_enter:
+                    if self.parent.login.isVisible():
+                        
+                        self.parent.userValidate( self.parent.login, self.parent.caja)
+                        self.parent.release_enter = False
+     
+            # Ejemplo: si presiona Enter
+            
+        return False  # False para dejar que el evento siga su curso
+
 
 
 class Ventana(QMainWindow):
@@ -22,6 +47,9 @@ class Ventana(QMainWindow):
         self.layout_ = QVBoxLayout()
         self.cola_item = ""
         self.tabla_row = 1
+        self.bandera = False
+        self.release = True
+        self.release_enter = True
         self.tabla_column = 3
         self.tabla_pointer =0
         self.articulos = []
@@ -29,7 +57,12 @@ class Ventana(QMainWindow):
              "nombre":"Moises Zabala",
              "pass":"1203"
         }
+        # Creamos el listener
+        
 
+        # Instalamos el filtro de eventos en la ventana principal
+        
+        
         #menu crea el l;a instancia del menu
         self.menuBar = self.menuBar()
         self.password =""
@@ -50,11 +83,17 @@ class Ventana(QMainWindow):
         self.almacen = loadUi("./ui/almacen.ui")
         
         self.caja = caja
+        
         #cargar el ui
         login = loadUi("./ui/login.ui")
-        login.showFullScreen() 
-
-      
+        self.login = login
+       
+        # Establecer la política de enfoque para que reciba eventos de teclado
+       
+        login.showFullScreen()  # Mostrar a pantalla completa
+        login.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        login.setFocus()  # Establecer foco en el widget login
+       
         
         #Selección de los botones
         botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9,login.btn_acceder,login.btn_borrar]
@@ -86,7 +125,7 @@ class Ventana(QMainWindow):
 
         
         # Evento de cambio
-        login.input_login.textChanged.connect(lambda:self.hide_password(login))
+        login.input_login.textChanged.connect(lambda: self.hide_password(login))
         self.current_window = login
 
         #Crear inputs a limpiar 
@@ -96,14 +135,21 @@ class Ventana(QMainWindow):
     def salir(self):
         sys.exit()
 
+    def prueba(self, login):
+         login.input_login.text()
+         print("hola")
+         
+    
     #Alerta cuando deja el label vacio
     def userValidate(self,login,caja):
         caja.nombre_usuario.setText("")
         valor =login.input_login.text()
+
         if valor == "":
             self.tipo_msj.titulo ="Error"
             self.tipo_msj.text = "Por favor escribe tu contraseña"
             self.sendMsjError(self.tipo_msj)
+            self.release_enter = True
             return
         
         if self.usuario["pass"] == self.password :
@@ -112,12 +158,15 @@ class Ventana(QMainWindow):
             login.input_login.setText("")
             self.change_window(caja,1)
             caja.nombre_usuario.setText(self.usuario["nombre"])
+            self.release_enter = True
             return
         
         #Alerta cuando la contraseña es incorrecta
         self.tipo_msj.titulo ="Error"
         self.tipo_msj.text = "Contraseña incorrecta"
         self.sendMsjError(self.tipo_msj)
+        print("uservalidate",self.release_enter)
+        self.release_enter = True
         self.password=""
         self.tecla["valor"] =""
         login.input_login.setText("")
@@ -125,16 +174,27 @@ class Ventana(QMainWindow):
         
     #Función para convertir la contraseña en asteriscos
     def hide_password(self,login):
-        valor = login.input_login.text()  
+
+        if self.bandera: 
+             self.bandera = False
+             return
+        valor = login.input_login.text()   
         lista = list(valor)
+        if self.tecla["key"] == "back":
+             self.borrar(login)
+             self.release = True
+
+             self.tecla["key"] =""
         if lista:
             if lista[-1] != "*":
                 self.password += lista[-1]
-             
         nuevo_valor =""
         for string in lista:
             nuevo_valor += "*"
+        self.bandera = True
         login.input_login.setText(nuevo_valor)
+        
+    #Falta solucionar que cambie el estado de la tecla enter
     
     #Función para mandar las alertas de error
     def sendMsjError(self,msj):
@@ -142,7 +202,8 @@ class Ventana(QMainWindow):
             self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
             self.msj.setIcon(QMessageBox.Icon.Critical)
             self.msj.setWindowTitle(msj.titulo)
-            self.msj.exec()
+            return self.msj.exec()
+            
             
     def sendMsjWarning(self,msj): 
         self.msj.setText(msj.text)
@@ -166,17 +227,20 @@ class Ventana(QMainWindow):
                 self.tipo_msj.titulo ="Warning"
                 self.tipo_msj.text ="¿Deseas cerrar sesión?"
                 res = self.sendMsjWarning(self.tipo_msj)
-                if res == QMessageBox.StandardButton.Ok :
+                if res == QMessageBox.StandardButton.Ok:
+                     self.bandera = False
+                     self.release = True
                      pass
                 else:
                     return 
-                
+            
             self.clear_input(self.inputs)  
             self.current_window.hide()  
             window.showFullScreen() 
             self.current_window =window
             self.password =""
             self.tecla["valor"] = ""
+
             
     
     #Función donde se simula el teclado
@@ -193,7 +257,10 @@ class Ventana(QMainWindow):
             new_valor_password = self.password[:-1]
             self.password = new_valor_password
             self.tecla["valor"] = new_valor_password
+            print(self.tecla["valor"])
             
+            self.bandera = True
+
             input.setText(new_valor_hide)
 
     def clear_input(self,inputs):
@@ -203,9 +270,13 @@ class Ventana(QMainWindow):
             limpiar_lista(self.caja,self)
             self.articulos =[]
         
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ventana = Ventana()
+    tecla_listener = TeclaListener(ventana)
+    app.installEventFilter(tecla_listener)
     ventana.hide()
     sys.exit(app.exec())
          

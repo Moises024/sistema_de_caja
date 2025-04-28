@@ -18,4 +18,5 @@ def conectar_botones_login(botones,login,padre,caja):
 
 def conectar_acciones_login(login,padre):
     login.salir.triggered.connect(padre.salir)
+    
 
