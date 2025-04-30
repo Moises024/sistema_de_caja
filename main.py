@@ -4,10 +4,14 @@ from PyQt6.uic import loadUi
 import sys
 import time
 from component.login import conectar_acciones_login,conectar_botones_login
-from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista
+from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
 from PyQt6.QtCore import Qt, QObject, QEvent
 
+class variables():
+    release_enter = True
+
+var = variables()
 
 class msj():
     titulo =""
@@ -22,15 +26,76 @@ class TeclaListener(QObject):
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
                 
+                if self.parent.caja.isVisible():
+                     if event.key() == Qt.Key.Key_1:
+                          keys.valor += "1"
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          vari.mont_pagado = int(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_2:
+                          keys.valor += "2"
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          vari.mont_pagado = int(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_3:
+                          keys.valor += "3"
+                          vari.mont_pagado = int(keys.valor)
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_4:
+                          keys.valor += "4"
+                          vari.mont_pagado = int(keys.valor)
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_5:
+                          keys.valor += "5"
+                          vari.mont_pagado = int(keys.valor)
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_6:
+                          keys.valor += "6"
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          vari.mont_pagado = int(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_7:
+                          keys.valor += "7"
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          vari.mont_pagado = int(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_8:
+                          keys.valor += "8"
+                          vari.mont_pagado = int(keys.valor)
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_9:
+                          keys.valor += "9"
+                          vari.mont_pagado = int(keys.valor)
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_0:
+                          keys.valor += "0"
+                          vari.mont_pagado = int(keys.valor)
+                          self.parent.caja.monto_pagado.setText(keys.valor)
+                          return True
+                     if event.key() == Qt.Key.Key_Backspace:
+                          back(self.parent.caja)
+                          return True
+                     if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return:
+                          devuelta(self.parent.caja,self.parent)
+                          return True
+                     
+                     
                 if event.key() == Qt.Key.Key_Backspace and self.parent.release:
                    self.parent.tecla["key"] = "back"
                    self.parent.release= False
-                print(self.parent.release_enter)
-                if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return and self.parent.release_enter:
+
+                if event.key() == Qt.Key.Key_Enter and var.release_enter or event.key() == Qt.Key.Key_Return and var.release_enter:
+                
                     if self.parent.login.isVisible():
-                        
+                        var.release_enter = False
+
                         self.parent.userValidate( self.parent.login, self.parent.caja)
-                        self.parent.release_enter = False
+                        return True
      
             # Ejemplo: si presiona Enter
             
@@ -49,7 +114,6 @@ class Ventana(QMainWindow):
         self.tabla_row = 1
         self.bandera = False
         self.release = True
-        self.release_enter = True
         self.tabla_column = 3
         self.tabla_pointer =0
         self.articulos = []
@@ -133,12 +197,7 @@ class Ventana(QMainWindow):
     
     #Salir del sistema
     def salir(self):
-        sys.exit()
-
-    def prueba(self, login):
-         login.input_login.text()
-         print("hola")
-         
+        sys.exit()         
     
     #Alerta cuando deja el label vacio
     def userValidate(self,login,caja):
@@ -149,7 +208,7 @@ class Ventana(QMainWindow):
             self.tipo_msj.titulo ="Error"
             self.tipo_msj.text = "Por favor escribe tu contraseña"
             self.sendMsjError(self.tipo_msj)
-            self.release_enter = True
+            var.release_enter = True
             return
         
         if self.usuario["pass"] == self.password :
@@ -158,15 +217,15 @@ class Ventana(QMainWindow):
             login.input_login.setText("")
             self.change_window(caja,1)
             caja.nombre_usuario.setText(self.usuario["nombre"])
-            self.release_enter = True
+            var.release_enter = True
             return
         
         #Alerta cuando la contraseña es incorrecta
         self.tipo_msj.titulo ="Error"
         self.tipo_msj.text = "Contraseña incorrecta"
         self.sendMsjError(self.tipo_msj)
-        print("uservalidate",self.release_enter)
-        self.release_enter = True
+        
+        var.release_enter = True
         self.password=""
         self.tecla["valor"] =""
         login.input_login.setText("")
@@ -174,11 +233,12 @@ class Ventana(QMainWindow):
         
     #Función para convertir la contraseña en asteriscos
     def hide_password(self,login):
+        
+        valor = login.input_login.text()   
 
-        if self.bandera: 
+        if self.bandera or valor == "": 
              self.bandera = False
              return
-        valor = login.input_login.text()   
         lista = list(valor)
         if self.tecla["key"] == "back":
              self.borrar(login)
@@ -189,6 +249,7 @@ class Ventana(QMainWindow):
             if lista[-1] != "*":
                 self.password += lista[-1]
         nuevo_valor =""
+
         for string in lista:
             nuevo_valor += "*"
         self.bandera = True
@@ -230,6 +291,7 @@ class Ventana(QMainWindow):
                 if res == QMessageBox.StandardButton.Ok:
                      self.bandera = False
                      self.release = True
+                     var.release_enter = True
                      pass
                 else:
                     return 
@@ -244,7 +306,7 @@ class Ventana(QMainWindow):
             
     
     #Función donde se simula el teclado
-    def teclado(self,number,login):
+    def teclado(self,number,login): 
             input = login.input_login
             self.tecla["valor"] += str(number)
             input.setText(self.tecla["valor"])
@@ -257,7 +319,6 @@ class Ventana(QMainWindow):
             new_valor_password = self.password[:-1]
             self.password = new_valor_password
             self.tecla["valor"] = new_valor_password
-            print(self.tecla["valor"])
             
             self.bandera = True
 

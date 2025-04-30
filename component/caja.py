@@ -6,6 +6,7 @@ array_almacen = [{"articulo":"arroz","ID":"1","precio":"250","cantidad":"1"},{"a
 
 class tecla:
    valor=""
+   
 keys = tecla()
 
 #Clase para manejar variables globales del sistema de pagos
@@ -207,6 +208,9 @@ def conectar_botones_caja(botones,padre,login,caja):
  botones[19].clicked.connect(lambda:devuelta(caja,padre))
  botones[20].clicked.connect(lambda:buscar_item(caja,padre))
  botones[21].clicked.connect(lambda:eliminar_item(caja,padre))
+
+def prueba():
+    print("clicked")
 
 def conectar_acciones_caja(acciones,padre):
     acciones[0].triggered.connect(padre.salir)
