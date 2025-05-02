@@ -1,4 +1,6 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
+from component.db import db
+import sqlite3
 
 #Clase para almacenar artículos en el inventario
 class contenedorArticulo:
@@ -10,8 +12,8 @@ almacen =contenedorArticulo()
 #Clase para representar un artículo
 class item:
     
-    def __init__(self,nombre,precio,cantidad):
-        self.id = self.generador_id()
+    def __init__(self,nombre,precio,cantidad,id=""):
+        self.id =id 
         self.nombre = nombre
         self.precio = precio
         self.cantidad = cantidad
@@ -82,7 +84,7 @@ def agrear_lista_elimar(row,c):
 
 #Función para renderizar la tabla de artículos en la interfaz   
 def render_table(padre,cantida,item=""):
-   
+    buscar_articulo()
     Item_ = QListWidgetItem()
     tabla = QTableWidget(cantida,4)
 
@@ -142,15 +144,17 @@ def agregar(padre):
     for articulo in  almacen.articulos:
         if articulo.nombre == nombre:
             bandera = True
-            articulo.cantidad = str(int(cantidad) + int(articulo.cantidad))
-            articulo.precio = precio
+            nueva_cant = int(cantidad) + int(articulo.cantidad)
+            new_item = item(nombre,precio,nueva_cant)
 
         
 
     if bandera == True:
-        pass
+        update_articulo(new_item)
     else:
-        almacen.articulos.append(new_item)
+        #llamar a la db
+        insertar_articulo(new_item)
+        #almacen.articulos.append(new_item)
 
     render_table(padre,1)
 
@@ -170,12 +174,13 @@ def eliminar(padre):
         return
 
     
-    del almacen.articulos[int(almacen.eliminadas)]
+    delete_articulo(almacen.articulos[almacen.eliminadas])
     render_table(padre,1)
     almacen.eliminadas=""
 
 # Función para conectar acciones de los botones en la interfaz de almacenamiento
 def conectar_botones_almacen(botones,padre):
+   
     render_table(padre,len(almacen.articulos))
     botones[0].clicked.connect(lambda:buscar(padre))
     botones[1].clicked.connect(lambda:agregar(padre))
@@ -187,3 +192,48 @@ def conectar_acciones_almacen(botones,padre):
     botones[0].triggered.connect(lambda:padre.change_window(padre.caja,3))
     pass
 
+def insertar_articulo(articulo):
+    database = db()
+    conn = database.crearConnexion()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO articulos(nombre,cantidad,precio) values(?,?,?)",(articulo.nombre,articulo.cantidad,articulo.precio))
+    try:
+        conn.commit()
+    except sqlite3.Error as err:
+        print(err)
+    conn.close()
+
+def buscar_articulo():
+    database = db()
+    conn = database.crearConnexion()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM articulos")
+    articulos =[]
+    for fila in cursor.fetchall():
+        articulo=item(fila[1],fila[3],fila[2],fila[0])
+        articulos.append(articulo)
+    almacen.articulos = articulos
+    conn.close() 
+
+def  update_articulo(new_item):
+    database = db()
+    conn = database.crearConnexion()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE articulos SET nombre=?, cantidad=?, precio=? where nombre=?",(new_item.nombre,new_item.cantidad,new_item.precio,new_item.nombre))
+    try:
+        conn.commit()
+    except sqlite3.Error as err:
+        print(err)
+    conn.close()
+
+def  delete_articulo(articulo):
+    database = db()
+    conn = database.crearConnexion()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM articulos WHERE nombre=?",(articulo.nombre,))
+    try:
+        conn.commit()
+    except sqlite3.Error as err:
+        print(err)
+    conn.close()
+    

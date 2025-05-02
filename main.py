@@ -77,7 +77,7 @@ class TeclaListener(QObject):
                           vari.mont_pagado = int(keys.valor)
                           self.parent.caja.monto_pagado.setText(keys.valor)
                           return True
-                     if event.key() == Qt.Key.Key_Backspace:
+                     if event.key() == Qt.Key.Key_Minus:
                           back(self.parent.caja)
                           return True
                      if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return:
