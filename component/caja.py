@@ -1,9 +1,10 @@
 from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView
-
+from component.db import db
+import sqlite3
 #Almacén de productos
-array_almacen = [{"articulo":"arroz","ID":"1","precio":"250","cantidad":"1"},{"articulo":"martillo","ID":"2","precio":"500","cantidad":"1"}, {"articulo":"plato","ID":"3","precio":"120","cantidad":"1"}, {"articulo":"Papas","ID":"4","precio":"80","cantidad":"1"},
-                 {"articulo":"Plátanos","ID":"5","precio":"20","cantidad":"1"}]
-
+class items:
+    articulos=[]
+almacen = items()
 class tecla:
    valor=""
    
@@ -105,10 +106,10 @@ def buscar_item(caja,padre):
     cuenta_articulo =1
 
     #Buscar productos en el almacén
-    for item_dic in array_almacen:
+    for item_dic in almacen.articulos:
         
         #Si se encuentra en el almacén lo mandará a la lista
-        if item_dic["articulo"] == informacion or informacion == item_dic["ID"] or vari.render:
+        if item_dic["nombre"] == informacion or informacion == item_dic["ID"] or vari.render:
             if vari.render:
                 vari.row_aliminada =""
                
@@ -138,11 +139,11 @@ def buscar_item(caja,padre):
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
-            tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["articulo"]))
+            tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["nombre"]))
             tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{articulo["precio"]}"))
         else:    
-            tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["articulo"]))
+            tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
             tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{articulo["precio"]}"))
         tabla_row +=1
@@ -168,10 +169,10 @@ def eliminar_item(caja,padre):
 
     if vari.row_aliminada == "":
         return
-    if int(articulos[vari.row_aliminada]["cantidad"]) <=1:
-        del articulos[vari.row_aliminada]
-    else:
-        articulos[vari.row_aliminada]["cantidad"] = int(articulos[vari.row_aliminada]["cantidad"])-1
+    # if int(articulos[vari.row_aliminada]["cantidad"]) <=1:
+    del articulos[vari.row_aliminada]
+    # else:
+    #     articulos[vari.row_aliminada]["cantidad"] = int(articulos[vari.row_aliminada]["cantidad"])-1
     vari.render =True
  
     buscar_item(caja,padre)
@@ -186,6 +187,7 @@ def is_already_exist(item,padre):
 
 #Acciones de los botones
 def conectar_botones_caja(botones,padre,login,caja):
+ buscar_articulos()
  botones[0].clicked.connect( lambda:padre.change_window(login,0))
  botones[1].clicked.connect(lambda:teclado(caja))
  botones[2].clicked.connect(lambda:teclado(caja))
@@ -227,5 +229,19 @@ def limpiar_lista(caja,padre):
 
 def celda_click(row,column):
     vari.row_aliminada = row
+
+def buscar_articulos():
+    baseDeDatos = db()
+    conn = baseDeDatos.crearConnexion()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM articulos")
+    except sqlite3.Error as err:
+        print(err)
+    result = cursor.fetchall()
+    for item in result:
+        almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
+    print( almacen.articulos)
+ 
    
 

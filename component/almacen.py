@@ -185,6 +185,7 @@ def conectar_botones_almacen(botones,padre):
     botones[0].clicked.connect(lambda:buscar(padre))
     botones[1].clicked.connect(lambda:agregar(padre))
     botones[2].clicked.connect(lambda:eliminar(padre))   
+    botones[3].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
 
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 def conectar_acciones_almacen(botones,padre):

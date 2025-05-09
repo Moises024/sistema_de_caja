@@ -10,6 +10,9 @@
     <height>702</height>
    </rect>
   </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -219,6 +222,34 @@
       <width>621</width>
       <height>361</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_actualizar">
+    <property name="geometry">
+     <rect>
+      <x>1050</x>
+      <y>130</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../img/actualizar.png</normaloff>../img/actualizar.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>70</width>
+      <height>38</height>
+     </size>
     </property>
    </widget>
   </widget>

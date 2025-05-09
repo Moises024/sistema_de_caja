@@ -175,7 +175,7 @@ class Ventana(QMainWindow):
         conectar_acciones_caja(acciones_caja,self)
 
         #variables de almacen
-        botones_almacen = [self.almacen.btn_buscar,self.almacen.btn_agregar,self.almacen.btn_eliminar]
+        botones_almacen = [self.almacen.btn_buscar,self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar]
         acciones_almacen = [self.almacen.actionCaja,self.almacen.actionSalir]
 
         #Funciones de almacen
@@ -342,3 +342,7 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
          
+
+
+
+"""Conectar la pantalla registrar, hacer la pantalla que hará el informe de cada dia(Lo que vendió, etc.)"""
