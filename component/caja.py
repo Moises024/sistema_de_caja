@@ -211,9 +211,6 @@ def conectar_botones_caja(botones,padre,login,caja):
  botones[20].clicked.connect(lambda:buscar_item(caja,padre))
  botones[21].clicked.connect(lambda:eliminar_item(caja,padre))
 
-def prueba():
-    print("clicked")
-
 def conectar_acciones_caja(acciones,padre):
     acciones[0].triggered.connect(padre.salir)
     acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,1))
@@ -241,7 +238,7 @@ def buscar_articulos():
     result = cursor.fetchall()
     for item in result:
         almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
-    print( almacen.articulos)
+   
  
    
 

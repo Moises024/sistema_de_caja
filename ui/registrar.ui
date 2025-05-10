@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="btn_registar">
+   <widget class="QPushButton" name="btn_registrar">
     <property name="geometry">
      <rect>
       <x>640</x>
@@ -86,7 +86,7 @@
      <string>Registrar Usuario</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="inpu_apellido">
+   <widget class="QLineEdit" name="input_apellido">
     <property name="geometry">
      <rect>
       <x>580</x>
@@ -94,6 +94,9 @@
       <width>241</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QLineEdit" name="input_nombre">
@@ -104,6 +107,9 @@
       <width>241</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
@@ -146,7 +152,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLineEdit" name="input_contrasena">
+   <widget class="QLineEdit" name="input_contra">
     <property name="geometry">
      <rect>
       <x>580</x>
@@ -154,6 +160,9 @@
       <width>241</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
@@ -188,14 +197,20 @@
     <property name="title">
      <string>Archivo</string>
     </property>
-    <addaction name="actionLogin"/>
+    <addaction name="login"/>
+    <addaction name="salir"/>
    </widget>
    <addaction name="menuLogin"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionLogin">
+  <action name="login">
    <property name="text">
     <string>Login</string>
+   </property>
+  </action>
+  <action name="salir">
+   <property name="text">
+    <string>Salir</string>
    </property>
   </action>
  </widget>

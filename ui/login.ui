@@ -329,11 +329,17 @@
     <property name="title">
      <string>Archivo</string>
     </property>
+    <addaction name="registrar"/>
     <addaction name="salir"/>
    </widget>
    <addaction name="menuArchivo"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="registrar">
+   <property name="text">
+    <string>Registrar</string>
+   </property>
+  </action>
   <action name="salir">
    <property name="text">
     <string>Salir</string>

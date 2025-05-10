@@ -1,11 +1,15 @@
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QTableWidget,QSizePolicy,QHeaderView
 from PyQt6.QtGui import QAction
 from PyQt6.uic import loadUi 
+from PyQt6.QtGui import QPixmap
+from pathlib import Path
 import sys
 import time
 from component.login import conectar_acciones_login,conectar_botones_login
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
+from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
+
 from PyQt6.QtCore import Qt, QObject, QEvent
 
 class variables():
@@ -117,10 +121,7 @@ class Ventana(QMainWindow):
         self.tabla_column = 3
         self.tabla_pointer =0
         self.articulos = []
-        self.usuario = {
-             "nombre":"Moises Zabala",
-             "pass":"1203"
-        }
+        self.usuario=""
         # Creamos el listener
         
 
@@ -147,7 +148,11 @@ class Ventana(QMainWindow):
         self.almacen = loadUi("./ui/almacen.ui")
         
         self.caja = caja
-        
+        #cagar regitsro ui
+        self.registrar = loadUi("./ui/registrar.ui")
+        botones_registrar = [self.registrar.btn_registrar]
+        conectar_acciones_registrar(self.registrar,self)
+        conectar_botones_registrar(botones_registrar,self.registrar,self)
         #cargar el ui
         login = loadUi("./ui/login.ui")
         self.login = login
@@ -200,36 +205,7 @@ class Ventana(QMainWindow):
         sys.exit()         
     
     #Alerta cuando deja el label vacio
-    def userValidate(self,login,caja):
-        caja.nombre_usuario.setText("")
-        valor =login.input_login.text()
-
-        if valor == "":
-            self.tipo_msj.titulo ="Error"
-            self.tipo_msj.text = "Por favor escribe tu contraseña"
-            self.sendMsjError(self.tipo_msj)
-            var.release_enter = True
-            return
-        
-        if self.usuario["pass"] == self.password :
-            self.password =""
-            self.tecla["valor"] =""
-            login.input_login.setText("")
-            self.change_window(caja,1)
-            caja.nombre_usuario.setText(self.usuario["nombre"])
-            var.release_enter = True
-            return
-        
-        #Alerta cuando la contraseña es incorrecta
-        self.tipo_msj.titulo ="Error"
-        self.tipo_msj.text = "Contraseña incorrecta"
-        self.sendMsjError(self.tipo_msj)
-        
-        var.release_enter = True
-        self.password=""
-        self.tecla["valor"] =""
-        login.input_login.setText("")
-        login.input_login.setFocus()
+    
         
     #Función para convertir la contraseña en asteriscos
     def hide_password(self,login):
@@ -282,6 +258,16 @@ class Ventana(QMainWindow):
         res=self.msj.exec()
         return res 
     
+    def sendMsjSuccess(self,msj): 
+        self.msj.setText(msj.text)
+        self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
+        pixmap = QPixmap("./img/success.png")
+        redimencionada = pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.msj.setIconPixmap(redimencionada)
+        self.msj.setWindowTitle(msj.titulo)
+        res=self.msj.exec()
+        return res 
+    
     #Función para cambiar de ventanas
     def change_window(self,window,id):
             if id == 0:
@@ -296,12 +282,16 @@ class Ventana(QMainWindow):
                 else:
                     return 
             
+            
             self.clear_input(self.inputs)  
             self.current_window.hide()  
             window.showFullScreen() 
             self.current_window =window
             self.password =""
             self.tecla["valor"] = ""
+            if id == 1:
+                 self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
+                 
 
             
     
@@ -345,4 +335,4 @@ if __name__ == "__main__":
 
 
 
-"""Conectar la pantalla registrar, hacer la pantalla que hará el informe de cada dia(Lo que vendió, etc.)"""
+"""Ingresar la factura dentro de una bd y que luego mande un mensaje de que se almacenó.)"""
