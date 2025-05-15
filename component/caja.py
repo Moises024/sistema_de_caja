@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView
 from component.db import db
 import sqlite3
+import time
+import json
 #Almacén de productos
 class items:
     articulos=[]
@@ -80,9 +82,7 @@ def devuelta(caja,padre):
         caja.pago.setText("")
 
        
-   vari.render =False
-   vari.mont_pagado=0
-   vari.monto_total=0
+ 
    
 #Aparición de los productos en la lista
 def buscar_item(caja,padre):
@@ -210,10 +210,12 @@ def conectar_botones_caja(botones,padre,login,caja):
  botones[19].clicked.connect(lambda:devuelta(caja,padre))
  botones[20].clicked.connect(lambda:buscar_item(caja,padre))
  botones[21].clicked.connect(lambda:eliminar_item(caja,padre))
+ botones[22].clicked.connect(lambda:generar_facturas(padre))
 
 def conectar_acciones_caja(acciones,padre):
     acciones[0].triggered.connect(padre.salir)
     acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,1))
+    acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,4))
 
 def limpiar_lista(caja,padre):
              # 1. Remover el widget visual
@@ -238,7 +240,29 @@ def buscar_articulos():
     result = cursor.fetchall()
     for item in result:
         almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
-   
- 
-   
+    conn.close()
+def generar_facturas(padre):
+        
+        precio_total = int(vari.monto_total)
+        fecha = int(time.time())
+        usuario = padre.usuario
+        print(vars(usuario))
+        factura= json.dumps(almacen.articulos)
+        baseDeDatos = db()
+        conn = baseDeDatos.crearConnexion()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO facturas(usuario_id,factura,cantidad,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
+        
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = "Factura generada correctamente"
+        padre.sendMsjSuccess(padre.tipo_msj)
+        
+        try:
+            conn.commit()
+        except sqlite3.Error as err:
+            print(err)
+        conn.close()
+        vari.render =False
+        vari.mont_pagado=0
+        vari.monto_total=0
 

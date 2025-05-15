@@ -5,10 +5,11 @@ from PyQt6.QtGui import QPixmap
 from pathlib import Path
 import sys
 import time
-from component.login import conectar_acciones_login,conectar_botones_login
+from component.login import conectar_acciones_login,conectar_botones_login,datos_usurios
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
 from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
+from component.inventario import conectar_botones_inventario,conectar_acciones_inventario,buscar_facturas
 
 from PyQt6.QtCore import Qt, QObject, QEvent
 
@@ -97,8 +98,8 @@ class TeclaListener(QObject):
                 
                     if self.parent.login.isVisible():
                         var.release_enter = False
-
-                        self.parent.userValidate( self.parent.login, self.parent.caja)
+                        datos_usurios(self.parent.login,self.parent,self.parent.caja)
+                    #     self.parent.userValidate( self.parent.login, self.parent.caja)
                         return True
      
             # Ejemplo: si presiona Enter
@@ -142,12 +143,18 @@ class Ventana(QMainWindow):
         salir_accion.triggered.connect(self.close)
 
         # Agrega la acción al menú
-        archivo.addAction(salir_accion)
-        
+        archivo.addAction(salir_accion)  
         caja = loadUi("./ui/caja.ui")
         self.almacen = loadUi("./ui/almacen.ui")
-        
         self.caja = caja
+
+        #cagar inventario 
+        self.inventario = loadUi("./ui/inventario.ui")
+        botones_inventario = [self.inventario.btn_fecha,self.inventario.btn_buscar_factura,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
+        conectar_botones_inventario(botones_inventario,self.inventario,self)
+        acciones_inventario = [self.inventario.caja,self.inventario.salir]
+        conectar_acciones_inventario(acciones_inventario,self)
+        
         #cagar regitsro ui
         self.registrar = loadUi("./ui/registrar.ui")
         botones_registrar = [self.registrar.btn_registrar]
@@ -172,8 +179,8 @@ class Ventana(QMainWindow):
         conectar_acciones_login(login,self)
 
         #variables de caja
-        botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista]
-        acciones_caja =[caja.actionSalir,caja.actionAlmacen]
+        botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista,caja.generar_factura]
+        acciones_caja =[caja.actionSalir,caja.actionAlmacen,caja.action_inventario]
 
         #funciones de caja
         conectar_botones_caja(botones_caja,self,login,caja)
@@ -289,9 +296,11 @@ class Ventana(QMainWindow):
             self.current_window =window
             self.password =""
             self.tecla["valor"] = ""
+            self.cola_item =None
             if id == 1:
                  self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
-                 
+            if id ==4:
+                 buscar_facturas(self)   
 
             
     

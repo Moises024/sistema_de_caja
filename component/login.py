@@ -1,6 +1,7 @@
 from component.db import db
 import sqlite3
 class usuario:
+    id=""
     nombre=""
     apellido =""
 user = usuario()
@@ -15,6 +16,7 @@ def datos_usurios(login,padre,caja):
         usuario = cursor.fetchone()
         user.nombre = usuario[1]
         user.apellido = usuario[3]
+        user.id = usuario[0]
         padre.usuario = user
         login.input_login.setText('')
         padre.change_window(caja,1)

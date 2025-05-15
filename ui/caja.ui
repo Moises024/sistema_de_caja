@@ -831,6 +831,7 @@ border: 1px solid black</string>
      <string>Archivo</string>
     </property>
     <addaction name="actionAlmacen"/>
+    <addaction name="action_inventario"/>
     <addaction name="actionSalir"/>
    </widget>
    <addaction name="menuArchivo"/>
@@ -838,6 +839,11 @@ border: 1px solid black</string>
   <action name="actionAlmacen">
    <property name="text">
     <string>Almacén</string>
+   </property>
+  </action>
+  <action name="action_inventario">
+   <property name="text">
+    <string>Inventario</string>
    </property>
   </action>
   <action name="actionSalir">

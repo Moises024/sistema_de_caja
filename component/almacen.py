@@ -156,6 +156,10 @@ def agregar(padre):
         insertar_articulo(new_item)
         #almacen.articulos.append(new_item)
 
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = "Artículo agregado correctamente"
+        padre.sendMsjSuccess(padre.tipo_msj)
+
     render_table(padre,1)
 
 
@@ -191,6 +195,7 @@ def conectar_botones_almacen(botones,padre):
 def conectar_acciones_almacen(botones,padre):
     botones[1].triggered.connect(padre.salir)
     botones[0].triggered.connect(lambda:padre.change_window(padre.caja,3))
+    
     pass
 
 def insertar_articulo(articulo):
