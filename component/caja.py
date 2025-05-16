@@ -18,6 +18,7 @@ class varibles:
     monto_total=0
     mont_pagado=0
     row_aliminada =""
+    gen_factura = False
 vari = varibles()
 
 #Función para manejar la entrada del teclado
@@ -40,6 +41,7 @@ def back(caja):
 
 #Alerta de cuando no se ingresa el pago
 def devuelta(caja,padre):
+   
    if caja.precio_total.text() == "" or caja.monto_pagado.text() == "" and not vari.render:
         padre.tipo_msj.titulo = "Warning"
         padre.tipo_msj.text = f"No se puede hacer dicha operación"
@@ -47,7 +49,8 @@ def devuelta(caja,padre):
         vari.render =False
         caja.devuelta_2.setText("")
         return
-   
+   vari.monto_total = 0
+   vari.render = False
    #Calcula el monto total a cobrar
    for articulo in padre.articulos:
         vari.monto_total+= int(articulo["precio"])*int(articulo["cantidad"])
@@ -70,6 +73,9 @@ def devuelta(caja,padre):
    
    #Calcula el monto a devolver
    monto_devolver = (vari.monto_total - vari.mont_pagado ) * -1
+
+   vari.gen_factura = True
+
    if not vari.render:
         caja.devuelta_2.setText(str(monto_devolver))
         caja.pago.setText(str(vari.mont_pagado))
@@ -80,6 +86,7 @@ def devuelta(caja,padre):
         caja.devuelta.setText("")
         caja.monto_pagado.setText("")
         caja.pago.setText("")
+
 
        
  
@@ -112,14 +119,15 @@ def buscar_item(caja,padre):
         if item_dic["nombre"] == informacion or informacion == item_dic["ID"] or vari.render:
             if vari.render:
                 vari.row_aliminada =""
-               
-                if(padre.cola_item):
+                
+                if padre.cola_item_caja:
                     limpiar_lista(caja,padre)
             else:
                 id = is_already_exist(item_dic,padre)
-
+                
                 if  id == "False":
                     padre.articulos.append(item_dic)
+                    numero_articulo = id
                 else:
                     numero_articulo = id
 
@@ -135,7 +143,7 @@ def buscar_item(caja,padre):
     #Actualiza la tabla con los artículos encontrados
     for i,articulo in enumerate(padre.articulos):
         tabla.setRowCount(tabla_row)
-        
+            
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
@@ -155,28 +163,27 @@ def buscar_item(caja,padre):
     padre.inputs[2].setText(str(total))
 
     # Limpia la lista si hay artículos
-    if(tabla_pointer >= 1 and padre.cola_item):
+    if(tabla_pointer >= 1 and padre.cola_item_caja):
         limpiar_lista(caja,padre)
 
     item.setSizeHint(tabla.sizeHint())
     caja.lista_articulo.addItem(item)
     caja.lista_articulo.setItemWidget(item,tabla)
-    padre.cola_item = item
+    padre.cola_item_caja = item
     
 #Eliminar productos de la lista
 def eliminar_item(caja,padre):
     articulos = padre.articulos
-
     if vari.row_aliminada == "":
         return
+    articulos[vari.row_aliminada]["cantidad"] = 1
     # if int(articulos[vari.row_aliminada]["cantidad"]) <=1:
     del articulos[vari.row_aliminada]
     # else:
     #     articulos[vari.row_aliminada]["cantidad"] = int(articulos[vari.row_aliminada]["cantidad"])-1
     vari.render =True
- 
     buscar_item(caja,padre)
-    devuelta(caja,padre)
+    
 
 #Función para verificar si un artículo ya existe en la lista
 def is_already_exist(item,padre):
@@ -219,17 +226,20 @@ def conectar_acciones_caja(acciones,padre):
 
 def limpiar_lista(caja,padre):
              # 1. Remover el widget visual
-        caja.lista_articulo.removeItemWidget(padre.cola_item)
-
+        if padre.cola_item_caja:
+            caja.lista_articulo.removeItemWidget(padre.cola_item_caja)
     # 2. Eliminar el item de la lista para que no quede ocupando espacio
-        fila = caja.lista_articulo.row(padre.cola_item)
-        caja.lista_articulo.takeItem(fila)
+            fila = caja.lista_articulo.row(padre.cola_item_caja)
+            caja.lista_articulo.takeItem(fila)
 
 
 def celda_click(row,column):
     vari.row_aliminada = row
 
 def buscar_articulos():
+
+    almacen.articulos = []
+
     baseDeDatos = db()
     conn = baseDeDatos.crearConnexion()
     cursor = conn.cursor()
@@ -241,28 +251,49 @@ def buscar_articulos():
     for item in result:
         almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
     conn.close()
+
 def generar_facturas(padre):
+        if vari.gen_factura == False:
+            padre.tipo_msj.titulo = "Warning"
+            padre.tipo_msj.text = "No ha generado la devuelta"
+            padre.sendMsjWarningSingle(padre.tipo_msj)
+            return
         
         precio_total = int(vari.monto_total)
         fecha = int(time.time())
         usuario = padre.usuario
-        print(vars(usuario))
+        
         factura= json.dumps(almacen.articulos)
         baseDeDatos = db()
         conn = baseDeDatos.crearConnexion()
         cursor = conn.cursor()
         cursor.execute("INSERT INTO facturas(usuario_id,factura,cantidad,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
-        
-        padre.tipo_msj.titulo = "Éxito"
-        padre.tipo_msj.text = "Factura generada correctamente"
-        padre.sendMsjSuccess(padre.tipo_msj)
-        
+
         try:
             conn.commit()
         except sqlite3.Error as err:
             print(err)
+            return
         conn.close()
         vari.render =False
         vari.mont_pagado=0
         vari.monto_total=0
 
+        vari.gen_factura = False
+
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = "Factura generada correctamente"
+        padre.sendMsjSuccess(padre.tipo_msj)
+        limpiar_completo(padre, padre.caja)
+        buscar_articulos()
+        padre.articulos =[]
+
+def limpiar_completo(padre, caja):
+    limpiar_lista(caja, padre)
+    caja.devuelta_2.setText("")
+    caja.devuelta.setText("")
+    caja.monto_pagado.setText("")
+    caja.pago.setText("")
+    caja.precio_total.setText("")
+    caja.total.setText("")
+    caja.input_buscar.setText("")

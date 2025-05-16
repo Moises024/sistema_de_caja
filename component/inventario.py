@@ -92,7 +92,6 @@ def limpiar_lista(padre):
     padre.inventario.tabla_factura.takeItem(fila)
 
 def buscar_facturas(padre):
-    padre.cola_item = None
     database = db()
     conn = database.crearConnexion()
     cursor = conn.cursor()
@@ -108,6 +107,7 @@ def buscar_facturas(padre):
         facturas.append(factura)
         almacen.facturas = facturas
     conn.close()
+    padre.numero_orden =  len(almacen.facturas)
     render_table(padre,len(facturas))
 
     

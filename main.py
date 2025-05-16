@@ -122,7 +122,10 @@ class Ventana(QMainWindow):
         self.tabla_column = 3
         self.tabla_pointer =0
         self.articulos = []
-        self.usuario=""
+        self.usuario = ""
+        self.cola_item_almacen = ""
+        self.cola_item_caja = False
+        self.numero_orden = ""
         # Creamos el listener
         
 
@@ -296,11 +299,13 @@ class Ventana(QMainWindow):
             self.current_window =window
             self.password =""
             self.tecla["valor"] = ""
-            self.cola_item =None
             if id == 1:
                  self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
+                 buscar_facturas(self)
+                 self.caja.no_orden.setText(str(self.numero_orden+1))
             if id ==4:
                  buscar_facturas(self)   
+
 
             
     
@@ -340,8 +345,5 @@ if __name__ == "__main__":
     ventana.hide()
     sys.exit(app.exec())
          
-         
 
-
-
-"""Ingresar la factura dentro de una bd y que luego mande un mensaje de que se almacenó.)"""
+""""""

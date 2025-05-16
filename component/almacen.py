@@ -72,10 +72,10 @@ def buscar(padre):
 #Función para limpiar la lista de artículos en la interfaz
 def limpiar_lista(padre):
              # 1. Remover el widget visual
-        padre.almacen.tabla_articulo.removeItemWidget(padre.cola_item)
+        padre.almacen.tabla_articulo.removeItemWidget(padre.cola_item_almacen)
 
     # 2. Eliminar el item de la lista para que no quede ocupando espacio
-        fila =  padre.almacen.tabla_articulo.row(padre.cola_item)
+        fila =  padre.almacen.tabla_articulo.row(padre.cola_item_almacen)
         padre.almacen.tabla_articulo.takeItem(fila)
 
 #Función para almacenar el índice del artículo a eliminar
@@ -88,7 +88,7 @@ def render_table(padre,cantida,item=""):
     Item_ = QListWidgetItem()
     tabla = QTableWidget(cantida,4)
 
-    if padre.cola_item:
+    if padre.cola_item_almacen:
         limpiar_lista(padre)
     tabla.setHorizontalHeaderLabels(["ID","NOMBRE","CANTIDAD","PRECIO"])
     tabla.resizeColumnsToContents()
@@ -118,7 +118,7 @@ def render_table(padre,cantida,item=""):
     Item_.setSizeHint(tabla.sizeHint())
     padre.almacen.tabla_articulo.addItem(Item_)
     padre.almacen.tabla_articulo.setItemWidget(Item_,tabla)
-    padre.cola_item = Item_
+    padre.cola_item_almacen = Item_
     
 #Función para agregar un nuevo artículo al inventario    
 def agregar(padre):
@@ -140,7 +140,7 @@ def agregar(padre):
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
     new_item = item(nombre,precio,cantidad)
-
+    
     for articulo in  almacen.articulos:
         if articulo.nombre == nombre:
             bandera = True

@@ -511,11 +511,16 @@ border: 1px solid black</string>
    <widget class="QLabel" name="no_orden">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>210</x>
       <y>150</y>
-      <width>101</width>
+      <width>111</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
     <property name="text">
      <string/>
