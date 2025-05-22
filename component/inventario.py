@@ -2,9 +2,12 @@ from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizeP
 from component.db import db
 import datetime
 import re
+
+
 class Almacen:
     facturas=[]
-    elimindas=None
+    eliminadas=None
+    item = ""
 almacen= Almacen()
 
 class Item:
@@ -16,8 +19,11 @@ class Item:
         self.usuario_id = usuario_id  
 
 def agrear_lista_elimar(row,c):
-    almacen.eliminadas = row
-
+    if almacen.item :
+        almacen.eliminadas = almacen.item 
+    else:
+        almacen.eliminadas = row
+    print(almacen.eliminadas)
 
 def render_table(padre,cantidad,item=""):
     Item_ = QListWidgetItem()
@@ -46,6 +52,40 @@ def render_table(padre,cantidad,item=""):
     padre.inventario.tabla_factura.addItem(Item_)
     padre.inventario.tabla_factura.setItemWidget(Item_,tabla)
     padre.cola_item = Item_
+
+def eliminar(padre):
+    print("eliminada: " ,almacen.eliminadas)
+    if almacen.eliminadas == None:
+       padre.tipo_msj.titulo = "Warning"
+       padre.tipo_msj.text = "Debe seleccionar una factura"
+       padre.sendMsjWarning(padre.tipo_msj) #msj
+       return
+    
+    item = ""
+    if almacen.item:
+        print(almacen.item)
+        item = almacen.item
+    else:
+        item = almacen.facturas[almacen.eliminadas]
+    #msj de que si esta seguro eliminar ese articulos
+    no_factura = item.no_factura
+    padre.tipo_msj.titulo = "Warning"
+    padre.tipo_msj.text = f"Seguro que quieres eliminar la factura con el NO. orden {no_factura}?"
+    resp = padre.sendMsjWarning(padre.tipo_msj)
+    if resp != 1024:
+        return
+    if almacen.item:
+        id = ""
+        for i,iten in enumerate(almacen.facturas):
+            if iten.no_factura == item.no_factura :
+                id = i
+        del almacen.facturas[id]
+    else:
+        del almacen.facturas[almacen.eliminadas]
+    render_table(padre,len(almacen.facturas))
+    almacen.eliminadas = None
+    almacen.item = ""
+
 def buscar_usuario(inventario,padre):
     usuario= inventario.input_factura.text()
     nuevo_almacen = []
@@ -55,9 +95,11 @@ def buscar_usuario(inventario,padre):
         if isInt:
             if int(usuario) == int(item.usuario_id):
                 nuevo_almacen.append(item)
+                almacen.item = item
         else:
             if re.search(usuario,item.usuario,re.IGNORECASE):
                 nuevo_almacen.append(item)
+                almacen.item = item
 
     if len(nuevo_almacen) == 0:
         padre.tipo_msj.titulo = "Error"
@@ -66,12 +108,16 @@ def buscar_usuario(inventario,padre):
         return
     render_table(padre,len(nuevo_almacen),nuevo_almacen)
 
+
+
     
 
 def conectar_botones_inventario(botones,inventario,padre):
-    botones[0].clicked.connect(hacer_inventario)
+    botones[0].clicked.connect(lambda:hacer_inventario(padre))
     botones[1].clicked.connect(lambda:buscar_usuario(inventario,padre))
     botones[2].clicked.connect(lambda:render_table(padre,len(almacen.facturas)))
+    botones[3].clicked.connect(lambda:eliminar(padre))
+
     pass
 def conectar_acciones_inventario(acciones, padre):
     acciones[0].triggered.connect(lambda:padre.change_window(padre.caja,1))
@@ -82,8 +128,23 @@ def isNumber(usuario):
         return True
     except:
         False
-def hacer_inventario():
-    pass
+def hacer_inventario(padre):
+    mes = padre.inventario.input_fecha_inicio.text()
+    ano = padre.inventario.input_fecha_final.text()
+    
+    fecha_inicio = datetime.datetime.strptime(mes,"%d/%m/%Y")
+    fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y")
+    fecha_int_inicio = int(fecha_inicio.timestamp())
+    fecha_int_final = int(fecha_final.timestamp()) + int(24*60*60)
+    print(fecha_int_inicio,fecha_int_final)
+    inventario =0
+    for item in almacen.facturas:
+        fecha_str = datetime.datetime.strptime(item.fecha,"%d/%m/%Y %H:%M:%S")
+        fecha_int = int(fecha_str.timestamp())
+        if fecha_int  >= fecha_int_inicio and fecha_int  <= fecha_int_final:
+            inventario += int(item.cantidad)
+
+    padre.inventario.label_factura.setText(f"El inventario es desde { mes} hasta {ano} total : ${str(inventario)}")
 def limpiar_lista(padre): 
          # 1. Remover el widget visual
     padre.inventario.tabla_factura.removeItemWidget(padre.cola_item)  
@@ -95,7 +156,7 @@ def buscar_facturas(padre):
     database = db()
     conn = database.crearConnexion()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id")
+    cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
     facturas = []
     resultado = cursor.fetchall()
     for fila in resultado:

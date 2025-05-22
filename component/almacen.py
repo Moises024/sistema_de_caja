@@ -67,6 +67,7 @@ def buscar(padre):
         padre.tipo_msj.text = "Artículo no encontrado"
         padre.sendMsjError(padre.tipo_msj)
         return
+    almacen.item = item
     render_table(padre,1,item)
 
 #Función para limpiar la lista de artículos en la interfaz
@@ -80,7 +81,10 @@ def limpiar_lista(padre):
 
 #Función para almacenar el índice del artículo a eliminar
 def agrear_lista_elimar(row,c):
-    almacen.eliminadas = row
+    if  almacen.item:
+        almacen.eliminadas =almacen.item
+    else:
+        almacen.eliminadas = row
 
 #Función para renderizar la tabla de artículos en la interfaz   
 def render_table(padre,cantida,item=""):
@@ -170,15 +174,29 @@ def eliminar(padre):
         padre.tipo_msj.titulo ="Warning"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
-    
+    item = ""
+    if almacen.item:
+        item = almacen.item
+    else:
+        item = almacen.articulos[almacen.eliminadas]
+
     padre.tipo_msj.titulo = "Warning"
-    padre.tipo_msj.text = (f"Seguro que quieres eliminar el artículo {almacen.articulos[almacen.eliminadas].nombre}?")
+    padre.tipo_msj.text = (f"Seguro que quieres eliminar el artículo {item.nombre}?")
 
     if (padre.sendMsjWarning(padre.tipo_msj)) != 1024:
         return
-
     
-    delete_articulo(almacen.articulos[almacen.eliminadas])
+    if almacen.item:
+        id =""
+        for i,item in enumerate(almacen.articulos):
+                if item.id == almacen.item.id:
+                        id = i
+        delete_articulo(almacen.articulos[id])
+        almacen.item =""
+    else:
+        delete_articulo(almacen.articulos[almacen.eliminadas])
+        
+
     render_table(padre,1)
     almacen.eliminadas=""
 
@@ -221,7 +239,7 @@ def buscar_articulo():
     almacen.articulos = articulos
     conn.close() 
 
-def  update_articulo(new_item):
+def update_articulo(new_item):
     database = db()
     conn = database.crearConnexion()
     cursor = conn.cursor()

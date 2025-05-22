@@ -153,7 +153,7 @@ class Ventana(QMainWindow):
 
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
-        botones_inventario = [self.inventario.btn_fecha,self.inventario.btn_buscar_factura,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
+        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_buscar_factura,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
         conectar_botones_inventario(botones_inventario,self.inventario,self)
         acciones_inventario = [self.inventario.caja,self.inventario.salir]
         conectar_acciones_inventario(acciones_inventario,self)

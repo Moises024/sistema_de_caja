@@ -119,7 +119,7 @@ def buscar_item(caja,padre):
         if item_dic["nombre"] == informacion or informacion == item_dic["ID"] or vari.render:
             if vari.render:
                 vari.row_aliminada =""
-                
+                vari.render = False
                 if padre.cola_item_caja:
                     limpiar_lista(caja,padre)
             else:
