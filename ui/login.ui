@@ -329,7 +329,6 @@
     <property name="title">
      <string>Archivo</string>
     </property>
-    <addaction name="registrar"/>
     <addaction name="salir"/>
    </widget>
    <addaction name="menuArchivo"/>

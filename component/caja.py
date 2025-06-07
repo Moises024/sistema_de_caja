@@ -28,7 +28,7 @@ def teclado(caja):
       keys.valor = valor
     else:
         keys.valor += valor
-    vari.mont_pagado = int(keys.valor)
+    vari. mont_pagado = int(keys.valor)
     caja.monto_pagado.setText(keys.valor)
 
 #Función para eliminar el último carácter del valor ingresado
@@ -87,10 +87,6 @@ def devuelta(caja,padre):
         caja.monto_pagado.setText("")
         caja.pago.setText("")
 
-
-       
- 
-   
 #Aparición de los productos en la lista
 def buscar_item(caja,padre):
     tabla_pointer=0
@@ -193,9 +189,9 @@ def is_already_exist(item,padre):
     return "False"
 
 #Acciones de los botones
-def conectar_botones_caja(botones,padre,login,caja):
+def conectar_botones_caja(botones,padre,caja):
  buscar_articulos()
- botones[0].clicked.connect( lambda:padre.change_window(login,0))
+ botones[0].clicked.connect( lambda:padre.change_window(padre.cierre_caja,6))
  botones[1].clicked.connect(lambda:teclado(caja))
  botones[2].clicked.connect(lambda:teclado(caja))
  botones[3].clicked.connect(lambda:teclado(caja))
@@ -220,9 +216,11 @@ def conectar_botones_caja(botones,padre,login,caja):
  botones[22].clicked.connect(lambda:generar_facturas(padre))
 
 def conectar_acciones_caja(acciones,padre):
+
     acciones[0].triggered.connect(padre.salir)
     acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,1))
     acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,4))
+    acciones[3].triggered.connect(lambda:padre.change_window(padre.registrar,5))
 
 def limpiar_lista(caja,padre):
              # 1. Remover el widget visual
@@ -263,7 +261,7 @@ def generar_facturas(padre):
         fecha = int(time.time())
         usuario = padre.usuario
         
-        factura= json.dumps(almacen.articulos)
+        factura= json.dumps(padre.articulos)
         baseDeDatos = db()
         conn = baseDeDatos.crearConnexion()
         cursor = conn.cursor()
@@ -297,3 +295,5 @@ def limpiar_completo(padre, caja):
     caja.precio_total.setText("")
     caja.total.setText("")
     caja.input_buscar.setText("")
+    numero_orden = caja.no_orden.text()
+    caja.no_orden.setText(str(int(numero_orden)+1))

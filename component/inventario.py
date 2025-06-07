@@ -109,9 +109,6 @@ def buscar_usuario(inventario,padre):
     render_table(padre,len(nuevo_almacen),nuevo_almacen)
 
 
-
-    
-
 def conectar_botones_inventario(botones,inventario,padre):
     botones[0].clicked.connect(lambda:hacer_inventario(padre))
     botones[1].clicked.connect(lambda:buscar_usuario(inventario,padre))
@@ -128,15 +125,15 @@ def isNumber(usuario):
         return True
     except:
         False
-def hacer_inventario(padre):
-    mes = padre.inventario.input_fecha_inicio.text()
-    ano = padre.inventario.input_fecha_final.text()
-    
+def hacer_inventario(padre): 
+    mes = padre.inventario.input_fecha_inicio.text().strip()
+    ano = padre.inventario.input_fecha_final.text().strip()
+    print(mes ,ano)
     fecha_inicio = datetime.datetime.strptime(mes,"%d/%m/%Y")
-    fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y")
+    fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y") 
     fecha_int_inicio = int(fecha_inicio.timestamp())
     fecha_int_final = int(fecha_final.timestamp()) + int(24*60*60)
-    print(fecha_int_inicio,fecha_int_final)
+    
     inventario =0
     for item in almacen.facturas:
         fecha_str = datetime.datetime.strptime(item.fecha,"%d/%m/%Y %H:%M:%S")

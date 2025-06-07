@@ -5,11 +5,13 @@ from PyQt6.QtGui import QPixmap
 from pathlib import Path
 import sys
 import time
+import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usurios
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
 from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,conectar_acciones_inventario,buscar_facturas
+from component.cierre_caja import conectar_acciones_cierre_caja,conectar_botones_cierre_caja,render_cierre_Caja
 
 from PyQt6.QtCore import Qt, QObject, QEvent
 
@@ -24,11 +26,11 @@ class msj():
 
 class TeclaListener(QObject):
    
-    def __init__(self, parent=None):
+     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
         self.key =""
-    def eventFilter(self, obj, event):
+     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
                 
                 if self.parent.caja.isVisible():
@@ -109,23 +111,29 @@ class TeclaListener(QObject):
 
 
 class Ventana(QMainWindow):
-    def __init__(self):
+     def __init__(self):
         super().__init__()
-        self.tipo_msj = msj()
-        self.tecla = {"valor":"","key":""}
-        self.msj = QMessageBox()
-        self.layout_ = QVBoxLayout()
-        self.cola_item = ""
-        self.tabla_row = 1
-        self.bandera = False
-        self.release = True
-        self.tabla_column = 3
-        self.tabla_pointer =0
-        self.articulos = []
-        self.usuario = ""
+        self.tipo_msj          = msj()
+        self.tecla             = {"valor":"","key":""}
+        self.msj               = QMessageBox()
+        self.layout_           = QVBoxLayout()
+        self.cola_item         = ""
+        self.tabla_row         = 1
+        self.bandera           = False
+        self.release           = True
+        self.tabla_column      = 3
+        self.tabla_pointer     = 0
+        self.articulos         = []
+        self.usuario           = ""
         self.cola_item_almacen = ""
-        self.cola_item_caja = False
-        self.numero_orden = ""
+        self.cola_item_caja    = False
+        self.cierre_caja_cola  = False
+        self.numero_orden      = ""
+        self.tiempo_inicio     = ""
+        self.tiempo_salida     = "" 
+        self.menu_caja         = False
+        self.acciones_caja =[]
+        
         # Creamos el listener
         
 
@@ -133,14 +141,14 @@ class Ventana(QMainWindow):
         
         
         #menu crea el l;a instancia del menu
-        self.menuBar = self.menuBar()
-        self.password =""
+        self.menuBar           = self.menuBar()
+        self.password          = ""
         
         #anade un menu
-        archivo = self.menuBar.addMenu("Archivo")
+        archivo                = self.menuBar.addMenu("Archivo")
         
         #crear los evento de la acccion
-        salir_accion = QAction("Salir", self)
+        salir_accion           = QAction("Salir", self)
         
         #conectar el evento con una funcion
         salir_accion.triggered.connect(self.close)
@@ -166,7 +174,16 @@ class Ventana(QMainWindow):
         #cargar el ui
         login = loadUi("./ui/login.ui")
         self.login = login
-       
+        #cierre de caja 
+        self.cierre_caja = loadUi("./ui/cierre_caja.ui")
+        
+        botones_cierre_caja  = [self.cierre_caja.btn_cerrar]
+        acciones_cierre_caja = [self.cierre_caja.actionCaja]
+
+        conectar_acciones_cierre_caja(acciones_cierre_caja,self)
+        conectar_botones_cierre_caja(botones_cierre_caja,self)
+
+               
         # Establecer la política de enfoque para que reciba eventos de teclado
        
         login.showFullScreen()  # Mostrar a pantalla completa
@@ -182,12 +199,12 @@ class Ventana(QMainWindow):
         conectar_acciones_login(login,self)
 
         #variables de caja
-        botones_caja =[caja.btn_cerrar,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista,caja.generar_factura]
-        acciones_caja =[caja.actionSalir,caja.actionAlmacen,caja.action_inventario]
+        botones_caja  = [caja.btn_cerrar_caja,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista,caja.generar_factura]
+       
 
         #funciones de caja
-        conectar_botones_caja(botones_caja,self,login,caja)
-        conectar_acciones_caja(acciones_caja,self)
+        conectar_botones_caja(botones_caja,self,caja)
+        
 
         #variables de almacen
         botones_almacen = [self.almacen.btn_buscar,self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar]
@@ -211,14 +228,14 @@ class Ventana(QMainWindow):
         self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total,caja.pago,caja.devuelta,caja.itbis,caja.input_buscar,caja.devuelta_2,caja.total,caja.nombre_usuario,caja.no_orden]
     
     #Salir del sistema
-    def salir(self):
+     def salir(self):
         sys.exit()         
     
     #Alerta cuando deja el label vacio
     
         
     #Función para convertir la contraseña en asteriscos
-    def hide_password(self,login):
+     def hide_password(self,login):
         
         valor = login.input_login.text()   
 
@@ -244,7 +261,7 @@ class Ventana(QMainWindow):
     #Falta solucionar que cambie el estado de la tecla enter
     
     #Función para mandar las alertas de error
-    def sendMsjError(self,msj):
+     def sendMsjError(self,msj):
             self.msj.setText(msj.text)
             self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
             self.msj.setIcon(QMessageBox.Icon.Critical)
@@ -252,7 +269,7 @@ class Ventana(QMainWindow):
             return self.msj.exec()
             
             
-    def sendMsjWarning(self,msj): 
+     def sendMsjWarning(self,msj): 
         self.msj.setText(msj.text)
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok|QMessageBox.StandardButton.Cancel)
         self.msj.setIcon(QMessageBox.Icon.Warning)
@@ -260,7 +277,7 @@ class Ventana(QMainWindow):
         res=self.msj.exec()
         return res 
     
-    def sendMsjWarningSingle(self,msj): 
+     def sendMsjWarningSingle(self,msj): 
         self.msj.setText(msj.text)
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msj.setIcon(QMessageBox.Icon.Warning)
@@ -268,7 +285,7 @@ class Ventana(QMainWindow):
         res=self.msj.exec()
         return res 
     
-    def sendMsjSuccess(self,msj): 
+     def sendMsjSuccess(self,msj): 
         self.msj.setText(msj.text)
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
         pixmap = QPixmap("./img/success.png")
@@ -279,44 +296,72 @@ class Ventana(QMainWindow):
         return res 
     
     #Función para cambiar de ventanas
-    def change_window(self,window,id):
-            if id == 0:
-                self.tipo_msj.titulo ="Warning"
-                self.tipo_msj.text ="¿Deseas cerrar sesión?"
-                res = self.sendMsjWarning(self.tipo_msj)
-                if res == QMessageBox.StandardButton.Ok:
-                     self.bandera = False
-                     self.release = True
-                     var.release_enter = True
-                     pass
-                else:
-                    return 
-            
-            
-            self.clear_input(self.inputs)  
-            self.current_window.hide()  
-            window.showFullScreen() 
-            self.current_window =window
-            self.password =""
-            self.tecla["valor"] = ""
-            if id == 1:
-                 self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
-                 buscar_facturas(self)
-                 self.caja.no_orden.setText(str(self.numero_orden+1))
-            if id ==4:
-                 buscar_facturas(self)   
+     def change_window(self,window,id):
+               if id == 0:
+                   self.tipo_msj.titulo ="Warning"
+                   self.tipo_msj.text ="¿Deseas cerrar sesión?"
+                   res = self.sendMsjWarning(self.tipo_msj)
+                   if res == QMessageBox.StandardButton.Ok:
+                        self.bandera = False
+                        self.release = True
+                        var.release_enter = True
+                        pass
+                   else:
+                       return 
+               if id == 6 :
+                       self.tiempo_salida = datetime.datetime.now()
+                       render_cierre_Caja(self)
 
+               self.clear_input(self.inputs)  
+               self.current_window.hide()  
+               window.showFullScreen() 
+               self.current_window =window
+               self.password =""
+               self.tecla["valor"] = ""
+               if id == 1:
+
+                  if self.usuario.rol == 3:
+                       if self.menu_caja == False:
+                            salir = QAction("Salir",self.caja)
+                            inventario = QAction("Inventario",self.caja)
+                            almacen = QAction("Almacén",self.caja)
+                            registrar = QAction("Registrar",self.caja)
+                            self.caja.menuArchivo.addAction(registrar)
+                            self.caja.menuArchivo.addAction(inventario)
+                            self.caja.menuArchivo.addAction(almacen)
+                            self.caja.menuArchivo.addAction(salir)
+                            self.acciones_caja.append(salir)
+                            self.acciones_caja.append(almacen)
+                            self.acciones_caja.append(inventario)
+                            self.acciones_caja.append(registrar)
+                            conectar_acciones_caja(self.acciones_caja,self)
+                            self.menu_caja =True
+                  else:
+
+                       if self.menu_caja:
+                            self.clearActions(self.caja.menuArchivo,self.acciones_caja)
+                            self.menu_caja = False
+
+
+                  self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
+                  buscar_facturas(self)
+                  self.caja.no_orden.setText(str(self.numero_orden+1))
+               if id ==4:
+                    buscar_facturas(self)   
+
+               if id == 7:
+                    var.release_enter=True
 
             
     
     #Función donde se simula el teclado
-    def teclado(self,number,login): 
+     def teclado(self,number,login): 
             input = login.input_login
             self.tecla["valor"] += str(number)
             input.setText(self.tecla["valor"])
 
     #Función del boton para eliminar caracteres
-    def borrar(self,login):
+     def borrar(self,login):
             input = login.input_login
             valor = input.text()
             new_valor_hide = valor[:-1]
@@ -328,14 +373,23 @@ class Ventana(QMainWindow):
 
             input.setText(new_valor_hide)
 
-    def clear_input(self,inputs):
+     def clear_input(self,inputs):
          for input in inputs:
               input.setText("")
          if self.cola_item :
             limpiar_lista(self.caja,self)
             self.articulos =[]
-        
+     def clearActions(self,menu,acciones):
 
+          for accion in acciones:
+               menu.removeAction(accion)
+          self.acciones_caja = []
+          
+
+
+          
+          
+     
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -346,4 +400,7 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
 
-""""""
+"""1- Para preguntar si quiere que busque la ropa por código
+   2- Activar y desactivar el control de botones de la caja
+   3- Usar expresión regular para encontrar los botones
+   4- Panel de sugerencias"""

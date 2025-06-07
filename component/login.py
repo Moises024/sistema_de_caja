@@ -1,9 +1,11 @@
 from component.db import db
+import datetime
 import sqlite3
 class usuario:
     id=""
     nombre=""
     apellido =""
+    rol=""
 user = usuario()
 def datos_usurios(login,padre,caja):
    
@@ -14,12 +16,21 @@ def datos_usurios(login,padre,caja):
     try:
         cursor.execute("SELECT * FROM usuarios WHERE contra=?",(contra,))
         usuario = cursor.fetchone()
-        user.nombre = usuario[1]
-        user.apellido = usuario[3]
-        user.id = usuario[0]
-        padre.usuario = user
-        login.input_login.setText('')
-        padre.change_window(caja,1)
+      
+        if usuario:
+            user.nombre = usuario[1]
+            user.apellido = usuario[3]
+            user.id = usuario[0]
+            user.rol =usuario[4]
+            padre.usuario = user
+            login.input_login.setText('')
+            padre.tiempo_inicio = datetime.datetime.now()
+            padre.change_window(caja,1)
+        else:
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = "Código inválido"
+            padre.sendMsjError(padre.tipo_msj)
+            return
     except sqlite3.Error as err:
         print(err)
         
