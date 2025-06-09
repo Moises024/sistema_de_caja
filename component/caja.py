@@ -1,8 +1,15 @@
-from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView
+from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
 from component.db import db
+from PyQt6.QtCore import pyqtSignal
 import sqlite3
 import time
 import json
+#convertir el label a aclickebel
+class ClickLabel(QLabel):
+    clicked = pyqtSignal()
+    def mousePressEvent(self,event):
+        self.clicked.emit()
+        super().mousePressEvent(event)
 #Almacén de productos
 class items:
     articulos=[]
@@ -88,7 +95,7 @@ def devuelta(caja,padre):
         caja.pago.setText("")
 
 #Aparición de los productos en la lista
-def buscar_item(caja,padre):
+def buscar_item(caja,padre,item_buscado =False):
     tabla_pointer=0
     tabla_row =1
     informacion = caja.input_buscar.text()
@@ -109,26 +116,30 @@ def buscar_item(caja,padre):
     cuenta_articulo =1
 
     #Buscar productos en el almacén
-    for item_dic in almacen.articulos:
+    if item_buscado == False:
+        for item_dic in almacen.articulos:
         
-        #Si se encuentra en el almacén lo mandará a la lista
-        if item_dic["nombre"] == informacion or informacion == item_dic["ID"] or vari.render:
-            if vari.render:
-                vari.row_aliminada =""
-                vari.render = False
-                if padre.cola_item_caja:
-                    limpiar_lista(caja,padre)
-            else:
-                id = is_already_exist(item_dic,padre)
-                
-                if  id == "False":
-                    padre.articulos.append(item_dic)
-                    numero_articulo = id
+            #Si se encuentra en el almacén lo mandará a la lista
+            if item_dic["nombre"] == informacion or informacion == item_dic["ID"] or vari.render:
+                if vari.render:
+                    vari.row_aliminada =""
+                    vari.render = False
+                    if padre.cola_item_caja:
+                        limpiar_lista(caja,padre)
                 else:
-                    numero_articulo = id
+                    id = is_already_exist(item_dic,padre)
 
-            bandera =True
+                    if  id == "False":
+                        padre.articulos.append(item_dic)
+                        numero_articulo = id
+                    else:
+                        numero_articulo = id
 
+                bandera =True
+    else:
+        bandera = True
+        numero_articulo = item_buscado[1]
+        print(numero_articulo)
     #Si no se encuentra no mandará nada       
     if not bandera:
         padre.tipo_msj.titulo ="Error"
@@ -141,6 +152,7 @@ def buscar_item(caja,padre):
         tabla.setRowCount(tabla_row)
             
         if numero_articulo == i:
+            print(numero_articulo)
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
             tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["nombre"]))
@@ -216,7 +228,7 @@ def conectar_botones_caja(botones,padre,caja):
  botones[22].clicked.connect(lambda:generar_facturas(padre))
 
 def conectar_acciones_caja(acciones,padre):
-
+    padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
     acciones[0].triggered.connect(padre.salir)
     acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,1))
     acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,4))
@@ -297,3 +309,34 @@ def limpiar_completo(padre, caja):
     caja.input_buscar.setText("")
     numero_orden = caja.no_orden.text()
     caja.no_orden.setText(str(int(numero_orden)+1))
+
+def sugerencia(texto,padre):
+    isValue = False
+    contenedor = QWidget()
+    labels = QVBoxLayout(contenedor)
+    for item in almacen.articulos:
+        
+        if texto.lower() in item["nombre"].lower():
+            label = ClickLabel(f"{item["nombre"]} : ID: {item["ID"]}")
+            new_item = items()
+            conectar_label(label,item,padre)
+            labels.addWidget(label)
+            isValue = True
+        padre.caja.sugerencias.setWidget(contenedor)
+        if  isValue :
+            padre.caja.sugerencias.setStyleSheet(""" 
+                background-color:#ffffff;
+            """)
+
+def buscar_click(item,padre,id):
+    buscar_item(padre.caja,padre,[item,id])
+
+def conectar_label(label,item,padre):
+    isExist_item = False
+    for articulo in padre.articulos:
+        if item["ID"] == articulo["ID"]:
+            isExist_item = True
+    if isExist_item == False:
+        padre.articulos.append(item)
+    id = len(padre.articulos) - 1
+    label.clicked.connect(lambda: buscar_click(item,padre,id))

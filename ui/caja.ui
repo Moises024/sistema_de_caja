@@ -799,6 +799,32 @@ border: 1px solid black</string>
      </rect>
     </property>
    </widget>
+   <widget class="QScrollArea" name="sugerencias">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>60</y>
+      <width>171</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: none;</string>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>171</width>
+       <height>71</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
    <zorder>label</zorder>
    <zorder>gridLayoutWidget</zorder>
    <zorder>label_2</zorder>
@@ -826,6 +852,7 @@ border: 1px solid black</string>
    <zorder>btn_buscar</zorder>
    <zorder>btn_eliminar_lista</zorder>
    <zorder>lista_articulo</zorder>
+   <zorder>sugerencias</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">

@@ -267,8 +267,7 @@ class Ventana(QMainWindow):
             self.msj.setIcon(QMessageBox.Icon.Critical)
             self.msj.setWindowTitle(msj.titulo)
             return self.msj.exec()
-            
-            
+             
      def sendMsjWarning(self,msj): 
         self.msj.setText(msj.text)
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok|QMessageBox.StandardButton.Cancel)
@@ -352,8 +351,6 @@ class Ventana(QMainWindow):
                if id == 7:
                     var.release_enter=True
 
-            
-    
     #Función donde se simula el teclado
      def teclado(self,number,login): 
             input = login.input_login
@@ -385,11 +382,6 @@ class Ventana(QMainWindow):
                menu.removeAction(accion)
           self.acciones_caja = []
           
-
-
-          
-          
-     
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
