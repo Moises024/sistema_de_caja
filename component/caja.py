@@ -7,6 +7,8 @@ import json
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
     clicked = pyqtSignal()
+    def __init__(self, parent=None):
+        super().__init__(parent)
     def mousePressEvent(self,event):
         self.clicked.emit()
         super().mousePressEvent(event)
@@ -139,7 +141,7 @@ def buscar_item(caja,padre,item_buscado =False):
     else:
         bandera = True
         numero_articulo = item_buscado[1]
-        print(numero_articulo)
+        
     #Si no se encuentra no mandará nada       
     if not bandera:
         padre.tipo_msj.titulo ="Error"
@@ -152,7 +154,6 @@ def buscar_item(caja,padre,item_buscado =False):
         tabla.setRowCount(tabla_row)
             
         if numero_articulo == i:
-            print(numero_articulo)
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
             tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["nombre"]))
@@ -223,9 +224,8 @@ def conectar_botones_caja(botones,padre,caja):
  botones[17].clicked.connect(lambda:teclado(caja))
  botones[18].clicked.connect(lambda:back(caja))
  botones[19].clicked.connect(lambda:devuelta(caja,padre))
- botones[20].clicked.connect(lambda:buscar_item(caja,padre))
- botones[21].clicked.connect(lambda:eliminar_item(caja,padre))
- botones[22].clicked.connect(lambda:generar_facturas(padre))
+ botones[20].clicked.connect(lambda:eliminar_item(caja,padre))
+ botones[21].clicked.connect(lambda:generar_facturas(padre))
 
 def conectar_acciones_caja(acciones,padre):
     padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
@@ -277,7 +277,7 @@ def generar_facturas(padre):
         baseDeDatos = db()
         conn = baseDeDatos.crearConnexion()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO facturas(usuario_id,factura,cantidad,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
+        cursor.execute("INSERT INTO facturas(usuario_id,factura,total,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
 
         try:
             conn.commit()
@@ -311,32 +311,41 @@ def limpiar_completo(padre, caja):
     caja.no_orden.setText(str(int(numero_orden)+1))
 
 def sugerencia(texto,padre):
-    isValue = False
+    
     contenedor = QWidget()
     labels = QVBoxLayout(contenedor)
+    labels_actions = []
     for item in almacen.articulos:
         
         if texto.lower() in item["nombre"].lower():
             label = ClickLabel(f"{item["nombre"]} : ID: {item["ID"]}")
-            new_item = items()
-            conectar_label(label,item,padre)
-            labels.addWidget(label)
-            isValue = True
-        padre.caja.sugerencias.setWidget(contenedor)
-        if  isValue :
-            padre.caja.sugerencias.setStyleSheet(""" 
-                background-color:#ffffff;
-            """)
+            labels_actions.append([label,item])
 
-def buscar_click(item,padre,id):
+    for label in labels_actions:
+        labels.addWidget(label[0])
+        connect_label(label,padre)
+    padre.caja.sugerencias.setWidget(contenedor)
+    
+
+def buscar_click(item,padre):
+    id =None
+    bandera = False
+    no_value = False
+    if len(padre.articulos) == 0:
+        padre.articulos.append(item)
+        no_value = True
+    else: 
+        for i,articulo in enumerate(padre.articulos):
+            if item["ID"] == articulo["ID"]:
+                    bandera = True
+                    id = i
+            
+    if bandera == False and no_value == False:
+        padre.articulos.append(item)    
     buscar_item(padre.caja,padre,[item,id])
 
-def conectar_label(label,item,padre):
-    isExist_item = False
-    for articulo in padre.articulos:
-        if item["ID"] == articulo["ID"]:
-            isExist_item = True
-    if isExist_item == False:
-        padre.articulos.append(item)
-    id = len(padre.articulos) - 1
-    label.clicked.connect(lambda: buscar_click(item,padre,id))
+def connect_label(label,padre):
+    label[0].clicked.connect(lambda:buscar_click(label[1],padre))
+
+
+    

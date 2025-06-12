@@ -11,10 +11,10 @@ class Almacen:
 almacen= Almacen()
 
 class Item:
-    def __init__(self,usuario,no_factura,cantidad,fecha,usuario_id):   
+    def __init__(self,usuario,no_factura,total,fecha,usuario_id):   
         self.usuario=usuario
         self.no_factura=no_factura
-        self.cantidad=cantidad
+        self.total=total
         self.fecha=fecha  
         self.usuario_id = usuario_id  
 
@@ -31,7 +31,7 @@ def render_table(padre,cantidad,item=""):
 
     if padre.cola_item:
         limpiar_lista(padre)
-    tabla.setHorizontalHeaderLabels(["USUARIO_ID","NO. ORDEN","USUARIO","CANTIDAD","FECHA"])
+    tabla.setHorizontalHeaderLabels(["USUARIO_ID","NO. ORDEN","USUARIO","TOTAL","FECHA"])
     tabla.resizeColumnsToContents()
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
@@ -139,7 +139,7 @@ def hacer_inventario(padre):
         fecha_str = datetime.datetime.strptime(item.fecha,"%d/%m/%Y %H:%M:%S")
         fecha_int = int(fecha_str.timestamp())
         if fecha_int  >= fecha_int_inicio and fecha_int  <= fecha_int_final:
-            inventario += int(item.cantidad)
+            inventario += int(item.total)
 
     padre.inventario.label_factura.setText(f"El inventario es desde { mes} hasta {ano} total : ${str(inventario)}")
 def limpiar_lista(padre): 
@@ -176,5 +176,5 @@ def agregar_Datos_tabla(tabla,datos):
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.usuario_id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.no_factura)))
             tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.usuario)))
-            tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.cantidad)))
+            tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.total)))
             tabla.setItem(i,index+4,QTableWidgetItem(str(articulo.fecha))) 

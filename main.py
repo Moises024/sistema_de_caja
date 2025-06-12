@@ -199,7 +199,7 @@ class Ventana(QMainWindow):
         conectar_acciones_login(login,self)
 
         #variables de caja
-        botones_caja  = [caja.btn_cerrar_caja,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_buscar,caja.btn_eliminar_lista,caja.generar_factura]
+        botones_caja  = [caja.btn_cerrar_caja,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_eliminar_lista,caja.generar_factura]
        
 
         #funciones de caja
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
 
-"""1- Para preguntar si quiere que busque la ropa por código
-   2- Activar y desactivar el control de botones de la caja
-   3- Usar expresión regular para encontrar los botones
-   4- Panel de sugerencias"""
+"""1- Eliminar el panel de sugerencias después de crear la factura
+   2- Si el input está vacio que quite el panel de sugerencias
+   3- Usar expresión regular para encontrar los botones para los buscadores
+"""
