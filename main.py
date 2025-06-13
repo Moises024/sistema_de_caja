@@ -161,7 +161,7 @@ class Ventana(QMainWindow):
 
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
-        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_buscar_factura,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
+        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
         conectar_botones_inventario(botones_inventario,self.inventario,self)
         acciones_inventario = [self.inventario.caja,self.inventario.salir]
         conectar_acciones_inventario(acciones_inventario,self)
@@ -207,7 +207,7 @@ class Ventana(QMainWindow):
         
 
         #variables de almacen
-        botones_almacen = [self.almacen.btn_buscar,self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar]
+        botones_almacen = [self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar]
         acciones_almacen = [self.almacen.actionCaja,self.almacen.actionSalir]
 
         #Funciones de almacen
@@ -392,7 +392,6 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
 
-"""1- Eliminar el panel de sugerencias después de crear la factura
-   2- Si el input está vacio que quite el panel de sugerencias
-   3- Usar expresión regular para encontrar los botones para los buscadores
+"""1- Hacer la funcion que elimine en el almacén los productos que se van vendiendo
+   2- Poner el parámetro del apellido en registrar para saber si es el mismo usuario 
 """

@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
+from PyQt6.QtCore import Qt
 from component.db import db
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QCursor
 import sqlite3
 import time
 import json
@@ -297,6 +299,9 @@ def generar_facturas(padre):
         limpiar_completo(padre, padre.caja)
         buscar_articulos()
         padre.articulos =[]
+        contenedor = QWidget()
+        padre.caja.sugerencias.setWidget(contenedor)
+
 
 def limpiar_completo(padre, caja):
     limpiar_lista(caja, padre)
@@ -311,8 +316,10 @@ def limpiar_completo(padre, caja):
     caja.no_orden.setText(str(int(numero_orden)+1))
 
 def sugerencia(texto,padre):
-    
     contenedor = QWidget()
+    if texto == "":
+        padre.caja.sugerencias.setWidget(contenedor)
+        return
     labels = QVBoxLayout(contenedor)
     labels_actions = []
     for item in almacen.articulos:
@@ -345,6 +352,9 @@ def buscar_click(item,padre):
     buscar_item(padre.caja,padre,[item,id])
 
 def connect_label(label,padre):
+    label[0].setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    label[0].setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+    label[0].setOpenExternalLinks(False)
     label[0].clicked.connect(lambda:buscar_click(label[1],padre))
 
 

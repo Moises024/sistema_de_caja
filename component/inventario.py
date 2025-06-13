@@ -23,7 +23,6 @@ def agrear_lista_elimar(row,c):
         almacen.eliminadas = almacen.item 
     else:
         almacen.eliminadas = row
-    print(almacen.eliminadas)
 
 def render_table(padre,cantidad,item=""):
     Item_ = QListWidgetItem()
@@ -54,7 +53,7 @@ def render_table(padre,cantidad,item=""):
     padre.cola_item = Item_
 
 def eliminar(padre):
-    print("eliminada: " ,almacen.eliminadas)
+    
     if almacen.eliminadas == None:
        padre.tipo_msj.titulo = "Warning"
        padre.tipo_msj.text = "Debe seleccionar una factura"
@@ -63,7 +62,7 @@ def eliminar(padre):
     
     item = ""
     if almacen.item:
-        print(almacen.item)
+       
         item = almacen.item
     else:
         item = almacen.facturas[almacen.eliminadas]
@@ -86,8 +85,12 @@ def eliminar(padre):
     almacen.eliminadas = None
     almacen.item = ""
 
-def buscar_usuario(inventario,padre):
-    usuario= inventario.input_factura.text()
+def buscar_usuario(text,padre):
+    if text == "":
+        render_table(padre,len(almacen.facturas))
+        return
+    usuario= text
+
     nuevo_almacen = []
     isInt = isNumber(usuario)
 
@@ -111,14 +114,15 @@ def buscar_usuario(inventario,padre):
 
 def conectar_botones_inventario(botones,inventario,padre):
     botones[0].clicked.connect(lambda:hacer_inventario(padre))
-    botones[1].clicked.connect(lambda:buscar_usuario(inventario,padre))
-    botones[2].clicked.connect(lambda:render_table(padre,len(almacen.facturas)))
-    botones[3].clicked.connect(lambda:eliminar(padre))
+    botones[1].clicked.connect(lambda:render_table(padre,len(almacen.facturas)))
+    botones[2].clicked.connect(lambda:eliminar(padre))
+    inventario.input_factura.textChanged.connect(lambda text:buscar_usuario(text,padre))
 
     pass
 def conectar_acciones_inventario(acciones, padre):
     acciones[0].triggered.connect(lambda:padre.change_window(padre.caja,1))
     acciones[1].triggered.connect(padre.salir)
+
 def isNumber(usuario):
     try:
         int(usuario)
@@ -128,7 +132,7 @@ def isNumber(usuario):
 def hacer_inventario(padre): 
     mes = padre.inventario.input_fecha_inicio.text().strip()
     ano = padre.inventario.input_fecha_final.text().strip()
-    print(mes ,ano)
+  
     fecha_inicio = datetime.datetime.strptime(mes,"%d/%m/%Y")
     fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y") 
     fecha_int_inicio = int(fecha_inicio.timestamp())
@@ -141,7 +145,7 @@ def hacer_inventario(padre):
         if fecha_int  >= fecha_int_inicio and fecha_int  <= fecha_int_final:
             inventario += int(item.total)
 
-    padre.inventario.label_factura.setText(f"El inventario es desde { mes} hasta {ano} total : ${str(inventario)}")
+    padre.inventario.label_factura.setText(f"El inventario desde el { mes} hasta el {ano} es de: ${str(inventario)}")
 def limpiar_lista(padre): 
          # 1. Remover el widget visual
     padre.inventario.tabla_factura.removeItemWidget(padre.cola_item)  

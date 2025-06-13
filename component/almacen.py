@@ -47,8 +47,11 @@ def isInt(valor):
         return False
 
 #Función para buscar un artículo en el inventario        
-def buscar(padre):
-    id = padre.almacen.input_articulo.text()
+def buscar(text,padre):
+    if text == "":
+        render_table(padre,len(almacen.articulos))
+        return
+    id = text
     item = ""
     bandera = False
 
@@ -57,7 +60,7 @@ def buscar(padre):
     
     #Busca el artículo en la lista de artículos
     for articulo in almacen.articulos:
-        if  id == articulo.id or id == articulo.nombre:
+        if  id == articulo.id or id.lower() in articulo.nombre.lower():
             item = articulo
             bandera=True
     
@@ -204,15 +207,15 @@ def eliminar(padre):
 def conectar_botones_almacen(botones,padre):
    
     render_table(padre,len(almacen.articulos))
-    botones[0].clicked.connect(lambda:buscar(padre))
-    botones[1].clicked.connect(lambda:agregar(padre))
-    botones[2].clicked.connect(lambda:eliminar(padre))   
-    botones[3].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
+    botones[0].clicked.connect(lambda:agregar(padre))
+    botones[1].clicked.connect(lambda:eliminar(padre))   
+    botones[2].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
 
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 def conectar_acciones_almacen(botones,padre):
     botones[1].triggered.connect(padre.salir)
     botones[0].triggered.connect(lambda:padre.change_window(padre.caja,3))
+    padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
     
     pass
 
