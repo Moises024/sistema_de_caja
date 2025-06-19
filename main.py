@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QTableWidget,QSizePolicy,QHeaderView
-from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox
+from PyQt6.QtGui import QAction,QIcon
 from PyQt6.uic import loadUi 
 from PyQt6.QtGui import QPixmap
 from pathlib import Path
@@ -7,8 +7,8 @@ import sys
 import time
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usurios
-from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta
-from component.almacen import conectar_acciones_almacen, conectar_botones_almacen
+from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja
+from component.almacen import conectar_acciones_almacen, conectar_botones_almacen,render_almacen
 from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,conectar_acciones_inventario,buscar_facturas
 from component.cierre_caja import conectar_acciones_cierre_caja,conectar_botones_cierre_caja,render_cierre_Caja
@@ -33,7 +33,7 @@ class TeclaListener(QObject):
      def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
                 
-                if self.parent.caja.isVisible():
+                if self.parent.caja.isVisible() and  self.parent.key_number :
                      if event.key() == Qt.Key.Key_1:
                           keys.valor += "1"
                           self.parent.caja.monto_pagado.setText(keys.valor)
@@ -118,6 +118,7 @@ class Ventana(QMainWindow):
         self.msj               = QMessageBox()
         self.layout_           = QVBoxLayout()
         self.cola_item         = ""
+        self.ventana_cantidad  = ""
         self.tabla_row         = 1
         self.bandera           = False
         self.release           = True
@@ -125,6 +126,7 @@ class Ventana(QMainWindow):
         self.tabla_pointer     = 0
         self.articulos         = []
         self.usuario           = ""
+        self.key_number        = True
         self.cola_item_almacen = ""
         self.cola_item_caja    = False
         self.cierre_caja_cola  = False
@@ -134,7 +136,11 @@ class Ventana(QMainWindow):
         self.menu_caja         = False
         self.acciones_caja =[]
         
-        # Creamos el listener
+        
+        # venan cantidad
+        self.ventana_cantidad = loadUi("./ui/ventana_cantidad.ui")
+        # conectar btn ventana_cantidad
+        self.ventana_cantidad.btn_ok.clicked.connect(lambda:click_ok_caja(self))
         
 
         # Instalamos el filtro de eventos en la ventana principal
@@ -225,7 +231,7 @@ class Ventana(QMainWindow):
         self.current_window = login
 
         #Crear inputs a limpiar 
-        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total,caja.pago,caja.devuelta,caja.itbis,caja.input_buscar,caja.devuelta_2,caja.total,caja.nombre_usuario,caja.no_orden]
+        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total,caja.pago,caja.devuelta,caja.itbis,caja.input_buscar,caja.devuelta_2,caja.total]
     
     #Salir del sistema
      def salir(self):
@@ -257,6 +263,7 @@ class Ventana(QMainWindow):
             nuevo_valor += "*"
         self.bandera = True
         login.input_login.setText(nuevo_valor)
+        print(self.password)
         
     #Falta solucionar que cambie el estado de la tecla enter
     
@@ -266,6 +273,7 @@ class Ventana(QMainWindow):
             self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
             self.msj.setIcon(QMessageBox.Icon.Critical)
             self.msj.setWindowTitle(msj.titulo)
+            self.msj.setWindowIcon(QIcon("./img/logo.png"))
             return self.msj.exec()
              
      def sendMsjWarning(self,msj): 
@@ -273,6 +281,7 @@ class Ventana(QMainWindow):
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok|QMessageBox.StandardButton.Cancel)
         self.msj.setIcon(QMessageBox.Icon.Warning)
         self.msj.setWindowTitle(msj.titulo)
+        self.msj.setWindowIcon(QIcon("./img/logo.png"))
         res=self.msj.exec()
         return res 
     
@@ -281,6 +290,7 @@ class Ventana(QMainWindow):
         self.msj.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msj.setIcon(QMessageBox.Icon.Warning)
         self.msj.setWindowTitle(msj.titulo)
+        self.msj.setWindowIcon(QIcon("./img/logo.png"))
         res=self.msj.exec()
         return res 
     
@@ -291,6 +301,7 @@ class Ventana(QMainWindow):
         redimencionada = pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.msj.setIconPixmap(redimencionada)
         self.msj.setWindowTitle(msj.titulo)
+        self.msj.setWindowIcon(QIcon("./img/logo.png"))
         res=self.msj.exec()
         return res 
     
@@ -318,7 +329,7 @@ class Ventana(QMainWindow):
                self.password =""
                self.tecla["valor"] = ""
                if id == 1:
-
+                    
                   if self.usuario.rol == 3:
                        if self.menu_caja == False:
                             salir = QAction("Salir",self.caja)
@@ -341,7 +352,7 @@ class Ventana(QMainWindow):
                             self.clearActions(self.caja.menuArchivo,self.acciones_caja)
                             self.menu_caja = False
 
-
+                  
                   self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
                   buscar_facturas(self)
                   self.caja.no_orden.setText(str(self.numero_orden+1))
@@ -350,6 +361,8 @@ class Ventana(QMainWindow):
 
                if id == 7:
                     var.release_enter=True
+               if id == 8:
+                    render_almacen(self)
 
     #Función donde se simula el teclado
      def teclado(self,number,login): 
@@ -392,6 +405,5 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
 
-"""1- Hacer la funcion que elimine en el almacén los productos que se van vendiendo
-   2- Poner el parámetro del apellido en registrar para saber si es el mismo usuario 
+"""1- Botón que abra apartado que le diga cuales articulos ya se acabaron 
 """

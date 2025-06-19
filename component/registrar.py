@@ -6,6 +6,7 @@ def registrar_usuario(registrar,padre):
     apellido = registrar.input_apellido
     contra = registrar.input_contra
     array_input = [nombre,apellido,contra]
+    
     for index,input in enumerate(array_input):
         if input.text() =='':
             padre.tipo_msj.titulo = "Error"
@@ -20,8 +21,18 @@ def registrar_usuario(registrar,padre):
     baseDeDatos = db()
     conn = baseDeDatos.crearConnexion()
     cursor = conn.cursor()
+
     
     try:
+        cursor.execute("SELECT * FROM usuarios WHERE lower(nombre)=lower(?) and lower(apellido)=lower(?)",(array_input[0],array_input[1]))
+        result = cursor.fetchone()
+        
+        if result != None:
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = "Usuario existente"
+            padre.sendMsjError(padre.tipo_msj)
+            return
+       
         cursor.execute("INSERT INTO usuarios(nombre,apellido,contra) VALUES(?, ?, ?)",(array_input[0],array_input[1],array_input[2]))
         conn.commit()
     except sqlite3.Error as err:
@@ -29,8 +40,6 @@ def registrar_usuario(registrar,padre):
         if err.sqlite_errorcode == 2067 :
             if err.args[0] == 'UNIQUE constraint failed: usuarios.contra':
                 padre.tipo_msj.text = "Ingrese otra contraseña"
-            else:
-                padre.tipo_msj.text = "Usuario ya existente"
         else:
             padre.tipo_msj.text = "No se pudo crear el usuario"
         conn.close()

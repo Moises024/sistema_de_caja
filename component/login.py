@@ -1,12 +1,14 @@
 from component.db import db
 import datetime
 import sqlite3
+
 class usuario:
     id=""
     nombre=""
     apellido =""
     rol=""
 user = usuario()
+
 def datos_usurios(login,padre,caja):
    
     contra = padre.password

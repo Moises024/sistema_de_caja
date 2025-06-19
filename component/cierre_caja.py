@@ -73,6 +73,7 @@ def render_cierre_Caja(padre):
 def limpiar_lista(padre): 
          # 1. Remover el widget visual
     padre.cierre_caja.list_caja.removeItemWidget(padre.cierre_caja_cola)  
+    
     #    Eliminar el item de la lista para que no quede ocupando espacio
     fila =  padre.cierre_caja.list_caja.row(padre.cierre_caja_cola)
     padre.cierre_caja.list_caja.takeItem(fila)

@@ -2,10 +2,12 @@ from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizeP
 from PyQt6.QtCore import Qt
 from component.db import db
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QCursor
+from PyQt6.QtGui import QCursor,QIcon
+from component.almacen import buscar_articulo
 import sqlite3
 import time
 import json
+
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
     clicked = pyqtSignal()
@@ -14,13 +16,19 @@ class ClickLabel(QLabel):
     def mousePressEvent(self,event):
         self.clicked.emit()
         super().mousePressEvent(event)
+
 #Almacén de productos
 class items:
     articulos=[]
 almacen = items()
+db_almacen = []
+
 class tecla:
    valor=""
-   
+
+class GlobalVaribles:
+    item_global = ""
+global_variable = GlobalVaribles()
 keys = tecla()
 
 #Clase para manejar variables globales del sistema de pagos
@@ -62,6 +70,7 @@ def devuelta(caja,padre):
         return
    vari.monto_total = 0
    vari.render = False
+
    #Calcula el monto total a cobrar
    for articulo in padre.articulos:
         vari.monto_total+= int(articulo["precio"])*int(articulo["cantidad"])
@@ -142,7 +151,9 @@ def buscar_item(caja,padre,item_buscado =False):
                 bandera =True
     else:
         bandera = True
-        numero_articulo = item_buscado[1]
+        if len(item_buscado) > 1:
+
+            numero_articulo = item_buscado[1]
         
     #Si no se encuentra no mandará nada       
     if not bandera:
@@ -154,7 +165,6 @@ def buscar_item(caja,padre,item_buscado =False):
     #Actualiza la tabla con los artículos encontrados
     for i,articulo in enumerate(padre.articulos):
         tabla.setRowCount(tabla_row)
-            
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
@@ -185,11 +195,22 @@ def buscar_item(caja,padre,item_buscado =False):
 #Eliminar productos de la lista
 def eliminar_item(caja,padre):
     articulos = padre.articulos
-    if vari.row_aliminada == "":
-        return
+    if vari.row_aliminada == "" or len(articulos) == 0:
+            padre.tipo_msj.titulo ="Error"
+            padre.tipo_msj.text = "El item no existe en la lista"
+            padre.sendMsjError(padre.tipo_msj)
+            return
+    
     articulos[vari.row_aliminada]["cantidad"] = 1
+
     # if int(articulos[vari.row_aliminada]["cantidad"]) <=1:
     del articulos[vari.row_aliminada]
+
+    caja.monto_pagado.setText("")
+    caja.devuelta.setText("")
+    caja.devuelta_2.setText("")
+    caja.pago.setText("")
+
     # else:
     #     articulos[vari.row_aliminada]["cantidad"] = int(articulos[vari.row_aliminada]["cantidad"])-1
     vari.render =True
@@ -232,7 +253,7 @@ def conectar_botones_caja(botones,padre,caja):
 def conectar_acciones_caja(acciones,padre):
     padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
     acciones[0].triggered.connect(padre.salir)
-    acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,1))
+    acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,8))
     acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,4))
     acciones[3].triggered.connect(lambda:padre.change_window(padre.registrar,5))
 
@@ -243,6 +264,7 @@ def limpiar_lista(caja,padre):
     # 2. Eliminar el item de la lista para que no quede ocupando espacio
             fila = caja.lista_articulo.row(padre.cola_item_caja)
             caja.lista_articulo.takeItem(fila)
+            
 
 
 def celda_click(row,column):
@@ -260,7 +282,9 @@ def buscar_articulos():
     except sqlite3.Error as err:
         print(err)
     result = cursor.fetchall()
+    
     for item in result:
+        db_almacen.append(item)
         almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
     conn.close()
 
@@ -279,6 +303,29 @@ def generar_facturas(padre):
         baseDeDatos = db()
         conn = baseDeDatos.crearConnexion()
         cursor = conn.cursor()
+        try:
+            for item in padre.articulos:
+                
+                for articulo in db_almacen:
+                   
+                    if articulo[0] == item["ID"]:
+                         if int(articulo[2]) == 0:
+                                padre.tipo_msj.titulo = "Error"
+                                padre.tipo_msj.text = f"Ya no hay {item["nombre"]} en el almacén"
+                                padre.sendMsjError(padre.tipo_msj)
+                                return
+                         if int(articulo[2]) < item["cantidad"]:
+                                padre.tipo_msj.titulo = "Error"
+                                padre.tipo_msj.text = f"No tienes suficientes {item["nombre"]} solo tienes  {articulo[2]} en el almacén"
+                                padre.sendMsjError(padre.tipo_msj)
+                                return
+                             
+                cursor.execute("UPDATE articulos SET cantidad = cantidad - ? WHERE id =? and cantidad > 0 and cantidad >= ? ",(item["cantidad"],item["ID"],item["cantidad"]))
+                conn.commit()
+        except sqlite3.Error as err:
+            print(err)
+            return
+        
         cursor.execute("INSERT INTO facturas(usuario_id,factura,total,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
 
         try:
@@ -286,7 +333,11 @@ def generar_facturas(padre):
         except sqlite3.Error as err:
             print(err)
             return
+        
+       
         conn.close()
+        buscar_articulo()
+        buscar_articulos()
         vari.render =False
         vari.mont_pagado=0
         vari.monto_total=0
@@ -334,28 +385,56 @@ def sugerencia(texto,padre):
     padre.caja.sugerencias.setWidget(contenedor)
     
 
-def buscar_click(item,padre):
-    id =None
+def buscar_click(padre,item):
+   
+    global_variable.item_global = item
+
+    if padre.ventana_cantidad.isVisible():
+        padre.ventana_cantidad.hide()
+        
+    padre.ventana_cantidad.show()
+    padre.key_number = False
+   
+   
+def click_ok_caja(padre):
+   
+    valor = padre.ventana_cantidad.input_cantidad.text()
+    if valor == '':
+        return
+    padre.ventana_cantidad.input_cantidad.setText("")
+    cantidad =False 
+    try:
+        cantidad = int(valor)
+    except:
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Solo se permiten números"
+        padre.sendMsjError(padre.tipo_msj)
+        return
+
+        
+    global_variable.item_global["cantidad"] = cantidad
     bandera = False
     no_value = False
     if len(padre.articulos) == 0:
-        padre.articulos.append(item)
+        
+        padre.articulos.append(global_variable.item_global)
         no_value = True
     else: 
-        for i,articulo in enumerate(padre.articulos):
-            if item["ID"] == articulo["ID"]:
+        for articulo in padre.articulos:
+            if global_variable.item_global["ID"] == articulo["ID"]:
                     bandera = True
-                    id = i
+                   
             
     if bandera == False and no_value == False:
-        padre.articulos.append(item)    
-    buscar_item(padre.caja,padre,[item,id])
-
+        padre.articulos.append(global_variable.item_global)    
+    padre.ventana_cantidad.hide()
+    buscar_item(padre.caja,padre,[global_variable.item_global])
+    
 def connect_label(label,padre):
     label[0].setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     label[0].setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
     label[0].setOpenExternalLinks(False)
-    label[0].clicked.connect(lambda:buscar_click(label[1],padre))
+    label[0].clicked.connect(lambda:buscar_click(padre,label[1]))
 
 
     

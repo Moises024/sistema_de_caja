@@ -129,12 +129,20 @@ def isNumber(usuario):
         return True
     except:
         False
+
 def hacer_inventario(padre): 
     mes = padre.inventario.input_fecha_inicio.text().strip()
     ano = padre.inventario.input_fecha_final.text().strip()
   
-    fecha_inicio = datetime.datetime.strptime(mes,"%d/%m/%Y")
-    fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y") 
+    try:
+        fecha_inicio = datetime.datetime.strptime(mes,"%d/%m/%Y")
+        fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y") 
+    except:
+        padre.tipo_msj.titulo = "Warninig"
+        padre.tipo_msj.text = "Debe agregar la fecha en este formato DD/MM/YYYY"
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        return
+        
     fecha_int_inicio = int(fecha_inicio.timestamp())
     fecha_int_final = int(fecha_final.timestamp()) + int(24*60*60)
     
@@ -146,6 +154,7 @@ def hacer_inventario(padre):
             inventario += int(item.total)
 
     padre.inventario.label_factura.setText(f"El inventario desde el { mes} hasta el {ano} es de: ${str(inventario)}")
+    
 def limpiar_lista(padre): 
          # 1. Remover el widget visual
     padre.inventario.tabla_factura.removeItemWidget(padre.cola_item)  

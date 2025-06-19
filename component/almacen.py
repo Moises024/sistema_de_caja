@@ -7,7 +7,7 @@ class contenedorArticulo:
     articulos=[]
     item=""
     eliminadas=""
-almacen =contenedorArticulo()
+almacen = contenedorArticulo()
 
 #Clase para representar un artículo
 class item:
@@ -51,19 +51,26 @@ def buscar(text,padre):
     if text == "":
         render_table(padre,len(almacen.articulos))
         return
-    id = text
+    id = False
+    nombre = text
     item = ""
     bandera = False
 
-    if isInt(id):
-        id = int(id)
+    if isInt(text): 
+        id = int(text)
     
     #Busca el artículo en la lista de artículos
     for articulo in almacen.articulos:
-        if  id == articulo.id or id.lower() in articulo.nombre.lower():
-            item = articulo
-            bandera=True
     
+        if  id == False:
+            if nombre.lower() in articulo.nombre.lower():
+             item = articulo
+             bandera=True
+        else:
+            if id == int(articulo.id):
+                item = articulo
+                bandera=True
+
     #Si no se encontró el artículo
     if not bandera:
         padre.tipo_msj.titulo = "Error"
@@ -134,7 +141,6 @@ def agregar(padre):
     precio = padre.almacen.precio_articulo.text()
     cantidad = padre.almacen.cantidad_articulo.text()
     
-
     cantidad = cantidad.strip()
     nombre = nombre.strip()
     bandera = False
@@ -155,7 +161,6 @@ def agregar(padre):
             new_item = item(nombre,precio,nueva_cant)
 
         
-
     if bandera == True:
         update_articulo(new_item)
     else:
@@ -173,7 +178,7 @@ def agregar(padre):
 #Función para eliminar un artículo del inventario
 def eliminar(padre):
     if almacen.eliminadas == "":
-        padre.tipo_msj.text ="Selecciona articulo a eliminar"
+        padre.tipo_msj.text ="Selecciona un articulo para eliminar"
         padre.tipo_msj.titulo ="Warning"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
@@ -206,7 +211,6 @@ def eliminar(padre):
 # Función para conectar acciones de los botones en la interfaz de almacenamiento
 def conectar_botones_almacen(botones,padre):
    
-    render_table(padre,len(almacen.articulos))
     botones[0].clicked.connect(lambda:agregar(padre))
     botones[1].clicked.connect(lambda:eliminar(padre))   
     botones[2].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
@@ -221,7 +225,7 @@ def conectar_acciones_almacen(botones,padre):
 
 def insertar_articulo(articulo):
     database = db()
-    conn = database.crearConnexion()
+    conn = database.crearConnexion() 
     cursor = conn.cursor()
     cursor.execute("INSERT INTO articulos(nombre,cantidad,precio) values(?,?,?)",(articulo.nombre,articulo.cantidad,articulo.precio))
     try:
@@ -264,3 +268,5 @@ def  delete_articulo(articulo):
         print(err)
     conn.close()
     
+def render_almacen(padre):
+    render_table(padre,len(almacen.articulos))
