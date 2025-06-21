@@ -7,6 +7,7 @@ class contenedorArticulo:
     articulos=[]
     item=""
     eliminadas=""
+    agotado = []
 almacen = contenedorArticulo()
 
 #Clase para representar un artículo
@@ -214,7 +215,7 @@ def conectar_botones_almacen(botones,padre):
     botones[0].clicked.connect(lambda:agregar(padre))
     botones[1].clicked.connect(lambda:eliminar(padre))   
     botones[2].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
-
+    botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 def conectar_acciones_almacen(botones,padre):
     botones[1].triggered.connect(padre.salir)
@@ -270,3 +271,7 @@ def  delete_articulo(articulo):
     
 def render_almacen(padre):
     render_table(padre,len(almacen.articulos))
+def mostrar_ventana_agotado(padre):
+    if padre.producto_agotado.isVisible():
+        padre.producto_agotado.hide()
+    padre.producto_agotado.show()

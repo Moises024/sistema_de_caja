@@ -135,16 +135,19 @@ class Ventana(QMainWindow):
         self.tiempo_salida     = "" 
         self.menu_caja         = False
         self.acciones_caja =[]
+        self.popUp = []
         
         
         # venan cantidad
         self.ventana_cantidad = loadUi("./ui/ventana_cantidad.ui")
         # conectar btn ventana_cantidad
         self.ventana_cantidad.btn_ok.clicked.connect(lambda:click_ok_caja(self))
-        
+        # ventana producto agotado 
+        self.producto_agotado = loadUi("./ui/productos_agotados.ui")
 
         # Instalamos el filtro de eventos en la ventana principal
-        
+        self.popUp.append(self.producto_agotado)
+        self.popUp.append(self.ventana_cantidad)
         
         #menu crea el l;a instancia del menu
         self.menuBar           = self.menuBar()
@@ -213,7 +216,7 @@ class Ventana(QMainWindow):
         
 
         #variables de almacen
-        botones_almacen = [self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar]
+        botones_almacen = [self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar,self.almacen.btn_agotado]
         acciones_almacen = [self.almacen.actionCaja,self.almacen.actionSalir]
 
         #Funciones de almacen
@@ -263,7 +266,7 @@ class Ventana(QMainWindow):
             nuevo_valor += "*"
         self.bandera = True
         login.input_login.setText(nuevo_valor)
-        print(self.password)
+       
         
     #Falta solucionar que cambie el estado de la tecla enter
     
@@ -307,6 +310,7 @@ class Ventana(QMainWindow):
     
     #Función para cambiar de ventanas
      def change_window(self,window,id):
+               self.cerrar_popUp()
                if id == 0:
                    self.tipo_msj.titulo ="Warning"
                    self.tipo_msj.text ="¿Deseas cerrar sesión?"
@@ -395,6 +399,11 @@ class Ventana(QMainWindow):
                menu.removeAction(accion)
           self.acciones_caja = []
           
+     def cerrar_popUp(self):
+          for ventana in self.popUp:
+               if ventana.isVisible():
+                    ventana.hide()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -405,5 +414,5 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
 
-"""1- Botón que abra apartado que le diga cuales articulos ya se acabaron 
+"""1- Poner las funciones a la ventana productos agotados
 """
