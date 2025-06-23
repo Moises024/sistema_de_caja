@@ -82,13 +82,14 @@ def buscar(text,padre):
     render_table(padre,1,item)
 
 #Función para limpiar la lista de artículos en la interfaz
-def limpiar_lista(padre):
+def limpiar_lista(tabla,cola):
              # 1. Remover el widget visual
-        padre.almacen.tabla_articulo.removeItemWidget(padre.cola_item_almacen)
+        tabla.removeItemWidget(cola)
 
     # 2. Eliminar el item de la lista para que no quede ocupando espacio
-        fila =  padre.almacen.tabla_articulo.row(padre.cola_item_almacen)
-        padre.almacen.tabla_articulo.takeItem(fila)
+        fila =  tabla.row(cola)
+        tabla.takeItem(fila)
+
 
 #Función para almacenar el índice del artículo a eliminar
 def agrear_lista_elimar(row,c):
@@ -104,7 +105,7 @@ def render_table(padre,cantida,item=""):
     tabla = QTableWidget(cantida,4)
 
     if padre.cola_item_almacen:
-        limpiar_lista(padre)
+        limpiar_lista(padre.almacen.tabla_articulo,padre.cola_item_almacen)
     tabla.setHorizontalHeaderLabels(["ID","NOMBRE","CANTIDAD","PRECIO"])
     tabla.resizeColumnsToContents()
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -156,10 +157,11 @@ def agregar(padre):
     new_item = item(nombre,precio,cantidad)
     
     for articulo in  almacen.articulos:
-        if articulo.nombre == nombre:
+        if articulo.nombre.lower() == nombre.lower():
             bandera = True
             nueva_cant = int(cantidad) + int(articulo.cantidad)
-            new_item = item(nombre,precio,nueva_cant)
+            new_item = item(articulo.nombre,precio,nueva_cant)
+            break
 
         
     if bandera == True:
@@ -221,6 +223,7 @@ def conectar_acciones_almacen(botones,padre):
     botones[1].triggered.connect(padre.salir)
     botones[0].triggered.connect(lambda:padre.change_window(padre.caja,3))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
+    padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     
     pass
 
@@ -241,10 +244,16 @@ def buscar_articulo():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM articulos")
     articulos =[]
+    almacen.agotado = []
     for fila in cursor.fetchall():
         articulo=item(fila[1],fila[3],fila[2],fila[0])
         articulos.append(articulo)
+        if fila[2] == 0:
+            almacen.agotado.append(articulo)
+
+            
     almacen.articulos = articulos
+
     conn.close() 
 
 def update_articulo(new_item):
@@ -272,6 +281,71 @@ def  delete_articulo(articulo):
 def render_almacen(padre):
     render_table(padre,len(almacen.articulos))
 def mostrar_ventana_agotado(padre):
+
     if padre.producto_agotado.isVisible():
         padre.producto_agotado.hide()
     padre.producto_agotado.show()
+
+    renderVentanaAgotado(padre)
+
+def renderVentanaAgotado(padre,item_=False):
+
+    if len(almacen.agotado) ==0:
+        padre.tipo_msj.titulo = "Aviso"
+        padre.tipo_msj.text = "No hay productos agotados"
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        
+        return
+    
+    tabla = QTableWidget()
+    tabla.setColumnCount(2)
+    tabla.setHorizontalHeaderLabels(["ID","NOMBRE"])
+    tabla.resizeColumnsToContents()
+    tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+    tabla.horizontalHeader().setStretchLastSection(True)
+    tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    tabla.setFixedHeight(padre.producto_agotado.lista_agotado.height())
+    if padre.ventana_agotado_cola:
+        limpiar_lista(padre.producto_agotado.lista_agotado,padre.ventana_agotado_cola)
+    item = QListWidgetItem()
+    if item_ == False:
+        tabla.setRowCount(len(almacen.agotado))
+        index_column = 0
+        for item_row,agotado in enumerate(almacen.agotado):
+            tabla.setItem(item_row,index_column,QTableWidgetItem(str(agotado.id)))
+            tabla.setItem(item_row,index_column+1,QTableWidgetItem(agotado.nombre))
+
+    else:
+       
+        tabla.setRowCount(1)
+        tabla.setItem(0,0,QTableWidgetItem(str(item_.id)))
+        tabla.setItem(0,1,QTableWidgetItem(item_.nombre))
+
+    item.setSizeHint(tabla.sizeHint())
+    padre.producto_agotado.lista_agotado.addItem(item)
+    padre.producto_agotado.lista_agotado.setItemWidget(item,tabla)
+    padre.ventana_agotado_cola = item
+    
+def buscador_agotado(text,padre):
+
+    encuentra = False
+
+    if text == "":
+        renderVentanaAgotado(padre)
+        return
+    for agotado in almacen.agotado:
+        
+        if text.lower() in agotado.nombre.lower():
+            renderVentanaAgotado(padre,agotado)
+
+            encuentra = True
+            break
+
+    if not encuentra:
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "No se encuentra el artículo"
+        padre.sendMsjError(padre.tipo_msj)
+
+
+
+        

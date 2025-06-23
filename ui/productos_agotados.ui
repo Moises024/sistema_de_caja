@@ -17,7 +17,7 @@
    <iconset>
     <normaloff>../img/logo.png</normaloff>../img/logo.png</iconset>
   </property>
-  <widget class="QListWidget" name="listWidget">
+  <widget class="QListWidget" name="lista_agotado">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -45,7 +45,7 @@
     <string>Productos agotados</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="buscador_agotado">
    <property name="geometry">
     <rect>
      <x>150</x>

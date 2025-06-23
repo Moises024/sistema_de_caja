@@ -130,6 +130,7 @@ class Ventana(QMainWindow):
         self.cola_item_almacen = ""
         self.cola_item_caja    = False
         self.cierre_caja_cola  = False
+        self.ventana_agotado_cola  = False
         self.numero_orden      = ""
         self.tiempo_inicio     = ""
         self.tiempo_salida     = "" 

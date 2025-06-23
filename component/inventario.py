@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
 from component.db import db
+import sqlite3
 import datetime
 import re
 
@@ -78,9 +79,13 @@ def eliminar(padre):
         for i,iten in enumerate(almacen.facturas):
             if iten.no_factura == item.no_factura :
                 id = i
+        
+        delete_de_baseDatos(almacen.facturas[id].no_factura)
         del almacen.facturas[id]
     else:
+        delete_de_baseDatos(almacen.facturas[almacen.eliminadas].no_factura)
         del almacen.facturas[almacen.eliminadas]
+
     render_table(padre,len(almacen.facturas))
     almacen.eliminadas = None
     almacen.item = ""
@@ -161,6 +166,17 @@ def limpiar_lista(padre):
     #    Eliminar el item de la lista para que no quede ocupando espacio
     fila =  padre.inventario.tabla_factura.row(padre.cola_item)
     padre.inventario.tabla_factura.takeItem(fila)
+
+def delete_de_baseDatos(id):
+    database = db()
+    conn = database.crearConnexion()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM facturas where id =?",[id])
+        conn.commit()
+    except sqlite3.Error as error:
+        print(f"Hubo un problema:{error}")
+
 
 def buscar_facturas(padre):
     database = db()
