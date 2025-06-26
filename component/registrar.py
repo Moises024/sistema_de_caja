@@ -5,7 +5,8 @@ def registrar_usuario(registrar,padre):
     nombre = registrar.input_nombre
     apellido = registrar.input_apellido
     contra = registrar.input_contra
-    array_input = [nombre,apellido,contra]
+    usuario = registrar.input_usuario
+    array_input = [nombre,apellido,usuario,contra]
     
     for index,input in enumerate(array_input):
         if input.text() =='':
@@ -25,15 +26,25 @@ def registrar_usuario(registrar,padre):
     
     try:
         cursor.execute("SELECT * FROM usuarios WHERE lower(nombre)=lower(?) and lower(apellido)=lower(?)",(array_input[0],array_input[1]))
-        result = cursor.fetchone()
-        
-        if result != None:
+        nombre = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM usuarios WHERE usuario = ?",(array_input[2],))
+        usuario = cursor.fetchone()
+       
+        if nombre:
             padre.tipo_msj.titulo = "Error"
-            padre.tipo_msj.text = "Usuario existente"
+            padre.tipo_msj.text = "Nombre/apellido existente"
             padre.sendMsjError(padre.tipo_msj)
             return
+        
+        if usuario:
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = "Usuario ya existente"
+            padre.sendMsjError(padre.tipo_msj)
+            return
+            
        
-        cursor.execute("INSERT INTO usuarios(nombre,apellido,contra) VALUES(?, ?, ?)",(array_input[0],array_input[1],array_input[2]))
+        cursor.execute("INSERT INTO usuarios(nombre,apellido,usuario,contra) VALUES(?, ?, ?, ?)",(array_input[0],array_input[1],array_input[2],array_input[3]))
         conn.commit()
     except sqlite3.Error as err:
        

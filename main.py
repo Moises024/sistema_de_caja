@@ -7,7 +7,7 @@ import sys
 import time
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usurios
-from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja
+from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen,render_almacen
 from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,conectar_acciones_inventario,buscar_facturas
@@ -137,6 +137,12 @@ class Ventana(QMainWindow):
         self.menu_caja         = False
         self.acciones_caja =[]
         self.popUp = []
+        self.CAJA_CODE = 1
+        self.ALMACEN_CODE = 8
+        self.INVENTARIO_CODE= 4
+        self.LOGIN_CODE = 0
+        self.REGISTRAR_CODE = 5
+        self.CERRAR_SESION_CODE = 6  
         
         
         # venan cantidad
@@ -202,7 +208,7 @@ class Ventana(QMainWindow):
        
         
         #Selección de los botones
-        botones=[login.btn_0,login.btn_1,login.btn_2,login.btn_3,login.btn_4,login.btn_5,login.btn_6,login.btn_7,login.btn_8,login.btn_9,login.btn_acceder,login.btn_borrar]
+        botones = [login.btn_acceder]
         
         #funciones de login 
         conectar_botones_login(botones,login,self,caja)
@@ -223,12 +229,6 @@ class Ventana(QMainWindow):
         #Funciones de almacen
         conectar_botones_almacen(botones_almacen, self )
         conectar_acciones_almacen(acciones_almacen,self)
- 
-        #fecha y tiempo
-        tiempo = time.localtime()
-        tiemp_locaL = time.strftime("%d-%m-%y    %H:%M:%S", tiempo)
-        login.label_tiempo.setText(tiemp_locaL)
-
         
         # Evento de cambio
         login.input_login.textChanged.connect(lambda: self.hide_password(login))
@@ -239,7 +239,7 @@ class Ventana(QMainWindow):
     
     #Salir del sistema
      def salir(self):
-        sys.exit()         
+        sys.exit()          
     
     #Alerta cuando deja el label vacio
     
@@ -312,7 +312,7 @@ class Ventana(QMainWindow):
     #Función para cambiar de ventanas
      def change_window(self,window,id):
                self.cerrar_popUp()
-               if id == 0:
+               if id == self.CERRAR_SESION_CODE:
                    self.tipo_msj.titulo ="Warning"
                    self.tipo_msj.text ="¿Deseas cerrar sesión?"
                    res = self.sendMsjWarning(self.tipo_msj)
@@ -333,9 +333,10 @@ class Ventana(QMainWindow):
                self.current_window =window
                self.password =""
                self.tecla["valor"] = ""
-               if id == 1:
-                    
-                  if self.usuario.rol == 3:
+               if id == self.CAJA_CODE:
+                   
+                    actualizar_datos_caja()
+                    if self.usuario.rol == 3:
                        if self.menu_caja == False:
                             salir = QAction("Salir",self.caja)
                             inventario = QAction("Inventario",self.caja)
@@ -351,22 +352,23 @@ class Ventana(QMainWindow):
                             self.acciones_caja.append(registrar)
                             conectar_acciones_caja(self.acciones_caja,self)
                             self.menu_caja =True
-                  else:
+                    else:
 
                        if self.menu_caja:
                             self.clearActions(self.caja.menuArchivo,self.acciones_caja)
                             self.menu_caja = False
 
                   
-                  self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
-                  buscar_facturas(self)
-                  self.caja.no_orden.setText(str(self.numero_orden+1))
-               if id ==4:
+                    self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
+                    buscar_facturas(self)
+                    self.caja.no_orden.setText(str(self.numero_orden+1))
+               if id == self.INVENTARIO_CODE:
                     buscar_facturas(self)   
 
                if id == 7:
                     var.release_enter=True
-               if id == 8:
+
+               if id == self.ALMACEN_CODE:
                     render_almacen(self)
 
     #Función donde se simula el teclado

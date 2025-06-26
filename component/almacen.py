@@ -221,7 +221,7 @@ def conectar_botones_almacen(botones,padre):
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 def conectar_acciones_almacen(botones,padre):
     botones[1].triggered.connect(padre.salir)
-    botones[0].triggered.connect(lambda:padre.change_window(padre.caja,3))
+    botones[0].triggered.connect(lambda:padre.change_window(padre.caja,1))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     

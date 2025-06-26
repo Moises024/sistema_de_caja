@@ -20,8 +20,9 @@ class ClickLabel(QLabel):
 #Almacén de productos
 class items:
     articulos=[]
+    db_almacen = []
 almacen = items()
-db_almacen = []
+
 
 class tecla:
    valor=""
@@ -226,8 +227,7 @@ def is_already_exist(item,padre):
 
 #Acciones de los botones
 def conectar_botones_caja(botones,padre,caja):
- buscar_articulos()
- botones[0].clicked.connect( lambda:padre.change_window(padre.cierre_caja,6))
+ botones[0].clicked.connect( lambda:padre.change_window(padre.cierre_caja,padre.CERRAR_SESION_CODE))
  botones[1].clicked.connect(lambda:teclado(caja))
  botones[2].clicked.connect(lambda:teclado(caja))
  botones[3].clicked.connect(lambda:teclado(caja))
@@ -253,9 +253,9 @@ def conectar_botones_caja(botones,padre,caja):
 def conectar_acciones_caja(acciones,padre):
     padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
     acciones[0].triggered.connect(padre.salir)
-    acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,8))
-    acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,4))
-    acciones[3].triggered.connect(lambda:padre.change_window(padre.registrar,5))
+    acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,padre.ALMACEN_CODE))
+    acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,padre.INVENTARIO_CODE))
+    acciones[3].triggered.connect(lambda:padre.change_window(padre.registrar,padre.REGISTRAR_CODE))
 
 def limpiar_lista(caja,padre):
              # 1. Remover el widget visual
@@ -273,7 +273,7 @@ def celda_click(row,column):
 def buscar_articulos():
 
     almacen.articulos = []
-
+    almacen.db_almacen = []
     baseDeDatos = db()
     conn = baseDeDatos.crearConnexion()
     cursor = conn.cursor()
@@ -284,9 +284,10 @@ def buscar_articulos():
     result = cursor.fetchall()
     
     for item in result:
-        db_almacen.append(item)
+        almacen.db_almacen.append(item)
         almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
     conn.close()
+    
 
 def generar_facturas(padre):
         if vari.gen_factura == False:
@@ -303,11 +304,12 @@ def generar_facturas(padre):
         baseDeDatos = db()
         conn = baseDeDatos.crearConnexion()
         cursor = conn.cursor()
+       
         try:
             for item in padre.articulos:
-                
-                for articulo in db_almacen:
-                   
+               
+                for articulo in almacen.db_almacen:
+                    
                     if articulo[0] == item["ID"]:
                          if int(articulo[2]) == 0:
                                 padre.tipo_msj.titulo = "Error"
@@ -435,6 +437,9 @@ def connect_label(label,padre):
     label[0].setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
     label[0].setOpenExternalLinks(False)
     label[0].clicked.connect(lambda:buscar_click(padre,label[1]))
-
+    
+    
+def actualizar_datos_caja():
+    buscar_articulos()
 
     
