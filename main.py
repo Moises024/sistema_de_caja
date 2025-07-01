@@ -19,6 +19,7 @@ from PyQt6.QtCore import Qt, QObject, QEvent
 
 
 
+
 class msj():
     titulo =""
     text =""
