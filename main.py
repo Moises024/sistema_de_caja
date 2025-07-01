@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect
 from PyQt6.QtGui import QAction,QIcon
+from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
 from PyQt6.QtGui import QPixmap
 from pathlib import Path
@@ -142,6 +143,9 @@ class Ventana(QMainWindow):
         self.LOGIN_CODE = 0
         self.REGISTRAR_CODE = 5
         self.CERRAR_SESION_CODE = 6  
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_animation)
+        self.active = False
         
         
         # venan cantidad
@@ -210,7 +214,8 @@ class Ventana(QMainWindow):
         login.contenedor.move(0,0)
         
         login.frame.move(math.floor(login.width()/2)-math.floor(login.frame.width()/2),math.floor(login.height()/2)-math.floor(login.frame.height()/2))
-     
+       
+        self.animation(1000,time.time()*1000,login.frame_2.pos().x(),1000,login.frame_2)
         login.wallpaper.move(0,0)
         login.wallpaper.setFixedSize(login.width(),login.height())
        
@@ -321,6 +326,8 @@ class Ventana(QMainWindow):
     #Función para cambiar de ventanas
      def change_window(self,window,id):
                self.cerrar_popUp()
+               if id == self.LOGIN_CODE:
+                    self.animation(1000,time.time()*1000,self.login.frame_2.pos().x(),1000,self.login.frame_2)
                if id == self.CERRAR_SESION_CODE:
                    self.tipo_msj.titulo ="Warning"
                    self.tipo_msj.text ="¿Deseas cerrar sesión?"
@@ -415,6 +422,35 @@ class Ventana(QMainWindow):
           for ventana in self.popUp:
                if ventana.isVisible():
                     ventana.hide()
+     def animation(self,start,start_time,end,duration,obj):
+          self.start = start
+          self.end = end
+          self.duration = duration
+          self.obj = obj
+          self.start_time = start_time
+          self.active = True
+          self.timer.start(16)  # Aproximadamente 60 FPS
+         
+     def update_animation(self):
+          t = (int(time.time() * 1000) - self.start_time)/self.duration
+          easy = self.esaseOut(t)
+          effect = QGraphicsOpacityEffect()
+          effect.setOpacity(easy)  # `easy` debe estar entre 0.0 (invisible) y 1.0 (opaco)
+
+          if t >1: 
+               t=1
+               self.timer.stop()
+               
+          
+          x = self.start + (self.end - self.start) * easy
+          self.obj.move(int(x),self.obj.pos().y())
+          self.obj.setGraphicsEffect(effect)
+          
+          
+     def esaseOut(self,t):
+          return 1-(1-t) * (1-t)
+
+
 
 
 if __name__ == "__main__":
