@@ -249,9 +249,11 @@ def conectar_botones_caja(botones,padre,caja):
  botones[19].clicked.connect(lambda:devuelta(caja,padre))
  botones[20].clicked.connect(lambda:eliminar_item(caja,padre))
  botones[21].clicked.connect(lambda:generar_facturas(padre))
-
+def buscador_articulos_input_caja(padre):
+      padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
 def conectar_acciones_caja(acciones,padre):
-    padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
+   
+  
     acciones[0].triggered.connect(padre.salir)
     acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,padre.ALMACEN_CODE))
     acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,padre.INVENTARIO_CODE))

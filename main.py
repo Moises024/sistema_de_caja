@@ -4,10 +4,11 @@ from PyQt6.uic import loadUi
 from PyQt6.QtGui import QPixmap
 from pathlib import Path
 import sys
+import math
 import time
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usurios
-from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja
+from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja,buscador_articulos_input_caja
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen,render_almacen
 from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,conectar_acciones_inventario,buscar_facturas
@@ -15,10 +16,7 @@ from component.cierre_caja import conectar_acciones_cierre_caja,conectar_botones
 
 from PyQt6.QtCore import Qt, QObject, QEvent
 
-class variables():
-    release_enter = True
 
-var = variables()
 
 class msj():
     titulo =""
@@ -96,10 +94,10 @@ class TeclaListener(QObject):
                    self.parent.tecla["key"] = "back"
                    self.parent.release= False
 
-                if event.key() == Qt.Key.Key_Enter and var.release_enter or event.key() == Qt.Key.Key_Return and var.release_enter:
+                if event.key() == Qt.Key.Key_Enter and self.parent.release_enter or event.key() == Qt.Key.Key_Return and self.parent.release_enter:
                 
                     if self.parent.login.isVisible():
-                        var.release_enter = False
+                        self.parent.release_enter = False
                         datos_usurios(self.parent.login,self.parent,self.parent.caja)
                     #     self.parent.userValidate( self.parent.login, self.parent.caja)
                         return True
@@ -122,6 +120,7 @@ class Ventana(QMainWindow):
         self.tabla_row         = 1
         self.bandera           = False
         self.release           = True
+        self.release_enter     = True
         self.tabla_column      = 3
         self.tabla_pointer     = 0
         self.articulos         = []
@@ -190,11 +189,13 @@ class Ventana(QMainWindow):
         #cargar el ui
         login = loadUi("./ui/login.ui")
         self.login = login
+        
         #cierre de caja 
         self.cierre_caja = loadUi("./ui/cierre_caja.ui")
         
         botones_cierre_caja  = [self.cierre_caja.btn_cerrar]
         acciones_cierre_caja = [self.cierre_caja.actionCaja]
+        buscador_articulos_input_caja(self)
 
         conectar_acciones_cierre_caja(acciones_cierre_caja,self)
         conectar_botones_cierre_caja(botones_cierre_caja,self)
@@ -205,6 +206,14 @@ class Ventana(QMainWindow):
         login.showFullScreen()  # Mostrar a pantalla completa
         login.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         login.setFocus()  # Establecer foco en el widget login
+        login.contenedor.setFixedSize(login.width(),login.height())
+        login.contenedor.move(0,0)
+        
+        login.frame.move(math.floor(login.width()/2)-math.floor(login.frame.width()/2),math.floor(login.height()/2)-math.floor(login.frame.height()/2))
+     
+        login.wallpaper.move(0,0)
+        login.wallpaper.setFixedSize(login.width(),login.height())
+       
        
         
         #Selección de los botones
@@ -319,7 +328,7 @@ class Ventana(QMainWindow):
                    if res == QMessageBox.StandardButton.Ok:
                         self.bandera = False
                         self.release = True
-                        var.release_enter = True
+                        self.release_enter = True
                         pass
                    else:
                        return 
@@ -366,7 +375,7 @@ class Ventana(QMainWindow):
                     buscar_facturas(self)   
 
                if id == 7:
-                    var.release_enter=True
+                    self.release_enter=True
 
                if id == self.ALMACEN_CODE:
                     render_almacen(self)

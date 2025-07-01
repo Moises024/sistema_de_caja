@@ -17,12 +17,14 @@ def datos_usurios(login,padre,caja):
         padre.tipo_msj.text = "Por favor rellena el campo de usuario"
         padre.sendMsjError(padre.tipo_msj)
         input_usuario.setFocus()
+        padre.release_enter =  True
         return
     if input_contra.text() == "":
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Por favor rellena el campo de contraseña"
         padre.sendMsjError(padre.tipo_msj)
         input_contra.setFocus()
+        padre.release_enter =  True
         return
     contra_ = padre.password
     usuario_ = input_usuario.text()
@@ -38,6 +40,8 @@ def datos_usurios(login,padre,caja):
             padre.tipo_msj.text = "Usuario incorrecto"
             padre.sendMsjError(padre.tipo_msj)
             input_usuario.setFocus()
+            padre.release_enter =  True
+
             return
     
 
@@ -59,6 +63,7 @@ def datos_usurios(login,padre,caja):
             padre.tipo_msj.text = "Contraseña incorrecta"
             padre.sendMsjError(padre.tipo_msj)
             input_contra.setFocus()
+            padre.release_enter =  True
 
     except sqlite3.Error as err:
         print("error",err)
