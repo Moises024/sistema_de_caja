@@ -123,6 +123,37 @@ def buscar_item(caja,padre,item_buscado =False):
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight(caja.lista_articulo.height())
+    tabla.verticalHeader().setVisible(False)
+    tabla.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+    tabla.setStyleSheet('''
+      QTableWidget {
+        gridline-color: #ccc;
+        font-size: 14px;
+        font-family: 'Segoe UI';
+        border:none;
+    }
+
+    QHeaderView::section {
+        background-color: #232f42;
+        color: white;
+        padding: 5px;
+        font-weight: bold;
+        border: 1px solid #666;
+        border:none;
+    }
+
+    QTableWidget::item {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border:none;
+    }
+
+    QTableWidget::item:selected {
+        background-color: #0078d7;
+        color: white;
+        border:none;
+    }   
+''')
     bandera = False
     index=0
     total =0 
