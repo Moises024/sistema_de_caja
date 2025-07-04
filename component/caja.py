@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizeP
 from PyQt6.QtCore import Qt
 from component.db import db
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QCursor,QIcon
+from PyQt6.QtGui import QCursor
 from component.almacen import buscar_articulo
 import sqlite3
 import time
@@ -56,8 +56,6 @@ def back(caja):
     keys.valor= keys.valor[:-1]
     caja.monto_pagado.setText(keys.valor)
     caja.devuelta_2.setText("")
-    caja.devuelta.setText("")
-    caja.pago.setText("")
 
 #Alerta de cuando no se ingresa el pago
 def devuelta(caja,padre):
@@ -88,7 +86,12 @@ def devuelta(caja,padre):
         vari.render =False
         vari.monto_total=0
         caja.devuelta_2.setText("")
-        caja.pago.setText("")
+        return
+   if  vari.monto_total ==0:
+        padre.tipo_msj.titulo = "Warning"
+        padre.tipo_msj.text = f"no hay articulos en el carrito de compras"
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        caja.devuelta_2.setText("")
         caja.monto_pagado.setText("")
         return
    
@@ -99,30 +102,54 @@ def devuelta(caja,padre):
 
    if not vari.render:
         caja.devuelta_2.setText(str(monto_devolver))
-        caja.pago.setText(str(vari.mont_pagado))
-        caja.devuelta.setText(str(monto_devolver))
         caja.monto_pagado.setText(str(vari.mont_pagado))
    else:
         caja.devuelta_2.setText("")
-        caja.devuelta.setText("")
         caja.monto_pagado.setText("")
-        caja.pago.setText("")
 
 #Aparición de los productos en la lista
 def buscar_item(caja,padre,item_buscado =False):
     tabla_pointer=0
     tabla_row =1
     informacion = caja.input_buscar.text()
+    unidades=0
     item = QListWidgetItem()
 
     #Crea una tabla para mostrar los artículos
     tabla = QTableWidget(tabla_row,padre.tabla_column)
     tabla.resizeColumnsToContents()
-    tabla.setHorizontalHeaderLabels(["NOMBRE","CANTIDAD","PRECIO"])
+    tabla.setHorizontalHeaderLabels(["Productos","ITBIS","Monto"])
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight(caja.lista_articulo.height())
+    tabla.verticalHeader().setVisible(False)
+    tabla.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+    tabla.setStyleSheet('''
+    
+
+    QHeaderView::section {
+        font-size: 20px;
+	    background: none;
+	    color: rgb(107, 107, 107);
+        font-weight:bold;
+        font-family:Dubai;
+        border:none;
+        border-bottom:3px solid #f1f1f1;
+    }
+
+    QTableWidget::item {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border:none;
+    }
+
+    QTableWidget::item:selected {
+        background-color: #0078d7;
+        color: white;
+        border:none;
+    }   
+''')
     bandera = False
     index=0
     total =0 
@@ -170,18 +197,24 @@ def buscar_item(caja,padre,item_buscado =False):
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
             tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["nombre"]))
-            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
-            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{articulo["precio"]}"))
+            # tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+            monto = articulo["precio"]*articulo["cantidad"]
+            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{monto}"))
+            unidades +=articulo["cantidad"]
         else:    
             tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
-            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
-            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{articulo["precio"]}"))
+            # tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+            monto = articulo["precio"]*articulo["cantidad"]
+            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{monto}"))
+            unidades +=articulo["cantidad"]
         tabla_row +=1
         tabla_pointer+=1 
         index=0
         total += int(articulo["precio"])*int(articulo["cantidad"])
+       
     tabla.cellClicked.connect(celda_click)
     caja.total.setText(str(total))
+    padre.caja.detalles.findChild(QLabel,"unidades").setText(str(unidades))
     padre.inputs[2].setText(str(total))
 
     # Limpia la lista si hay artículos
@@ -208,9 +241,9 @@ def eliminar_item(caja,padre):
     del articulos[vari.row_aliminada]
 
     caja.monto_pagado.setText("")
-    caja.devuelta.setText("")
+
     caja.devuelta_2.setText("")
-    caja.pago.setText("")
+    
 
     # else:
     #     articulos[vari.row_aliminada]["cantidad"] = int(articulos[vari.row_aliminada]["cantidad"])-1
@@ -243,14 +276,14 @@ def conectar_botones_caja(botones,padre,caja):
  botones[13].clicked.connect(lambda:teclado(caja))
  botones[14].clicked.connect(lambda:teclado(caja))
  botones[15].clicked.connect(lambda:teclado(caja))
- botones[16].clicked.connect(lambda:teclado(caja))
- botones[17].clicked.connect(lambda:teclado(caja))
- botones[18].clicked.connect(lambda:back(caja))
- botones[19].clicked.connect(lambda:devuelta(caja,padre))
- botones[20].clicked.connect(lambda:eliminar_item(caja,padre))
- botones[21].clicked.connect(lambda:generar_facturas(padre))
+ botones[16].clicked.connect(lambda:back(caja))
+ botones[17].clicked.connect(lambda:devuelta(caja,padre))
+ botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
+ botones[19].clicked.connect(lambda:generar_facturas(padre))
+
 def buscador_articulos_input_caja(padre):
-      padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
+    padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
+    
 def conectar_acciones_caja(acciones,padre):
    
   
@@ -356,21 +389,19 @@ def generar_facturas(padre):
         padre.articulos =[]
         contenedor = QWidget()
         padre.caja.sugerencias.setWidget(contenedor)
-
+       
 
 def limpiar_completo(padre, caja):
     limpiar_lista(caja, padre)
     caja.devuelta_2.setText("")
-    caja.devuelta.setText("")
     caja.monto_pagado.setText("")
-    caja.pago.setText("")
     caja.precio_total.setText("")
     caja.total.setText("")
     caja.input_buscar.setText("")
-    numero_orden = caja.no_orden.text()
-    caja.no_orden.setText(str(int(numero_orden)+1))
+   
 
 def sugerencia(texto,padre):
+
     contenedor = QWidget()
     if texto == "":
         padre.caja.sugerencias.setWidget(contenedor)
@@ -387,6 +418,16 @@ def sugerencia(texto,padre):
         labels.addWidget(label[0])
         connect_label(label,padre)
     padre.caja.sugerencias.setWidget(contenedor)
+    padre.caja.sugerencias.findChild(QWidget).setStyleSheet('''
+        QLabel{
+                font-family:Dubai;
+                padding-left:5px;
+                                                            }
+        QLabel::hover{
+                    background-color:#232f42;
+                    color:#fff;                                           }
+''')
+
     
 
 def buscar_click(padre,item):
@@ -397,6 +438,7 @@ def buscar_click(padre,item):
         padre.ventana_cantidad.hide()
         
     padre.ventana_cantidad.show()
+    padre.ventana_cantidad.input_cantidad.setFocus()
     padre.key_number = False
    
    

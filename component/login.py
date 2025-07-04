@@ -9,7 +9,7 @@ class usuario:
     rol=""
 user = usuario()
 
-def datos_usurios(login,padre,caja):
+def datos_usuarios(login,padre,main_window):
     input_usuario = login.input_nombre_usuario
     input_contra = login.input_login
     if input_usuario.text() == "":
@@ -57,7 +57,7 @@ def datos_usurios(login,padre,caja):
             input_contra.setText('')
             input_usuario.setText('')
             padre.tiempo_inicio = datetime.datetime.now()
-            padre.change_window(caja,1)
+            padre.change_window(main_window,padre.MAIN_WINDOW)
         else:
             padre.tipo_msj.titulo = "Error"
             padre.tipo_msj.text = "Contraseña incorrecta"
@@ -74,7 +74,7 @@ def conectar_botones_login(botones,login,padre,caja):
     
     #Acción de los botones
     
-    botones[0].clicked.connect(lambda:datos_usurios(login,padre,caja))
+    botones[0].clicked.connect(lambda:datos_usuarios(login,padre,padre.main_window))
     
 
 

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect,QLabel
 from PyQt6.QtGui import QAction,QIcon
 from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
@@ -8,14 +8,15 @@ import sys
 import math
 import time
 import datetime
-from component.login import conectar_acciones_login,conectar_botones_login,datos_usurios
+from component.login import conectar_acciones_login,conectar_botones_login,datos_usuarios
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja,buscador_articulos_input_caja
 from component.almacen import conectar_acciones_almacen, conectar_botones_almacen,render_almacen
 from component.registrar import conectar_acciones_registrar,conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,conectar_acciones_inventario,buscar_facturas
 from component.cierre_caja import conectar_acciones_cierre_caja,conectar_botones_cierre_caja,render_cierre_Caja
-
+from component.main_window import connectar_botones_main
 from PyQt6.QtCore import Qt, QObject, QEvent
+
 
 
 
@@ -99,7 +100,7 @@ class TeclaListener(QObject):
                 
                     if self.parent.login.isVisible():
                         self.parent.release_enter = False
-                        datos_usurios(self.parent.login,self.parent,self.parent.caja)
+                        datos_usuarios(self.parent.login,self.parent,self.parent.main_window)
                     #     self.parent.userValidate( self.parent.login, self.parent.caja)
                         return True
      
@@ -142,7 +143,8 @@ class Ventana(QMainWindow):
         self.INVENTARIO_CODE= 4
         self.LOGIN_CODE = 0
         self.REGISTRAR_CODE = 5
-        self.CERRAR_SESION_CODE = 6  
+        self.CERRAR_SESION_CODE = 6 
+        self.MAIN_WINDOW =10 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_animation)
         self.active = False
@@ -174,10 +176,13 @@ class Ventana(QMainWindow):
 
         # Agrega la acción al menú
         archivo.addAction(salir_accion)  
-        caja = loadUi("./ui/caja.ui")
+        caja = loadUi("./ui/Facturar.ui")
         self.almacen = loadUi("./ui/almacen.ui")
         self.caja = caja
-
+        #main Window 
+        self.main_window = loadUi("./ui/mainWindow.ui")
+        botones_main_window = [self.main_window.nav_1,self.main_window.nav_2,self.main_window.nav_3,self.main_window.nav_4,self.main_window.nav_5]
+        connectar_botones_main(botones_main_window,self)
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
         botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
@@ -212,6 +217,7 @@ class Ventana(QMainWindow):
         login.setFocus()  # Establecer foco en el widget login
         login.contenedor.setFixedSize(login.width(),login.height())
         login.contenedor.move(0,0)
+        login.input_nombre_usuario.setFocus()
         
         login.frame.move(math.floor(login.width()/2)-math.floor(login.frame.width()/2),math.floor(login.height()/2)-math.floor(login.frame.height()/2))
        
@@ -229,7 +235,7 @@ class Ventana(QMainWindow):
         conectar_acciones_login(login,self)
 
         #variables de caja
-        botones_caja  = [caja.btn_cerrar_caja,caja.btn_0,caja.btn_00,caja.btn_000,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_valor_5,caja.btn_borrar,caja.btn_igual,caja.btn_eliminar_lista,caja.generar_factura]
+        botones_caja  = [caja.btn_cerrar_caja,caja.btn_0,caja.btn_00,caja.btn_1,caja.btn_2,caja.btn_3,caja.btn_4,caja.btn_5,caja.btn_6,caja.btn_7,caja.btn_8,caja.btn_9,caja.btn_valor_1,caja.btn_valor_2,caja.btn_valor_3,caja.btn_valor_4,caja.btn_borrar,caja.btn_igual,caja.btn_eliminar_lista,caja.generar_factura]
        
 
         #funciones de caja
@@ -249,7 +255,7 @@ class Ventana(QMainWindow):
         self.current_window = login
 
         #Crear inputs a limpiar 
-        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total,caja.pago,caja.devuelta,caja.itbis,caja.input_buscar,caja.devuelta_2,caja.total]
+        self.inputs =[login.input_login,caja.monto_pagado,caja.precio_total,caja.input_buscar,caja.devuelta_2,caja.total]
     
     #Salir del sistema
      def salir(self):
@@ -344,13 +350,17 @@ class Ventana(QMainWindow):
                        render_cierre_Caja(self)
 
                self.clear_input(self.inputs)  
-               self.current_window.hide()  
-               window.showFullScreen() 
-               self.current_window =window
                self.password =""
                self.tecla["valor"] = ""
+
                if id == self.CAJA_CODE:
-                   
+                    self.main_window.root.layout().addWidget(self.caja)
+                    self.caja.setParent(self.main_window)
+                    self.caja.move(0,self.main_window.header.height()-10)
+                    self.caja.setFixedSize(self.main_window.width(),self.main_window.height())
+                    self.caja.contenedor.move(int(self.caja.width()/2)-int(self.caja.contenedor.width()/2),int(self.caja.height()/2) - int(self.caja.contenedor.height()/2))
+                    self.caja.contenedor.setStyleSheet("background-color:transparent;")
+                    self.current_window =window
                     actualizar_datos_caja()
                     if self.usuario.rol == 3:
                        if self.menu_caja == False:
@@ -375,17 +385,27 @@ class Ventana(QMainWindow):
                             self.menu_caja = False
 
                   
-                    self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
+                    # self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
                     buscar_facturas(self)
-                    self.caja.no_orden.setText(str(self.numero_orden+1))
+                    # self.caja.no_orden.setText(str(self.numero_orden+1))
                if id == self.INVENTARIO_CODE:
-                    buscar_facturas(self)   
+                    buscar_facturas(self)  
+                    self.current_window.setParent(None) 
 
                if id == 7:
                     self.release_enter=True
 
                if id == self.ALMACEN_CODE:
                     render_almacen(self)
+               if id == self.MAIN_WINDOW:
+                    self.current_window.hide()  
+                    window.showFullScreen() 
+                    self.current_window =window
+                    self.main_window.header.setFixedWidth(self.main_window.width())
+                    self.main_window.root.setFixedSize(self.main_window.width(),self.main_window.height())
+                    self.main_window.container_user.findChild(QLabel,"user").setText(self.usuario.nombre + " " + self.usuario.apellido )
+                        
+                    
 
     #Función donde se simula el teclado
      def teclado(self,number,login): 
