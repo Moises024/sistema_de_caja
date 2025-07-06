@@ -218,14 +218,10 @@ def conectar_botones_almacen(botones,padre):
     botones[1].clicked.connect(lambda:eliminar(padre))   
     botones[2].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
-# Función para conectar acciones de los menús en la interfaz de almacenamiento
-def conectar_acciones_almacen(botones,padre):
-    botones[1].triggered.connect(padre.salir)
-    botones[0].triggered.connect(lambda:padre.change_window(padre.caja,1))
-    padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
-    
-    pass
+    padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
+# Función para conectar acciones de los menús en la interfaz de almacenamiento
+
 
 def insertar_articulo(articulo):
     database = db()

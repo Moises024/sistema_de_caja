@@ -32,6 +32,7 @@ def connectar_botones_main(botones,padre):
                     border-radius:10px;
                     text-align:center;
                     padding:10px;
+                    height:100%;
             }
             QLabel::hover{
                             background-color:#232f42;
@@ -52,7 +53,8 @@ def activeLink(padre,label):
                     border-radius:10px;
                     text-align:center;
                     padding:10px;
-                    background-color:#232f42;
+                    background-color: rgba(167, 167, 167, 100);
+                    height:100%;
             }
             QLabel::hover{
                             background-color:#232f42;
@@ -67,6 +69,7 @@ def activeLink(padre,label):
                     text-align:center;
                     padding:10px;
                     background-color:transparent;
+                    height:100%;
             }
             QLabel::hover{
                             background-color:#232f42;
@@ -78,6 +81,12 @@ def activeLink(padre,label):
         padre.change_window(padre.caja,padre.CAJA_CODE)
     if label["id"]== 1:
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
+    if label["id"]== 2:
+        padre.change_window(padre.almacen,padre.ALMACEN_CODE)
+    if label["id"]== 3:
+        padre.change_window(padre.cierre_caja,padre.CERRAR_SESION_CODE)
+    if label["id"] ==4:
+        padre.change_window(padre.almacen,padre.ALMACEN_CODE)
 
 def agregar_salir(main_window,padre):
     salir = Create_link("Salir")

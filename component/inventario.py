@@ -123,11 +123,6 @@ def conectar_botones_inventario(botones,inventario,padre):
     botones[2].clicked.connect(lambda:eliminar(padre))
     inventario.input_factura.textChanged.connect(lambda text:buscar_usuario(text,padre))
 
-    pass
-def conectar_acciones_inventario(acciones, padre):
-    acciones[0].triggered.connect(lambda:padre.change_window(padre.caja,1))
-    acciones[1].triggered.connect(padre.salir)
-
 def isNumber(usuario):
     try:
         int(usuario)

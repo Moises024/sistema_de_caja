@@ -18,8 +18,7 @@ class Item:
 def conectar_botones_cierre_caja(botones,padre):
     botones[0].clicked.connect(lambda:padre.change_window(padre.login,padre.LOGIN_CODE))
    
-def conectar_acciones_cierre_caja(acciones,padre):
-    acciones[0].triggered.connect(lambda:padre.change_window(padre.caja,padre.CAJA_CODE))
+
 
 def render(padre,cantidad):
     Item_ = QListWidgetItem()

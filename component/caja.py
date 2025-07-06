@@ -118,37 +118,44 @@ def buscar_item(caja,padre,item_buscado =False):
     #Crea una tabla para mostrar los artículos
     tabla = QTableWidget(tabla_row,padre.tabla_column)
     tabla.resizeColumnsToContents()
-    tabla.setHorizontalHeaderLabels(["Productos","ITBIS","Monto"])
+    tabla.setHorizontalHeaderLabels(["Cant.","Productos","ITBIS","Precio","Total"])
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
-    tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Custom)
+    
     tabla.setFixedHeight(caja.lista_articulo.height())
     tabla.verticalHeader().setVisible(False)
     tabla.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+    tabla.setFocusPolicy(Qt.FocusPolicy.NoFocus)
     tabla.setStyleSheet('''
-    
+        QHeaderView::section{
+                        border:none;
+                        border-bottom:3px solid #f1f1f1;
+                        font-family:Dubai;
+                        font-weight:bold;
+                        color: rgb(107, 107, 107);
+                        border-top-left-radius:10px;
+                        border-top-right-radius:10px;
+                        }
+        QTableWidget::item{
+                        padding:10px;
+                        border:none;
+                        }
+        QTableWidget::section::hover{
+                        background-color:#232f42;
+                        }
+        QTableWidget::item::selected{
+                        background-color:#232f42;
+                        color:#f1f1f1;
+                        border:none;
+                        }
+         QTableWidget::item::hover{
+                        background-color:#232f4270;
+                        color:#f1f1f1;
+                        border:none;
+                        }
 
-    QHeaderView::section {
-        font-size: 20px;
-	    background: none;
-	    color: rgb(107, 107, 107);
-        font-weight:bold;
-        font-family:Dubai;
-        border:none;
-        border-bottom:3px solid #f1f1f1;
-    }
 
-    QTableWidget::item {
-        padding: 5px;
-        border: 1px solid #ddd;
-        border:none;
-    }
-
-    QTableWidget::item:selected {
-        background-color: #0078d7;
-        color: white;
-        border:none;
-    }   
 ''')
     bandera = False
     index=0
@@ -196,16 +203,20 @@ def buscar_item(caja,padre,item_buscado =False):
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
-            tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["nombre"]))
-            # tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(articulo["nombre"]))
+            tabla.setItem(numero_articulo,index,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             monto = articulo["precio"]*articulo["cantidad"]
-            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{monto}"))
+            tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"0"))
+            tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
+            tabla.setItem(numero_articulo,index+4,QTableWidgetItem(f"{str(monto)}"))
             unidades +=articulo["cantidad"]
         else:    
-            tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
-            # tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             monto = articulo["precio"]*articulo["cantidad"]
-            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{monto}"))
+            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(articulo["nombre"]))
+            tabla.setItem(tabla_pointer,index,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+            tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{str(monto)}"))
+            tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
+            tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"0"))
             unidades +=articulo["cantidad"]
         tabla_row +=1
         tabla_pointer+=1 

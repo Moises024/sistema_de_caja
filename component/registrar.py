@@ -64,9 +64,5 @@ def registrar_usuario(registrar,padre):
     padre.tipo_msj.text = "Usuario registrado correctamente"
     padre.sendMsjSuccess(padre.tipo_msj)
     
-def conectar_acciones_registrar(registrar,padre):
-    registrar.login.triggered.connect(lambda:padre.change_window(padre.login,7))
-    registrar.salir.triggered.connect(padre.salir)
-
 def conectar_botones_registrar(botones,registrar,padre):
     botones[0].clicked.connect(lambda:registrar_usuario(registrar,padre))

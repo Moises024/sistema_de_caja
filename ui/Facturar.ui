@@ -165,7 +165,7 @@ background-color: rgb(255, 255, 255);
      <string notr="true">QLineEdit {
 	border-radius: 5px;
 	background-color:  rgb(255, 255, 255);
-	padding-left: 35px;
+	padding-left: 50px;
 	font-size: 17px;
 	color: rgb(43, 43, 43);
 }</string>
@@ -853,7 +853,8 @@ background-color:transparent;</string>
     <property name="styleSheet">
      <string notr="true">background-color:#ffffff;
 border:none;
-</string>
+border-top-left-radius:10px;
+border-top-right-radius:10px;</string>
     </property>
    </widget>
    <widget class="QWidget" name="detalles" native="true">
@@ -974,6 +975,28 @@ border-bottom-right-radius:10px;
      </property>
     </widget>
    </widget>
+   <widget class="QLabel" name="icon_buscar">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>41</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:transparent;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>../img/lupa.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
    <zorder>detalles</zorder>
    <zorder>listView_2</zorder>
    <zorder>precio_total</zorder>
@@ -993,6 +1016,7 @@ border-bottom-right-radius:10px;
    <zorder>line_3</zorder>
    <zorder>sugerencias</zorder>
    <zorder>lista_articulo</zorder>
+   <zorder>icon_buscar</zorder>
   </widget>
  </widget>
  <resources/>

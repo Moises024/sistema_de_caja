@@ -64,6 +64,7 @@ def datos_usuarios(login,padre,main_window):
             padre.sendMsjError(padre.tipo_msj)
             input_contra.setFocus()
             padre.release_enter =  True
+            padre.password =""
 
     except sqlite3.Error as err:
         print("error",err)
