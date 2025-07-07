@@ -152,11 +152,11 @@ class Ventana(QMainWindow):
         
         
         # venan cantidad
-        self.ventana_cantidad = loadUi("./ui/ventana_cantidad.ui")
+        self.ventana_cantidad = loadUi("./ui/IngresarCantidad.ui")
         # conectar btn ventana_cantidad
         self.ventana_cantidad.btn_ok.clicked.connect(lambda:click_ok_caja(self))
         # ventana producto agotado 
-        self.producto_agotado = loadUi("./ui/productos_agotados.ui")
+        self.producto_agotado = loadUi("./ui/ProductosAgotados.ui")
 
         # Instalamos el filtro de eventos en la ventana principal
         self.popUp.append(self.producto_agotado)
@@ -389,7 +389,11 @@ class Ventana(QMainWindow):
 
                if id == 7:
                     self.release_enter=True
-
+               if self.REGISTRAR_CODE == id:
+                    self.clean_Window()
+                    window.setParent(self.main_window)
+                    self.main_window.root.layout().addWidget(window)
+                    self.current_window = window
                if id == self.ALMACEN_CODE:
                     render_almacen(self)
                     self.clean_Window()

@@ -63,7 +63,7 @@ padding-left: 10px;</string>
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../Downloads/name_user_3716.ico</pixmap>
+     <pixmap>../img/name_user_3716.ico</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -108,7 +108,7 @@ border-radius: 20px;</string>
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../Downloads/secure_safety_password_protection_security_lock_padlock_icon_219355.ico</pixmap>
+     <pixmap>../img/secure_safety_password_protection_security_lock_padlock_icon_219355.ico</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -169,7 +169,7 @@ border-radius: 20px;</string>
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../Downloads/Gender_Neutral_User_icon-icons.com_55902.ico</pixmap>
+     <pixmap>../img/Gender_Neutral_User_icon-icons.com_55902.ico</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -229,7 +229,7 @@ border-radius: 20px;</string>
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../Downloads/4092564-about-mobile-ui-profile-ui-user-website_114033.ico</pixmap>
+     <pixmap>../img/4092564-about-mobile-ui-profile-ui-user-website_114033.ico</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>

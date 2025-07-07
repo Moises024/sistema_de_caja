@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>widget</class>
+ <widget class="QWidget" name="widget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,9 +11,9 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Productos Agotados</string>
   </property>
-  <widget class="QListWidget" name="listWidget">
+  <widget class="QListWidget" name="lista_agotado">
    <property name="geometry">
     <rect>
      <x>35</x>
@@ -27,7 +27,7 @@
 border-radius: 10px;</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_6">
+  <widget class="QLineEdit" name="buscador_agotado">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -47,7 +47,7 @@ font-size: 16px;</string>
     <string>Digita un producto</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_4">
+  <widget class="QPushButton" name="btn_actualizar">
    <property name="geometry">
     <rect>
      <x>380</x>

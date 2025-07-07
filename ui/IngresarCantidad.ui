@@ -11,12 +11,12 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Ingresar Cantidad</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(255, 255, 255);</string>
   </property>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="input_cantidad">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -51,7 +51,7 @@ font: 75 20pt &quot;Dubai&quot;;</string>
     <string>Ingrese la cantidad</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="btn_ok">
    <property name="geometry">
     <rect>
      <x>40</x>

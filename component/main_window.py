@@ -86,7 +86,7 @@ def activeLink(padre,label):
     if label["id"]== 3:
         padre.change_window(padre.cierre_caja,padre.CERRAR_SESION_CODE)
     if label["id"] ==4:
-        padre.change_window(padre.almacen,padre.ALMACEN_CODE)
+        padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
 
 def agregar_salir(main_window,padre):
     salir = Create_link("Salir")
