@@ -393,6 +393,8 @@ class Ventana(QMainWindow):
                     self.clean_Window()
                     window.setParent(self.main_window)
                     self.main_window.root.layout().addWidget(window)
+                    window.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
+
                     self.current_window = window
                if id == self.ALMACEN_CODE:
                     render_almacen(self)
