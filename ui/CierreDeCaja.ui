@@ -82,27 +82,49 @@ color: rgb(255, 255, 255);
 background: none;</string>
    </property>
    <property name="text">
-    <string>Cierre de caja</string>
+    <string>Cierre de Caja</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_cerrar">
    <property name="geometry">
     <rect>
-     <x>1010</x>
+     <x>990</x>
      <y>10</y>
-     <width>101</width>
+     <width>121</width>
      <height>41</height>
     </rect>
    </property>
    <property name="styleSheet">
     <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(0, 76, 197);
+
 color: rgb(255, 255, 255);
 font-size: 15px;
-border-radius: 10px;</string>
+border-radius: 10px;
+
+background-color: #004cc5;
+</string>
    </property>
    <property name="text">
-    <string>Cerrar sesion</string>
+    <string>Cerrar Sesión</string>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../img/cerrar-removebg-preview.png</normaloff>../img/cerrar-removebg-preview.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+   <property name="autoExclusive">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLabel" name="total_vendido">
@@ -113,6 +135,11 @@ border-radius: 10px;</string>
      <width>71</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color:transparent;</string>

@@ -1,11 +1,13 @@
 from PyQt6.QtWidgets import QLabel,QWidget
 from PyQt6.QtCore import pyqtSignal,Qt
-from PyQt6.QtGui import QCursor
+from PyQt6.QtGui import QCursor,QPixmap
 
 
 class labels:
+    names=[]
     clicked_bottons=[]
 array_label = labels()
+array_label.names=["Facturar","Inventario","Almacen","Registrar"]
 class Create_link(QLabel):
     clicked = pyqtSignal()
     def __init__(self,parent=None):
@@ -14,15 +16,24 @@ class Create_link(QLabel):
         self.clicked.emit()
         super().mousePressEvent(event)
 
+
+
 def connectar_botones_main(botones,padre):
-    agregar_salir(padre.main_window,padre)
+    if len(array_label.clicked_bottons) > 0:
+        for i,label in enumerate(array_label.clicked_bottons):
+            label["link"].deleteLater()
+    array_label.clicked_bottons = []
     for i,label in enumerate(botones):
-        text = label.text()
+        text = array_label.names[i]
         label.setText('')
-        label_click = Create_link(label)
-        label_click.setText(text)
-        label_click.setFixedSize(label.width(),label.height())
-        array_label.clicked_bottons.append({"link":label_click,"id":i})
+       
+        if padre.usuario.rol == 3 or i ==0:
+            print("entre")
+            label_click = Create_link(label)
+            label_click.setText(text)
+            label_click.setFixedSize(label.width(),label.height())
+            array_label.clicked_bottons.append({"link":label_click,"id":i})
+    
     for label in array_label.clicked_bottons:
         label["link"].setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         label["link"].setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
@@ -33,6 +44,7 @@ def connectar_botones_main(botones,padre):
                     text-align:center;
                     padding:10px;
                     height:100%;
+                    color:#f1f1f1;
             }
             QLabel::hover{
                             background-color:#232f42;
@@ -79,20 +91,25 @@ def activeLink(padre,label):
         ''')
     if label["id"] == 0:
         padre.change_window(padre.caja,padre.CAJA_CODE)
-    if label["id"]== 1:
+    if label["id"]== 1 and padre.usuario.rol  == 3:
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
-    if label["id"]== 2:
+    if label["id"]== 2 and padre.usuario.rol  == 3:
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
-    if label["id"]== 3:
-        padre.change_window(padre.cierre_caja,padre.CERRAR_SESION_CODE)
-    if label["id"] ==4:
+    if label["id"] ==3 and padre.usuario.rol  == 3:
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
 
 def agregar_salir(main_window,padre):
+    
+    pixmap = QPixmap("./img/apagar.png")
+    
+    
     salir = Create_link("Salir")
+    salir.setFixedSize(60,45)
+    redimencionada = pixmap.scaled(salir.width(), salir.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+    salir.setPixmap(redimencionada)
     parent = main_window.header.findChild(QWidget,"container_user",)
     header_width = main_window.header.width()
-    user_width = (40/100) * header_width
+    user_width = (40/110) * header_width
     parent.setFixedWidth(int(user_width))
     salir.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     salir.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
@@ -105,15 +122,12 @@ def agregar_salir(main_window,padre):
                         color: rgb(255, 255, 255);
 	                        font: 100 18pt "Dubai";
                         padding-left:10px;
+                        border-radius:50px;
                         }
-        QLabel::hover{
-                            background-color:#232f42;
-                            
 
-                            }
 ''')
-    salir.setFixedSize(80,30)
-    salir.move(parent.width()-80,int(int(parent.height()/2)-20))
+    
+    salir.move(parent.width()-60,int(int(parent.height()/2)-20))
     salir.clicked.connect(padre.salir)
     
 

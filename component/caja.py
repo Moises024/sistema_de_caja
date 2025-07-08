@@ -118,10 +118,14 @@ def buscar_item(caja,padre,item_buscado =False):
     #Crea una tabla para mostrar los artículos
     tabla = QTableWidget(tabla_row,padre.tabla_column)
     tabla.resizeColumnsToContents()
-    tabla.setHorizontalHeaderLabels(["Cant.","Productos","ITBIS","Precio","Total"])
+    tabla.setHorizontalHeaderLabels(["Productos","Cant.","ITBIS","Precio"])
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Custom)
+    tabla.setColumnWidth(0, 120)
+    tabla.setColumnWidth(1, 60)
+    tabla.setColumnWidth(2, 60)
+    tabla.setColumnWidth(3, 100)
     
     tabla.setFixedHeight(caja.lista_articulo.height())
     tabla.verticalHeader().setVisible(False)
@@ -134,8 +138,7 @@ def buscar_item(caja,padre,item_buscado =False):
                         font-family:Dubai;
                         font-weight:bold;
                         color: rgb(107, 107, 107);
-                        border-top-left-radius:10px;
-                        border-top-right-radius:10px;
+                        
                         }
         QTableWidget::item{
                         padding:10px;
@@ -203,18 +206,17 @@ def buscar_item(caja,padre,item_buscado =False):
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
-            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(articulo["nombre"]))
-            tabla.setItem(numero_articulo,index,QTableWidgetItem(f"x{articulo["cantidad"]}"))
-            monto = articulo["precio"]*articulo["cantidad"]
+            tabla.setItem(numero_articulo,index,QTableWidgetItem(articulo["nombre"]))
+            tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
+           
             tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"0"))
             tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
-            tabla.setItem(numero_articulo,index+4,QTableWidgetItem(f"{str(monto)}"))
+            
             unidades +=articulo["cantidad"]
         else:    
-            monto = articulo["precio"]*articulo["cantidad"]
-            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(articulo["nombre"]))
-            tabla.setItem(tabla_pointer,index,QTableWidgetItem(f"x{articulo["cantidad"]}"))
-            tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{str(monto)}"))
+            
+            tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
+            tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
             tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"0"))
             unidades +=articulo["cantidad"]
@@ -291,6 +293,9 @@ def conectar_botones_caja(botones,padre,caja):
  botones[17].clicked.connect(lambda:devuelta(caja,padre))
  botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
  botones[19].clicked.connect(lambda:generar_facturas(padre))
+ for boton in botones:
+    boton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
 
 def buscador_articulos_input_caja(padre):
     padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
@@ -389,7 +394,6 @@ def generar_facturas(padre):
         vari.render =False
         vari.mont_pagado=0
         vari.monto_total=0
-
         vari.gen_factura = False
 
         padre.tipo_msj.titulo = "Éxito"
@@ -400,6 +404,7 @@ def generar_facturas(padre):
         padre.articulos =[]
         contenedor = QWidget()
         padre.caja.sugerencias.setWidget(contenedor)
+        padre.caja.detalles.findChild(QLabel,"unidades").setText(str(0))
        
 
 def limpiar_completo(padre, caja):
@@ -433,6 +438,8 @@ def sugerencia(texto,padre):
         QLabel{
                 font-family:Dubai;
                 padding-left:5px;
+                color:#f1f1f1;
+                font-size:18px;
                                                             }
         QLabel::hover{
                     background-color:#232f42;

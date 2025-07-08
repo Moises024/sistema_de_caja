@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
 from component.db import db
+from PyQt6.QtGui import QCursor
+from PyQt6.QtCore import Qt
 import sqlite3
 import datetime
 import re
@@ -122,6 +124,10 @@ def conectar_botones_inventario(botones,inventario,padre):
     botones[1].clicked.connect(lambda:render_table(padre,len(almacen.facturas)))
     botones[2].clicked.connect(lambda:eliminar(padre))
     inventario.input_factura.textChanged.connect(lambda text:buscar_usuario(text,padre))
+    for btn in botones:
+        btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    padre.inventario.input_fecha_inicio.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    padre.inventario.input_fecha_final.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
 def isNumber(usuario):
     try:
@@ -153,7 +159,9 @@ def hacer_inventario(padre):
         if fecha_int  >= fecha_int_inicio and fecha_int  <= fecha_int_final:
             inventario += int(item.total)
 
-    padre.inventario.label_factura.setText(f"El inventario desde el { mes} hasta el {ano} es de: ${str(inventario)}")
+    padre.inventario.msj_1.setText(f"El inventario desde el { mes}")
+    padre.inventario.msj_2.setText(f"hasta el {ano} es de:")
+    padre.inventario.msj_3.setText(f"${str(inventario)}")
     
 def limpiar_lista(padre): 
          # 1. Remover el widget visual

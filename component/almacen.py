@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
 from component.db import db
+from PyQt6.QtGui import QCursor
+from PyQt6.QtCore import Qt
 import sqlite3
 
 #Clase para almacenar artículos en el inventario
@@ -220,6 +222,8 @@ def conectar_botones_almacen(botones,padre):
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
+    for btn in botones:
+        btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 
 

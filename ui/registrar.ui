@@ -199,7 +199,7 @@ font-size: 28px;
 background: none;</string>
      </property>
      <property name="text">
-      <string>Registrar usuario</string>
+      <string>Registrar Usuario</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="input_nombre">

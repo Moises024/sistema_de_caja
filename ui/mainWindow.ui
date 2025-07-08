@@ -38,7 +38,7 @@ background-color: rgb(35, 35, 35);</string>
    <widget class="QLabel" name="nav_2">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>290</x>
       <y>20</y>
       <width>141</width>
       <height>51</height>
@@ -58,7 +58,7 @@ background-color: rgb(35, 35, 35);</string>
    <widget class="QLabel" name="nav_3">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>510</x>
       <y>20</y>
       <width>121</width>
       <height>51</height>
@@ -76,26 +76,6 @@ background-color: rgb(35, 35, 35);</string>
     </property>
    </widget>
    <widget class="QLabel" name="nav_4">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>20</y>
-      <width>191</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QLabel {
-	
-	color: rgb(255, 255, 255);
-	font: 100 18pt &quot;Dubai&quot;;
-}</string>
-    </property>
-    <property name="text">
-     <string>Cierre de caja</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="nav_5">
     <property name="geometry">
      <rect>
       <x>730</x>
@@ -198,7 +178,10 @@ border-radius: 15px;</string>
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../Downloads/4213460-account-avatar-head-person-profile-user_115386.ico</pixmap>
+      <pixmap>../img/Gender_Neutral_User_icon-icons.com_55902.ico</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

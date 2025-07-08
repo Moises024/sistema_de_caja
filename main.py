@@ -14,7 +14,7 @@ from component.almacen import  conectar_botones_almacen,render_almacen
 from component.registrar import conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,buscar_facturas
 from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja
-from component.main_window import connectar_botones_main,activeLink
+from component.main_window import connectar_botones_main,activeLink,agregar_salir
 
 from PyQt6.QtCore import Qt, QObject, QEvent
 
@@ -124,7 +124,7 @@ class Ventana(QMainWindow):
         self.bandera           = False
         self.release           = True
         self.release_enter     = True
-        self.tabla_column      = 5
+        self.tabla_column      = 4
         self.tabla_pointer     = 0
         self.articulos         = []
         self.usuario           = ""
@@ -182,8 +182,8 @@ class Ventana(QMainWindow):
         self.caja = caja
         #main Window 
         self.main_window = loadUi("./ui/mainWindow.ui")
-        botones_main_window = [self.main_window.nav_1,self.main_window.nav_2,self.main_window.nav_3,self.main_window.nav_4,self.main_window.nav_5]
-        connectar_botones_main(botones_main_window,self)
+        self.botones_main_window = [self.main_window.nav_1,self.main_window.nav_2,self.main_window.nav_3,self.main_window.nav_4]
+        
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
         botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
@@ -396,6 +396,7 @@ class Ventana(QMainWindow):
                     window.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
 
                     self.current_window = window
+                    
                if id == self.ALMACEN_CODE:
                     render_almacen(self)
                     self.clean_Window()
@@ -403,7 +404,10 @@ class Ventana(QMainWindow):
                     self.main_window.root.layout().addWidget(window)
                     self.almacen.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
                     self.current_window = window
+                    
                if id == self.MAIN_WINDOW:
+                    agregar_salir(self.main_window,self)
+                    connectar_botones_main(self.botones_main_window,self)
                     self.current_window.hide()  
                     window.showFullScreen() 
                     self.current_window =window

@@ -45,7 +45,17 @@ font-size: 14px;
 font: 18pt &quot;Dubai&quot;;</string>
     </property>
     <property name="text">
-     <string>Actualizar</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../img/actualizar.png</normaloff>../img/actualizar.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
     </property>
    </widget>
    <widget class="QLineEdit" name="input_articulo">
@@ -65,7 +75,7 @@ border-radius: 5px;
 font-size: 16px;</string>
     </property>
     <property name="placeholderText">
-     <string>Buscar factura</string>
+     <string>Buscar producto</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_agotado">
@@ -85,7 +95,7 @@ font-size: 14px;
 font: 18pt &quot;Dubai&quot;;</string>
     </property>
     <property name="text">
-     <string>Articulos Agotados</string>
+     <string>Artículos Agotados</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_eliminar">
@@ -105,7 +115,17 @@ font-size: 14px;
 font: 18pt &quot;Dubai&quot;;</string>
     </property>
     <property name="text">
-     <string>Eliminar</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../img/borrar.png</normaloff>../img/borrar.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>33</width>
+      <height>33</height>
+     </size>
     </property>
    </widget>
    <widget class="QWidget" name="widget" native="true">
@@ -126,7 +146,7 @@ border-radius: 10px;</string>
       <rect>
        <x>50</x>
        <y>10</y>
-       <width>281</width>
+       <width>291</width>
        <height>51</height>
       </rect>
      </property>
@@ -136,7 +156,7 @@ font-size: 28px;
 background: none;</string>
      </property>
      <property name="text">
-      <string>Agregar nuevo articulo</string>
+      <string>Agregar Nuevo Artículo</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="nombre_articulo">
@@ -212,7 +232,7 @@ padding-left: 10px;</string>
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../../Downloads/circle-edit-article_icon-icons.com_66938.svg</pixmap>
+      <pixmap>../img/circle-edit-article_icon-icons.com_66938 (1).png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -228,7 +248,7 @@ padding-left: 10px;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(144, 164, 174);
+      <string notr="true">
 color: rgb(255, 255, 255);
 border-radius: 20px;</string>
      </property>
@@ -236,7 +256,7 @@ border-radius: 20px;</string>
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../../Downloads/sortamountup_120333.svg</pixmap>
+      <pixmap>../img/sortamountup_120333.svg</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -252,7 +272,7 @@ border-radius: 20px;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(144, 164, 174);
+      <string notr="true">
 color: rgb(255, 255, 255);
 border-radius: 20px;</string>
      </property>
@@ -260,7 +280,7 @@ border-radius: 20px;</string>
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../../Downloads/label_114874.ico</pixmap>
+      <pixmap>../img/label_114874.ico</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>

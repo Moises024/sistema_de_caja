@@ -1,4 +1,6 @@
 from component.db import db
+from PyQt6.QtGui import QCursor
+from PyQt6.QtCore import Qt
 import sqlite3
 
 def registrar_usuario(registrar,padre):
@@ -66,3 +68,5 @@ def registrar_usuario(registrar,padre):
     
 def conectar_botones_registrar(botones,registrar,padre):
     botones[0].clicked.connect(lambda:registrar_usuario(registrar,padre))
+    for btn in botones:
+        btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
