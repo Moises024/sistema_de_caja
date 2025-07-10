@@ -149,7 +149,7 @@ class Ventana(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_animation)
         self.active = False
-        
+        self.btn_salir = None
         
         # venan cantidad
         self.ventana_cantidad = loadUi("./ui/IngresarCantidad.ui")
@@ -404,12 +404,21 @@ class Ventana(QMainWindow):
                     self.main_window.root.layout().addWidget(window)
                     self.almacen.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
                     self.current_window = window
-                    
+               
                if id == self.MAIN_WINDOW:
-                    agregar_salir(self.main_window,self)
+                    
+                    if self.usuario.rol == 3 and self.btn_salir == None:
+                         agregar_salir(self.main_window,self)
+                    
+                    if self.usuario.rol != 3 and self.btn_salir:
+                         self.btn_salir.setParent(None)
+                         self.btn_salir.deleteLater()
+                         self.btn_salir = None
+                         
                     connectar_botones_main(self.botones_main_window,self)
                     self.current_window.hide()  
                     window.showFullScreen() 
+
                     self.current_window =window
                     self.main_window.header.setFixedWidth(self.main_window.width())
                     self.main_window.root.setFixedSize(self.main_window.width(),self.main_window.height())

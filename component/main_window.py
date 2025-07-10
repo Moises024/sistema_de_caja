@@ -28,7 +28,6 @@ def connectar_botones_main(botones,padre):
         label.setText('')
        
         if padre.usuario.rol == 3 or i ==0:
-            print("entre")
             label_click = Create_link(label)
             label_click.setText(text)
             label_click.setFixedSize(label.width(),label.height())
@@ -104,13 +103,11 @@ def agregar_salir(main_window,padre):
     
     
     salir = Create_link("Salir")
-    salir.setFixedSize(60,45)
-    redimencionada = pixmap.scaled(salir.width(), salir.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-    salir.setPixmap(redimencionada)
-    parent = main_window.header.findChild(QWidget,"container_user",)
-    header_width = main_window.header.width()
-    user_width = (40/110) * header_width
-    parent.setFixedWidth(int(user_width))
+    contenedor_user = main_window.header.findChild(QWidget,"container_user",)
+    parent = contenedor_user.findChild(QWidget,"contenedor_btn_salir",) 
+    contenedor_user.setFixedWidth(429)
+    width_user = contenedor_user.width()
+    padre.btn_salir = salir
     salir.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     salir.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
     salir.setOpenExternalLinks(False)
@@ -127,7 +124,10 @@ def agregar_salir(main_window,padre):
 
 ''')
     
-    salir.move(parent.width()-60,int(int(parent.height()/2)-20))
+    salir.setFixedSize(parent.width(),parent.height())
+    redimencionada = pixmap.scaled(parent.width(), parent.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+    salir.setPixmap(redimencionada)
+    parent.move(width_user-parent.width(),int(int(parent.height()/2)-6))
     salir.clicked.connect(padre.salir)
     
 
