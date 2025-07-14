@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Ingresar Cantidad</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../img/logo.png</normaloff>../img/logo.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(255, 255, 255);</string>
   </property>
@@ -29,6 +33,9 @@
     <string notr="true">border: 1px solid #999;
 border-radius: 8px;
 font-size: 18px;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
    <property name="placeholderText">
     <string>Cantidad</string>

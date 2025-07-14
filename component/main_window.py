@@ -7,7 +7,7 @@ class labels:
     names=[]
     clicked_bottons=[]
 array_label = labels()
-array_label.names=["Facturar","Inventario","Almacen","Registrar"]
+array_label.names=["Facturar","Inventario","Almacén","Registrar"]
 class Create_link(QLabel):
     clicked = pyqtSignal()
     def __init__(self,parent=None):
@@ -106,6 +106,7 @@ def agregar_salir(main_window,padre):
     contenedor_user = main_window.header.findChild(QWidget,"container_user",)
     parent = contenedor_user.findChild(QWidget,"contenedor_btn_salir",) 
     contenedor_user.setFixedWidth(429)
+   
     width_user = contenedor_user.width()
     padre.btn_salir = salir
     salir.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))

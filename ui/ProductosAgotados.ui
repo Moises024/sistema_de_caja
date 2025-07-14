@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Productos Agotados</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../img/logo.png</normaloff>../img/logo.png</iconset>
+  </property>
   <widget class="QListWidget" name="lista_agotado">
    <property name="geometry">
     <rect>
@@ -43,8 +47,14 @@ padding-left: 45px;
 border-radius: 5px;
 font-size: 16px;</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+   </property>
    <property name="placeholderText">
-    <string>Digita un producto</string>
+    <string>Ingresa un producto</string>
+   </property>
+   <property name="clearButtonEnabled">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_actualizar">
@@ -64,7 +74,17 @@ font-size: 14px;
 font: 18pt &quot;Dubai&quot;;</string>
    </property>
    <property name="text">
-    <string>Actualizar</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../img/actualizar.png</normaloff>../img/actualizar.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>39</width>
+     <height>39</height>
+    </size>
    </property>
   </widget>
  </widget>

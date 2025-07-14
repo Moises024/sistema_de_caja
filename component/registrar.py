@@ -44,9 +44,13 @@ def registrar_usuario(registrar,padre):
             padre.tipo_msj.text = "Usuario ya existente"
             padre.sendMsjError(padre.tipo_msj)
             return
-            
-       
-        cursor.execute("INSERT INTO usuarios(nombre,apellido,usuario,contra) VALUES(?, ?, ?, ?)",(array_input[0],array_input[1],array_input[2],array_input[3]))
+    
+        nombre = array_input[0]
+        apellido =array_input[1]
+        usuario =array_input[3]
+        contra = array_input[2]
+
+        cursor.execute("INSERT INTO usuarios(nombre,apellido,usuario,contra) VALUES(?, ?, ?, ?)",(nombre,apellido,usuario,contra))
         conn.commit()
     except sqlite3.Error as err:
        
@@ -65,6 +69,10 @@ def registrar_usuario(registrar,padre):
     padre.tipo_msj.titulo = "Éxito"
     padre.tipo_msj.text = "Usuario registrado correctamente"
     padre.sendMsjSuccess(padre.tipo_msj)
+    registrar.input_nombre.setText("")
+    registrar.input_apellido.setText("")
+    registrar.input_contra.setText("")
+    registrar.input_usuario.setText("")
     
 def conectar_botones_registrar(botones,registrar,padre):
     botones[0].clicked.connect(lambda:registrar_usuario(registrar,padre))

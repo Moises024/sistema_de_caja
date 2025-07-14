@@ -72,7 +72,7 @@ background-color: rgb(35, 35, 35);</string>
 }</string>
     </property>
     <property name="text">
-     <string>Almacen</string>
+     <string>Almacén</string>
     </property>
    </widget>
    <widget class="QLabel" name="nav_4">

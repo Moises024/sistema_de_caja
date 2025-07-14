@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect,QLabel
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect,QLabel,QWidget
 from PyQt6.QtGui import QAction,QIcon
 from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
@@ -6,7 +6,7 @@ from PyQt6.QtGui import QPixmap
 from pathlib import Path
 import sys
 import math
-import time
+import time 
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usuarios
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja,buscador_articulos_input_caja
@@ -355,6 +355,7 @@ class Ventana(QMainWindow):
                        render_cierre_Caja(self)
                        self.main_window.root.layout().addWidget(window)
                        window.setParent(self.main_window)
+                       window.btn_cerrar.move(int(window.width()-window.btn_cerrar.width()),0)
                        window.move(int(self.main_window.width()/2)-int(window.width()/2),int(self.main_window.height()/2)-int(window.height()/2))
                        self.current_window = window
 
@@ -379,8 +380,12 @@ class Ventana(QMainWindow):
                     buscar_facturas(self)
                     # self.caja.no_orden.setText(str(self.numero_orden+1))
                if id == self.INVENTARIO_CODE:
-                    buscar_facturas(self)  
+                    buscar_facturas(self) 
+                    window.msj_1.setText("")
+                    window.msj_2.setText("")
+                    window.msj_3.setText("")
                     self.clean_Window()
+                    
                     self.inventario.setParent(self.main_window)
                     self.main_window.root.layout().addWidget(window)
                     self.inventario.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
@@ -391,6 +396,10 @@ class Ventana(QMainWindow):
                     self.release_enter=True
                if self.REGISTRAR_CODE == id:
                     self.clean_Window()
+                    window.input_nombre.setText("")
+                    window.input_apellido.setText("")
+                    window.input_contra.setText("")
+                    window.input_usuario.setText("")
                     window.setParent(self.main_window)
                     self.main_window.root.layout().addWidget(window)
                     window.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
@@ -399,6 +408,9 @@ class Ventana(QMainWindow):
                     
                if id == self.ALMACEN_CODE:
                     render_almacen(self)
+                    window.cantidad_articulo.setText("")
+                    window.precio_articulo.setText("")
+                    window.nombre_articulo.setText("")
                     self.clean_Window()
                     self.almacen.setParent(self.main_window)
                     self.main_window.root.layout().addWidget(window)
@@ -414,7 +426,20 @@ class Ventana(QMainWindow):
                          self.btn_salir.setParent(None)
                          self.btn_salir.deleteLater()
                          self.btn_salir = None
-                         
+                    if self.usuario.rol != 3:
+                              container_user = self.main_window.header.findChild(QWidget,"container_user",)
+                              container_user.setFixedWidth(300)
+                              salir = container_user.findChild(QWidget,"contenedor_btn_salir",) 
+                              salir.move(container_user.width(),int(salir.height()/2))
+                              user = container_user.findChild(QLabel,"user")
+                              user.setFixedWidth(200)
+                              user.setStyleSheet('''
+                                   QLabel{
+                                             color:#f1f1f1;
+                                             font-size:18px;
+
+                                        }
+                              ''')                         
                     connectar_botones_main(self.botones_main_window,self)
                     self.current_window.hide()  
                     window.showFullScreen() 
