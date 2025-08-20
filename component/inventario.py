@@ -5,7 +5,11 @@ from PyQt6.QtCore import Qt
 import sqlite3
 import datetime
 import re
-
+import requests
+import os
+import json
+from dotenv import load_dotenv
+load_dotenv()
 
 class Almacen:
     facturas=[]
@@ -171,32 +175,49 @@ def limpiar_lista(padre):
     padre.inventario.tabla_factura.takeItem(fila)
 
 def delete_de_baseDatos(id):
-    database = db()
-    conn = database.crearConnexion()
-    cursor = conn.cursor()
+    # database = db()
+    # conn = database.crearConnexion()
+    # cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM facturas where id =?",[id])
-        conn.commit()
+        # cursor.execute("DELETE FROM facturas where id =?",[id])
+        # conn.commit()
+        headers = {
+            "Content-Type":"Application/json",
+            "id":"1"
+        }
+        resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps({"_id":id}),headers=headers)
+        data = resp.json()
+        if not data["ok"]:
+            print(data["res"])
+            return
+        print(data["res"])
+    
     except sqlite3.Error as error:
         print(f"Hubo un problema:{error}")
 
 
 def buscar_facturas(padre):
-    database = db()
-    conn = database.crearConnexion()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
+#     {'id': 1, 'usuario_id': 1, 'factura': '[{"ID": 29, "nombre": "Fresa", "cantidad": 10, "precio": 20}]', 'total': 200, 'f
+# echa': 1752773175, 'nombre': 'Moises', 'contra': '123', 'apellido': 'Perez', 'rol': 3, 'usuario': 'Moises024'}
+    # database = db()
+    # conn = database.crearConnexion()
+    # cursor = conn.cursor()
+    # cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
+    # def __init__(self,usuario,no_factura,total,fecha,usuario_id):  
     facturas = []
-    resultado = cursor.fetchall()
-    for fila in resultado:
-        time =  int(fila[4])
+    resp = requests.get(os.getenv("URL")+"/api/inventario")
+    resultado = resp.json()
+    for fila in resultado["res"]:
+
+       
+        time =  int(fila["fecha"])
         fecha = datetime.datetime.fromtimestamp(time)
         fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
-        usuario_id = fila[1]
-        factura = Item(fila[6] +" "+fila[8], fila[0], fila[3],fecha_formateada,usuario_id)
+        usuario_id = fila["usuario_id"]
+        factura = Item(fila["nombre"] +" "+fila["apellido"], fila["id"], fila["total"],fecha_formateada,usuario_id)
         facturas.append(factura)
         almacen.facturas = facturas
-    conn.close()
+    # conn.close()
     padre.numero_orden =  len(almacen.facturas)
     render_table(padre,len(facturas))
 

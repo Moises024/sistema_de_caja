@@ -3,6 +3,11 @@ from component.db import db
 from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
 import sqlite3
+import requests
+import os
+from dotenv import load_dotenv
+import json
+load_dotenv()
 
 #Clase para almacenar artículos en el inventario
 class contenedorArticulo:
@@ -64,8 +69,9 @@ def buscar(text,padre):
     
     #Busca el artículo en la lista de artículos
     for articulo in almacen.articulos:
-    
+        
         if  id == False:
+            
             if nombre.lower() in articulo.nombre.lower():
              item = articulo
              bandera=True
@@ -170,7 +176,7 @@ def agregar(padre):
         update_articulo(new_item)
     else:
         #llamar a la db
-        insertar_articulo(new_item)
+        insertar_articulo(new_item,padre)
         #almacen.articulos.append(new_item)
 
         padre.tipo_msj.titulo = "Éxito"
@@ -227,34 +233,62 @@ def conectar_botones_almacen(botones,padre):
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 
 
-def insertar_articulo(articulo):
-    database = db()
-    conn = database.crearConnexion() 
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO articulos(nombre,cantidad,precio) values(?,?,?)",(articulo.nombre,articulo.cantidad,articulo.precio))
+def insertar_articulo(articulo,padre):
+    # database = db()
+    # conn = database.crearConnexion() 
+    # cursor = conn.cursor()
+    # cursor.execute("INSERT INTO articulos(nombre,cantidad,precio) values(?,?,?)",(articulo.nombre,articulo.cantidad,articulo.precio))
     try:
-        conn.commit()
-    except sqlite3.Error as err:
-        print(err)
-    conn.close()
+        # conn.commit()
+        data = []
+        data.append(articulo.nombre)
+        data.append(articulo.cantidad)
+        data.append(articulo.precio)
+        headers={
+            "Content-Type":"Application/json",
+            "id":"0"
+        }
+
+        resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
+        data= resp.json()
+        print(data["res"])
+    except:
+        print("hola mundaso")
+    # conn.close()
 
 def buscar_articulo():
-    database = db()
-    conn = database.crearConnexion()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM articulos")
+    # database = db()
+    # conn = database.crearConnexion()
+    # cursor = conn.cursor()
+    # cursor.execute("SELECT * FROM articulos")
+   
+    # for fila in cursor.fetchall():
+    #     articulo=item(fila[1],fila[3],fila[2],fila[0])
+    #     articulos.append(articulo)
+    #     if fila[2] == 0:
+    #         almacen.agotado.append(articulo)
+
+            
+    # almacen.articulos = articulos
+
+    # conn.close() 
     articulos =[]
     almacen.agotado = []
-    for fila in cursor.fetchall():
-        articulo=item(fila[1],fila[3],fila[2],fila[0])
+    resp = requests.get(os.getenv("URL")+"/api/almacen")
+    data = resp.json()
+    if not data["ok"]:
+            #msj para moises
+        return
+    for fila in data["res"]:
+        articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
         articulos.append(articulo)
-        if fila[2] == 0:
+        if fila["precio"] == 0:
             almacen.agotado.append(articulo)
 
             
     almacen.articulos = articulos
+    
 
-    conn.close() 
 
 def update_articulo(new_item):
     database = db()
@@ -268,15 +302,25 @@ def update_articulo(new_item):
     conn.close()
 
 def  delete_articulo(articulo):
-    database = db()
-    conn = database.crearConnexion()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM articulos WHERE nombre=?",(articulo.nombre,))
+    # database = db()
+    # conn = database.crearConnexion()
+    # cursor = conn.cursor()
+    # cursor.execute("DELETE FROM articulos WHERE nombre=?",(articulo.nombre,))
     try:
-        conn.commit()
+        headers={
+            "Content-type": "Application/json" ,
+            "id":"1"
+                   }
+        resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps({"_id":articulo.id}),headers=headers)
+        data = resp.json()
+        if not data["ok"]:
+            print(data["res"])
+            return
+        print(data["res"])
+
     except sqlite3.Error as err:
         print(err)
-    conn.close()
+    # conn.close()
     
 def render_almacen(padre):
     render_table(padre,len(almacen.articulos))
@@ -285,6 +329,7 @@ def mostrar_ventana_agotado(padre):
     if padre.producto_agotado.isVisible():
         padre.producto_agotado.hide()
     padre.producto_agotado.show()
+    padre.producto_agotado.btn_actualizar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
     renderVentanaAgotado(padre)
 
