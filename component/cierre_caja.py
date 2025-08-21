@@ -2,6 +2,8 @@ from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizeP
 from component.db import db
 import sqlite3
 import datetime
+from PyQt6.QtGui import QCursor
+from PyQt6.QtCore import Qt
 
 class Almacen:
     facturas=[]
@@ -17,7 +19,7 @@ class Item:
     
 def conectar_botones_cierre_caja(botones,padre):
     botones[0].clicked.connect(lambda:padre.change_window(padre.login,padre.LOGIN_CODE))
-   
+    padre.cierre_caja.btn_cerrar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
 
 def render(padre,cantidad):

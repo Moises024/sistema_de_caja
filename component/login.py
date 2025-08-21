@@ -1,7 +1,8 @@
 from component.db import db
 import datetime
 import sqlite3
-
+from PyQt6.QtGui import QCursor
+from PyQt6.QtCore import Qt
 class usuario:
     id=""
     nombre=""
@@ -76,8 +77,7 @@ def conectar_botones_login(botones,login,padre,caja):
     #Acción de los botones
     
     botones[0].clicked.connect(lambda:datos_usuarios(login,padre,padre.main_window))
-    
-
+    login.btn_acceder.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
 def conectar_acciones_login(login,padre):
     login.salir.triggered.connect(padre.salir)

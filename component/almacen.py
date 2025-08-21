@@ -108,7 +108,7 @@ def agrear_lista_elimar(row,c):
 
 #Función para renderizar la tabla de artículos en la interfaz   
 def render_table(padre,cantida,item=""):
-    buscar_articulo()
+    buscar_articulo(padre)
     Item_ = QListWidgetItem()
     tabla = QTableWidget(cantida,4)
 
@@ -173,15 +173,11 @@ def agregar(padre):
 
         
     if bandera == True:
-        update_articulo(new_item)
+        update_articulo(new_item,padre)
     else:
         #llamar a la db
         insertar_articulo(new_item,padre)
         #almacen.articulos.append(new_item)
-
-        padre.tipo_msj.titulo = "Éxito"
-        padre.tipo_msj.text = "Artículo agregado correctamente"
-        padre.sendMsjSuccess(padre.tipo_msj)
 
     render_table(padre,1)
 
@@ -210,10 +206,10 @@ def eliminar(padre):
         for i,item in enumerate(almacen.articulos):
                 if item.id == almacen.item.id:
                         id = i
-        delete_articulo(almacen.articulos[id])
+        delete_articulo(almacen.articulos[id],padre)
         almacen.item =""
     else:
-        delete_articulo(almacen.articulos[almacen.eliminadas])
+        delete_articulo(almacen.articulos[almacen.eliminadas],padre)
         
 
     render_table(padre,1)
@@ -238,6 +234,7 @@ def insertar_articulo(articulo,padre):
     # conn = database.crearConnexion() 
     # cursor = conn.cursor()
     # cursor.execute("INSERT INTO articulos(nombre,cantidad,precio) values(?,?,?)",(articulo.nombre,articulo.cantidad,articulo.precio))
+    
     try:
         # conn.commit()
         data = []
@@ -251,12 +248,26 @@ def insertar_articulo(articulo,padre):
 
         resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
         data= resp.json()
-        print(data["res"])
+        if not data["ok"]:
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = data["res"]
+            padre.sendMsjError(padre.tipo_msj)
+            
+            #aqui poner mens de error
+            return
+        #aqui pone rmsj de exito
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = data["res"]
+        padre.sendMsjSuccess(padre.tipo_msj)
+      
     except:
-        print("hola mundaso")
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Conexión fallida"
+        padre.sendMsjError(padre.tipo_msj)
+    
     # conn.close()
 
-def buscar_articulo():
+def buscar_articulo(padre):
     # database = db()
     # conn = database.crearConnexion()
     # cursor = conn.cursor()
@@ -274,34 +285,75 @@ def buscar_articulo():
     # conn.close() 
     articulos =[]
     almacen.agotado = []
-    resp = requests.get(os.getenv("URL")+"/api/almacen")
-    data = resp.json()
-    if not data["ok"]:
-            #msj para moises
-        return
-    for fila in data["res"]:
-        articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
-        articulos.append(articulo)
-        if fila["precio"] == 0:
-            almacen.agotado.append(articulo)
+    try:
+        resp = requests.get(os.getenv("URL")+"/api/almacen")
+        data = resp.json()
+        if not data["ok"]:
 
-            
-    almacen.articulos = articulos
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = data["res"]
+            padre.sendMsjError(padre.tipo_msj)
+               
+            return
+        for fila in data["res"]:
+            articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
+            articulos.append(articulo)
+            if fila["precio"] == 0:
+                almacen.agotado.append(articulo)
+
+                
+        almacen.articulos = articulos
+    except:
+       
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Conexión fallida"
+        padre.sendMsjError(padre.tipo_msj)
+   
     
 
 
-def update_articulo(new_item):
-    database = db()
-    conn = database.crearConnexion()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE articulos SET nombre=?, cantidad=?, precio=? where nombre=?",(new_item.nombre,new_item.cantidad,new_item.precio,new_item.nombre))
-    try:
-        conn.commit()
-    except sqlite3.Error as err:
-        print(err)
-    conn.close()
+def update_articulo(new_item,padre):
+    # database = db()
+    # conn = database.crearConnexion()
+    # cursor = conn.cursor()
+    # cursor.execute("UPDATE articulos SET nombre=?, cantidad=?, precio=? where nombre=?",(new_item.nombre,new_item.cantidad,new_item.precio,new_item.nombre))
+    # try:
+    #     conn.commit()
+    # except sqlite3.Error as err:
+    #     print(err)
+    # conn.close()
+    data = []
+    data.append(new_item.nombre)
+    data.append(new_item.cantidad)
+    data.append(int(new_item.precio))
+    data.append(new_item.nombre)
+    
 
-def  delete_articulo(articulo):
+    try:
+        headers={
+            "Content-Type" : "Application/json",
+            "id":"2"
+        }
+        resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
+        info = resp.json()
+        if not info["ok"]:
+        
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = info["res"]
+            padre.sendMsjError(padre.tipo_msj)
+            return
+         
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = info["res"]
+        padre.sendMsjSuccess(padre.tipo_msj)
+    except :
+        #msj de conexcion fallida
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Conexión fallida"
+        padre.sendMsjError(padre.tipo_msj)
+    
+
+def  delete_articulo(articulo, padre):
     # database = db()
     # conn = database.crearConnexion()
     # cursor = conn.cursor()
@@ -314,13 +366,26 @@ def  delete_articulo(articulo):
         resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps({"_id":articulo.id}),headers=headers)
         data = resp.json()
         if not data["ok"]:
-            print(data["res"])
+            #msj de error 
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = data["res"]
+            padre.sendMsjError(padre.tipo_msj)
+            
             return
-        print(data["res"])
+        
+            #msj de exitos
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = data["res"]
+        padre.sendMsjSuccess(padre.tipo_msj)
+        
 
-    except sqlite3.Error as err:
-        print(err)
-    # conn.close()
+    except:
+        #msj de conexxion fallida
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Conexión fallida"
+        padre.sendMsjError(padre.tipo_msj)
+        # conn.close()
+        pass
     
 def render_almacen(padre):
     render_table(padre,len(almacen.articulos))

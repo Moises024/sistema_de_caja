@@ -2,7 +2,11 @@ from component.db import db
 from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
 import sqlite3
-
+import os
+import requests
+import json
+from dotenv import load_dotenv
+load_dotenv()
 def registrar_usuario(registrar,padre):
     nombre = registrar.input_nombre
     apellido = registrar.input_apellido
@@ -24,22 +28,35 @@ def registrar_usuario(registrar,padre):
     baseDeDatos = db()
     conn = baseDeDatos.crearConnexion()
     cursor = conn.cursor()
-
+    is_name = False
+    is_usuario = False
     
     try:
-        cursor.execute("SELECT * FROM usuarios WHERE lower(nombre)=lower(?) and lower(apellido)=lower(?)",(array_input[0],array_input[1]))
-        nombre = cursor.fetchone()
+        # cursor.execute("SELECT * FROM usuarios WHERE lower(nombre)=lower(?) and lower(apellido)=lower(?)",(array_input[0],array_input[1]))
+        # nombre = cursor.fetchone()
+        resp = requests.get(os.getenv("URL")+"/api/user")
+        data_json  = resp.json()
+        data = data_json["res"]
 
-        cursor.execute("SELECT * FROM usuarios WHERE usuario = ?",(array_input[2],))
-        usuario = cursor.fetchone()
+        for user in data:
+            if user["nombre"].lower() == nombre.lower():
+                is_name = True
+                break
+            if user["usuario"].lower() == usuario.lower():
+                is_usuario = True
+                break
+            
+        # cursor.execute("SELECT * FROM usuarios WHERE usuario = ?",(array_input[2],))
+        # usuario = cursor.fetchone()
+        
        
-        if nombre:
+        if is_name:
             padre.tipo_msj.titulo = "Error"
             padre.tipo_msj.text = "Nombre/apellido existente"
             padre.sendMsjError(padre.tipo_msj)
             return
         
-        if usuario:
+        if is_usuario:
             padre.tipo_msj.titulo = "Error"
             padre.tipo_msj.text = "Usuario ya existente"
             padre.sendMsjError(padre.tipo_msj)
@@ -50,8 +67,29 @@ def registrar_usuario(registrar,padre):
         usuario =array_input[3]
         contra = array_input[2]
 
-        cursor.execute("INSERT INTO usuarios(nombre,apellido,usuario,contra) VALUES(?, ?, ?, ?)",(nombre,apellido,usuario,contra))
-        conn.commit()
+        # cursor.execute("INSERT INTO usuarios(nombre,apellido,usuario,contra) VALUES(?, ?, ?, ?)",(nombre,apellido,usuario,contra))
+        # conn.commit()
+        data = []
+        data.append(nombre)
+        data.append(contra)
+        data.append(apellido)
+        data.append(usuario)
+        headers = {
+            "Content-Type":"Application/json"
+        }
+        resp = requests.post(os.getenv("URL")+"/api/user",data=json.dumps(data),headers=headers)
+        res = resp.json()
+        if not res["ok"]:
+            print(res['res'])
+            return
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = res["res"]
+        padre.sendMsjSuccess(padre.tipo_msj)
+        registrar.input_nombre.setText("") 
+        registrar.input_apellido.setText("")
+        registrar.input_contra.setText("")
+        registrar.input_usuario.setText("")
+
     except sqlite3.Error as err:
        
         if err.sqlite_errorcode == 2067 :
@@ -63,16 +101,10 @@ def registrar_usuario(registrar,padre):
         padre.tipo_msj.titulo = "Error"
         padre.sendMsjError(padre.tipo_msj)
         return
-    conn.close()
+    # conn.close()
 
 
-    padre.tipo_msj.titulo = "Éxito"
-    padre.tipo_msj.text = "Usuario registrado correctamente"
-    padre.sendMsjSuccess(padre.tipo_msj)
-    registrar.input_nombre.setText("")
-    registrar.input_apellido.setText("")
-    registrar.input_contra.setText("")
-    registrar.input_usuario.setText("")
+    
     
 def conectar_botones_registrar(botones,registrar,padre):
     botones[0].clicked.connect(lambda:registrar_usuario(registrar,padre))

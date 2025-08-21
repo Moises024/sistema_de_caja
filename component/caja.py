@@ -7,7 +7,10 @@ from component.almacen import buscar_articulo
 import sqlite3
 import time
 import json
-
+import requests
+import os
+from dotenv import load_dotenv
+load_dotenv()
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
     clicked = pyqtSignal()
@@ -322,22 +325,24 @@ def celda_click(row,column):
     vari.row_aliminada = row
 
 def buscar_articulos():
-
+    #ID
     almacen.articulos = []
     almacen.db_almacen = []
-    baseDeDatos = db()
-    conn = baseDeDatos.crearConnexion()
-    cursor = conn.cursor()
+    # baseDeDatos = db()
+    # conn = baseDeDatos.crearConnexion()
+    # cursor = conn.cursor()
     try:
-        cursor.execute("SELECT * FROM articulos")
+        resp = requests.get(os.getenv("URL")+"/api/almacen")
+        result = resp.json()
+    
+        for item in result['res']:
+            
+            almacen.db_almacen.append(item)
+            almacen.articulos.append({"ID":item["id"],"nombre":item["nombre"],"cantidad":1,"precio":item["precio"]})
+        # conn.close()
     except sqlite3.Error as err:
         print(err)
-    result = cursor.fetchall()
     
-    for item in result:
-        almacen.db_almacen.append(item)
-        almacen.articulos.append({"ID":item[0],"nombre":item[1],"cantidad":1,"precio":item[3]})
-    conn.close()
     
 
 def generar_facturas(padre):
@@ -352,59 +357,89 @@ def generar_facturas(padre):
         usuario = padre.usuario
         
         factura= json.dumps(padre.articulos)
-        baseDeDatos = db()
-        conn = baseDeDatos.crearConnexion()
-        cursor = conn.cursor()
+        # baseDeDatos = db()
+        # conn = baseDeDatos.crearConnexion()
+        # cursor = conn.cursor()
        
         try:
+           
             for item in padre.articulos:
                
                 for articulo in almacen.db_almacen:
-                    
-                    if articulo[0] == item["ID"]:
-                         if int(articulo[2]) == 0:
+                    if articulo["id"] == item["ID"]:
+                         if int(articulo["cantidad"]) == 0:
                                 padre.tipo_msj.titulo = "Error"
                                 padre.tipo_msj.text = f"Ya no hay {item["nombre"]} en el almacén"
                                 padre.sendMsjError(padre.tipo_msj)
                                 return
-                         if int(articulo[2]) < item["cantidad"]:
+                         if int(articulo["cantidad"]) < item["cantidad"]:
                                 padre.tipo_msj.titulo = "Error"
                                 padre.tipo_msj.text = f"No tienes suficientes {item["nombre"]} solo tienes  {articulo[2]} en el almacén"
                                 padre.sendMsjError(padre.tipo_msj)
                                 return
                              
-                cursor.execute("UPDATE articulos SET cantidad = cantidad - ? WHERE id =? and cantidad > 0 and cantidad >= ? ",(item["cantidad"],item["ID"],item["cantidad"]))
-                conn.commit()
+                # cursor.execute("UPDATE articulos SET cantidad = cantidad - ? WHERE id =? and cantidad > 0 and cantidad >= ? ",(item["cantidad"],item["ID"],item["cantidad"]))
+                # conn.commit()
+                headers={
+                    "Content-Type":"Application/json",
+                    "id":"3"
+                }
+                data = []
+                data.append(item["cantidad"])
+                data.append(item["ID"])
+                resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
+                info = resp.json()
+                if not info["ok"]:
+                    #msj errior al cliente 
+                    print(info["res"])
+                    return
+              
         except sqlite3.Error as err:
             print(err)
             return
         
-        cursor.execute("INSERT INTO facturas(usuario_id,factura,total,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
+        # cursor.execute("INSERT INTO facturas(usuario_id,factura,total,fecha) values(?,?,?,?)", (usuario.id, factura,precio_total, fecha))
 
         try:
-            conn.commit()
+            headers={
+                    "Content-Type":"Application/json",
+                    "id":"0"
+                }
+            data = []
+        
+            data.append(usuario.id)
+            data.append(factura)
+            data.append(precio_total)
+            data.append(fecha)
+            resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps(data),headers=headers)
+            info = resp.json()
+            if not info["ok"]:
+                #msj erro al clienete 
+                return
+            buscar_articulo(padre)
+            buscar_articulos()
+            vari.render =False
+            vari.mont_pagado=0
+            vari.monto_total=0
+            vari.gen_factura = False
+
+            padre.tipo_msj.titulo = "Éxito"
+            padre.tipo_msj.text = "Factura generada correctamente"
+            padre.sendMsjSuccess(padre.tipo_msj)
+            limpiar_completo(padre, padre.caja)
+            buscar_articulos()
+            padre.articulos =[]
+            contenedor = QWidget()
+            padre.caja.sugerencias.setWidget(contenedor)
+            padre.caja.detalles.findChild(QLabel,"unidades").setText(str(0))
+            # conn.commit()
         except sqlite3.Error as err:
             print(err)
             return
         
        
-        conn.close()
-        buscar_articulo()
-        buscar_articulos()
-        vari.render =False
-        vari.mont_pagado=0
-        vari.monto_total=0
-        vari.gen_factura = False
-
-        padre.tipo_msj.titulo = "Éxito"
-        padre.tipo_msj.text = "Factura generada correctamente"
-        padre.sendMsjSuccess(padre.tipo_msj)
-        limpiar_completo(padre, padre.caja)
-        buscar_articulos()
-        padre.articulos =[]
-        contenedor = QWidget()
-        padre.caja.sugerencias.setWidget(contenedor)
-        padre.caja.detalles.findChild(QLabel,"unidades").setText(str(0))
+        # conn.close()
+        
        
 
 def limpiar_completo(padre, caja):

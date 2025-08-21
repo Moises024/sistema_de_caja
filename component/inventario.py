@@ -86,11 +86,11 @@ def eliminar(padre):
             if iten.no_factura == item.no_factura :
                 id = i
         
-        delete_de_baseDatos(almacen.facturas[id].no_factura)
-        del almacen.facturas[id]
+        if delete_de_baseDatos(almacen.facturas[id].no_factura,padre):
+            del almacen.facturas[id]
     else:
-        delete_de_baseDatos(almacen.facturas[almacen.eliminadas].no_factura)
-        del almacen.facturas[almacen.eliminadas]
+        if delete_de_baseDatos(almacen.facturas[almacen.eliminadas].no_factura,padre):
+            del almacen.facturas[almacen.eliminadas]
 
     render_table(padre,len(almacen.facturas))
     almacen.eliminadas = None
@@ -174,7 +174,7 @@ def limpiar_lista(padre):
     fila =  padre.inventario.tabla_factura.row(padre.cola_item)
     padre.inventario.tabla_factura.takeItem(fila)
 
-def delete_de_baseDatos(id):
+def delete_de_baseDatos(id, padre):
     # database = db()
     # conn = database.crearConnexion()
     # cursor = conn.cursor()
@@ -188,12 +188,21 @@ def delete_de_baseDatos(id):
         resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps({"_id":id}),headers=headers)
         data = resp.json()
         if not data["ok"]:
-            print(data["res"])
-            return
-        print(data["res"])
+
+            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.text = data["res"]
+            padre.sendMsjError(padre.tipo_msj)
+            
+            return False
+        padre.tipo_msj.titulo = "Éxito"
+        padre.tipo_msj.text = data["res"]
+        padre.sendMsjSuccess(padre.tipo_msj)
+        return True
     
     except sqlite3.Error as error:
-        print(f"Hubo un problema:{error}")
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Conexión fallida"
+        padre.sendMsjError(padre.tipo_msj)
 
 
 def buscar_facturas(padre):
@@ -205,24 +214,27 @@ def buscar_facturas(padre):
     # cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
     # def __init__(self,usuario,no_factura,total,fecha,usuario_id):  
     facturas = []
-    resp = requests.get(os.getenv("URL")+"/api/inventario")
-    resultado = resp.json()
-    for fila in resultado["res"]:
+    try:
+        resp = requests.get(os.getenv("URL")+"/api/inventario")
+        resultado = resp.json()
+        for fila in resultado["res"]:
+        
+            time =  int(fila["fecha"])
+            fecha = datetime.datetime.fromtimestamp(time)
+            fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
+            usuario_id = fila["usuario_id"]
+            factura = Item(fila["nombre"] +" "+fila["apellido"], fila["id_factura"], fila["total"],fecha_formateada,usuario_id)
+            facturas.append(factura)
+            almacen.facturas = facturas
+        # conn.close()
+        padre.numero_orden =  len(almacen.facturas)
+        render_table(padre,len(facturas))
+    except:
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = "Conexión fallida"
+        padre.sendMsjError(padre.tipo_msj)
+        
 
-       
-        time =  int(fila["fecha"])
-        fecha = datetime.datetime.fromtimestamp(time)
-        fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
-        usuario_id = fila["usuario_id"]
-        factura = Item(fila["nombre"] +" "+fila["apellido"], fila["id"], fila["total"],fecha_formateada,usuario_id)
-        facturas.append(factura)
-        almacen.facturas = facturas
-    # conn.close()
-    padre.numero_orden =  len(almacen.facturas)
-    render_table(padre,len(facturas))
-
-    
-    pass
 def agregar_Datos_tabla(tabla,datos):
     for i,articulo in enumerate(datos):
             index=0
