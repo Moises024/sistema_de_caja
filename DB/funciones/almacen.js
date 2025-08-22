@@ -1,4 +1,6 @@
 import { database } from "../module/db.js"
+import path from "path"
+
 export const addAlmacen = async (req, res) => {
 
 
@@ -20,7 +22,11 @@ export const getAlmacen = async (req, res) => {
         const articulos = await cursor.connection.all("SELECT * FROM articulos")
         res.json({ ok: true, res: articulos })
     } catch (err) {
-        res.json({ ok: false, res: "No se pudieron conseguir los artículos. ", error: err })
+        console.log(err)
+
+
+          res.json({ ok: false, res: "No se pudieron conseguir los artículos. ", error: err,path:path.resolve() })
+    
     }
 }
 export const delArticulo = async (req, res) => {

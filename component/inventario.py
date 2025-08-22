@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
+from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QWidget,QVBoxLayout
 from component.db import db
 from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
@@ -18,14 +18,34 @@ class Almacen:
 almacen= Almacen()
 
 class Item:
-    def __init__(self,usuario,no_factura,total,fecha,usuario_id):   
+    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles):   
         self.usuario=usuario
         self.no_factura=no_factura
         self.total=total
         self.fecha=fecha  
         self.usuario_id = usuario_id  
+        self.detalles = detalles
 
-def agrear_lista_elimar(row,c):
+def agrear_lista_elimar(row,c,padre):
+    if c == 5 :
+
+        detalles = json.loads(almacen.facturas[row].detalles)
+        ventanita = QWidget()
+       
+        layout = QVBoxLayout(ventanita)
+       
+        padre.pantalla_detalles.no_factura.setText(str(almacen.facturas[row].no_factura))
+        for detalle in detalles:
+            texto = "Nombre: " +str(detalle["nombre"]) +" Cantidad: " +str(detalle["cantidad"]) +" Precio: " + str(detalle["precio"])
+            label_1  = QLabel(texto)
+            
+            layout.addWidget(label_1)
+          
+            
+        padre.pantalla_detalles.detalles.setWidget(ventanita) 
+        #aqui
+        padre.pantalla_detalles.show()
+        return
     if almacen.item :
         almacen.eliminadas = almacen.item 
     else:
@@ -33,17 +53,17 @@ def agrear_lista_elimar(row,c):
 
 def render_table(padre,cantidad,item=""):
     Item_ = QListWidgetItem()
-    tabla = QTableWidget(cantidad,5)
+    tabla = QTableWidget(cantidad,6)
 
     if padre.cola_item:
         limpiar_lista(padre)
-    tabla.setHorizontalHeaderLabels(["USUARIO_ID","NO. ORDEN","USUARIO","TOTAL","FECHA"])
+    tabla.setHorizontalHeaderLabels(["USUARIO_ID","NO. ORDEN","USUARIO","TOTAL","FECHA","ACCION"])
     tabla.resizeColumnsToContents()
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.inventario.tabla_factura.height())
-    tabla.cellClicked.connect(agrear_lista_elimar)
+    tabla.cellClicked.connect(lambda row ,c:agrear_lista_elimar(row,c,padre))
 
     #Si no hay un artículo específico, renderiza todos los artículos
     if item == "":
@@ -185,6 +205,7 @@ def delete_de_baseDatos(id, padre):
             "Content-Type":"Application/json",
             "id":"1"
         }
+        
         resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps({"_id":id}),headers=headers)
         data = resp.json()
         if not data["ok"]:
@@ -200,6 +221,7 @@ def delete_de_baseDatos(id, padre):
         return True
     
     except sqlite3.Error as error:
+        print("inventario linea: 208")
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -215,6 +237,7 @@ def buscar_facturas(padre):
     # def __init__(self,usuario,no_factura,total,fecha,usuario_id):  
     facturas = []
     try:
+        
         resp = requests.get(os.getenv("URL")+"/api/inventario")
         resultado = resp.json()
         for fila in resultado["res"]:
@@ -223,13 +246,14 @@ def buscar_facturas(padre):
             fecha = datetime.datetime.fromtimestamp(time)
             fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
             usuario_id = fila["usuario_id"]
-            factura = Item(fila["nombre"] +" "+fila["apellido"], fila["id_factura"], fila["total"],fecha_formateada,usuario_id)
+            factura = Item(fila["nombre"] +" "+fila["apellido"], fila["id_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
             facturas.append(factura)
             almacen.facturas = facturas
         # conn.close()
         padre.numero_orden =  len(almacen.facturas)
         render_table(padre,len(facturas))
-    except:
+    except Exception  as e:
+        print("inventari linea; 239",e)
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -243,3 +267,4 @@ def agregar_Datos_tabla(tabla,datos):
             tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.usuario)))
             tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.total)))
             tabla.setItem(i,index+4,QTableWidgetItem(str(articulo.fecha))) 
+            tabla.setItem(i,index+5,QTableWidgetItem("ver")) 

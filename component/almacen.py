@@ -261,6 +261,7 @@ def insertar_articulo(articulo,padre):
         padre.sendMsjSuccess(padre.tipo_msj)
       
     except:
+        print("almacen linea 264")
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -304,7 +305,7 @@ def buscar_articulo(padre):
                 
         almacen.articulos = articulos
     except:
-       
+        print("aca almacenm line: 308")
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -348,6 +349,7 @@ def update_articulo(new_item,padre):
         padre.sendMsjSuccess(padre.tipo_msj)
     except :
         #msj de conexcion fallida
+        print("almacen linea: 352")
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -381,6 +383,7 @@ def  delete_articulo(articulo, padre):
 
     except:
         #msj de conexxion fallida
+        print("alamcen lina: 385")
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)

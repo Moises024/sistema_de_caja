@@ -151,6 +151,9 @@ class Ventana(QMainWindow):
         self.active = False
         self.btn_salir = None
         
+        #pantalla detalles 
+        self.pantalla_detalles  = loadUi("./ui/PantallaDetalles.ui")
+        self.pantalla_detalles.setWindowIcon(QIcon("./img/logo.png"))
         # venan cantidad
         self.ventana_cantidad = loadUi("./ui/IngresarCantidad.ui")
         # conectar btn ventana_cantidad
@@ -530,5 +533,7 @@ if __name__ == "__main__":
     sys.exit(app.exec())
          
 
-"""1- Poner las funciones a la ventana productos agotados
+"""1- pantalla de cargar (inicio del sistema y generar factura)
+   2- Ajustar el diseño a detalles
+   
 """

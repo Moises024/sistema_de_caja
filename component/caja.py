@@ -342,6 +342,7 @@ def buscar_articulos():
         # conn.close()
     except sqlite3.Error as err:
         print(err)
+        print("aca caja")
     
     
 
@@ -374,7 +375,7 @@ def generar_facturas(padre):
                                 return
                          if int(articulo["cantidad"]) < item["cantidad"]:
                                 padre.tipo_msj.titulo = "Error"
-                                padre.tipo_msj.text = f"No tienes suficientes {item["nombre"]} solo tienes  {articulo[2]} en el almacén"
+                                padre.tipo_msj.text = f"No tienes suficientes {item["nombre"]} solo tienes  {articulo["cantidad"]} en el almacén"
                                 padre.sendMsjError(padre.tipo_msj)
                                 return
                              
