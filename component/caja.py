@@ -342,7 +342,7 @@ def buscar_articulos():
         # conn.close()
     except sqlite3.Error as err:
         print(err)
-        print("aca caja")
+        
     
     
 
@@ -365,20 +365,7 @@ def generar_facturas(padre):
         try:
            
             for item in padre.articulos:
-               
-                for articulo in almacen.db_almacen:
-                    if articulo["id"] == item["ID"]:
-                         if int(articulo["cantidad"]) == 0:
-                                padre.tipo_msj.titulo = "Error"
-                                padre.tipo_msj.text = f"Ya no hay {item["nombre"]} en el almacén"
-                                padre.sendMsjError(padre.tipo_msj)
-                                return
-                         if int(articulo["cantidad"]) < item["cantidad"]:
-                                padre.tipo_msj.titulo = "Error"
-                                padre.tipo_msj.text = f"No tienes suficientes {item["nombre"]} solo tienes  {articulo["cantidad"]} en el almacén"
-                                padre.sendMsjError(padre.tipo_msj)
-                                return
-                             
+                            
                 # cursor.execute("UPDATE articulos SET cantidad = cantidad - ? WHERE id =? and cantidad > 0 and cantidad >= ? ",(item["cantidad"],item["ID"],item["cantidad"]))
                 # conn.commit()
                 headers={
@@ -388,6 +375,7 @@ def generar_facturas(padre):
                 data = []
                 data.append(item["cantidad"])
                 data.append(item["ID"])
+                data.append(item["cantidad"])
                 resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
                 info = resp.json()
                 if not info["ok"]:
@@ -497,7 +485,8 @@ def buscar_click(padre,item):
    
    
 def click_ok_caja(padre):
-   
+    is_pass=True
+    items_almacen = ""
     valor = padre.ventana_cantidad.input_cantidad.text()
     if valor == '':
         return
@@ -510,8 +499,19 @@ def click_ok_caja(padre):
         padre.tipo_msj.text = "Solo se permiten números"
         padre.sendMsjError(padre.tipo_msj)
         return
-
+    for articulo in almacen.db_almacen:
         
+        if global_variable.item_global["ID"] == articulo["id"]:
+            items_almacen = articulo
+            if int(articulo["cantidad"]) < cantidad:
+                is_pass=False
+
+    if not is_pass:
+        #msj de que no tieni suficiente cantidad para agregar erl aryticulo
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = f"No tienes suficientes {items_almacen["nombre"]}, solo tienes {items_almacen["cantidad"]} en el almacén"
+        padre.sendMsjError(padre.tipo_msj)
+        return
     global_variable.item_global["cantidad"] = cantidad
     bandera = False
     no_value = False

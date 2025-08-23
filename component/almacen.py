@@ -1,15 +1,18 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
-from component.db import db
+
 from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
-import sqlite3
+import threading
 import requests
 import os
 from dotenv import load_dotenv
 import json
 load_dotenv()
 
-#Clase para almacenar artículos en el inventario
+class Thread_:
+    Hilos=[]
+    stop_event = threading.Event()
+thread_ = Thread_()
 class contenedorArticulo:
     articulos=[]
     item=""
@@ -26,24 +29,7 @@ class item:
         self.precio = precio
         self.cantidad = cantidad
 
-    def generador_id(self):
-        
-        guardar = ""
 
-        if len(almacen.articulos) == 0:
-            return 1
-
-        for i_j,t in enumerate(almacen.articulos):
-            valor = t
-            if guardar == "":
-                guardar = int(valor.id)
-
-            for i_i,z in enumerate(almacen.articulos):
-                if guardar < int(z.id):
-                    guardar = z.id
-
-        guardar += 1
-        return guardar 
 
 
 #Función para verificar si un valor es un entero    
@@ -56,12 +42,16 @@ def isInt(valor):
 
 #Función para buscar un artículo en el inventario        
 def buscar(text,padre):
+    
+   
     if text == "":
+       
         render_table(padre,len(almacen.articulos))
+     
         return
     id = False
     nombre = text
-    item = ""
+    items_ =[]
     bandera = False
 
     if isInt(text): 
@@ -73,11 +63,11 @@ def buscar(text,padre):
         if  id == False:
             
             if nombre.lower() in articulo.nombre.lower():
-             item = articulo
-             bandera=True
+                items_.append(articulo) 
+                bandera=True
         else:
             if id == int(articulo.id):
-                item = articulo
+                items_.append(articulo) 
                 bandera=True
 
     #Si no se encontró el artículo
@@ -86,8 +76,15 @@ def buscar(text,padre):
         padre.tipo_msj.text = "Artículo no encontrado"
         padre.sendMsjError(padre.tipo_msj)
         return
-    almacen.item = item
-    render_table(padre,1,item)
+    almacen.item = items_
+   
+    render_table(padre,len(almacen.articulos),items_)
+
+   
+    # render_table(padre,len(almacen.articulos))
+   
+    
+    
 
 #Función para limpiar la lista de artículos en la interfaz
 def limpiar_lista(tabla,cola):
@@ -101,16 +98,22 @@ def limpiar_lista(tabla,cola):
 
 #Función para almacenar el índice del artículo a eliminar
 def agrear_lista_elimar(row,c):
-    if  almacen.item:
-        almacen.eliminadas =almacen.item
+    if  len(almacen.item) > 0 :
+        for i,item in enumerate(almacen.item):
+            if i == row:
+
+                almacen.eliminadas =item
     else:
         almacen.eliminadas = row
 
 #Función para renderizar la tabla de artículos en la interfaz   
-def render_table(padre,cantida,item=""):
-    buscar_articulo(padre)
+
+
+def render_table(padre,cantida,item=False):
+    
+    
     Item_ = QListWidgetItem()
-    tabla = QTableWidget(cantida,4)
+    tabla = QTableWidget(0,4)
 
     if padre.cola_item_almacen:
         limpiar_lista(padre.almacen.tabla_articulo,padre.cola_item_almacen)
@@ -121,22 +124,29 @@ def render_table(padre,cantida,item=""):
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.almacen.tabla_articulo.height())
     tabla.cellClicked.connect(agrear_lista_elimar)
-
+   
     #Si no hay un artículo específico, renderiza todos los artículos
-    if item == "":
+    if not item:
         tabla.setRowCount(len(almacen.articulos))
+        
         for i,articulo in enumerate(almacen.articulos):
             index=0
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.nombre)))
             tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.cantidad)))
             tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.precio))) 
+
     else:
+       
         index=0
-        tabla.setItem(index,index   ,QTableWidgetItem(str(item.id)))
-        tabla.setItem(index,index+1 ,QTableWidgetItem(str(item.nombre)))
-        tabla.setItem(index,index+2 ,QTableWidgetItem(str(item.cantidad)))
-        tabla.setItem(index,index+3 ,QTableWidgetItem(str(item.precio)))
+        tabla.setRowCount(len(item))
+        
+        for i,articulo in enumerate(item):
+            tabla.setItem(i,index,QTableWidgetItem(str(articulo.id)))
+            tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.nombre)))
+            tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.cantidad)))
+            tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.precio))) 
+       
  
 
     Item_.setSizeHint(tabla.sizeHint())
@@ -173,8 +183,10 @@ def agregar(padre):
 
         
     if bandera == True:
+       
         update_articulo(new_item,padre)
     else:
+        
         #llamar a la db
         insertar_articulo(new_item,padre)
         #almacen.articulos.append(new_item)
@@ -190,28 +202,36 @@ def eliminar(padre):
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
     item = ""
-    if almacen.item:
-        item = almacen.item
-    else:
-        item = almacen.articulos[almacen.eliminadas]
+    is_int = False
+    try:
+        int(almacen.eliminadas)
+        is_int= True
+    except:
+        is_int= False
 
+    if is_int:
+        item = almacen.articulos[almacen.eliminadas]
+        almacen.eliminadas = item
+    else:
+        item = almacen.eliminadas
+
+    print(item)
     padre.tipo_msj.titulo = "Warning"
     padre.tipo_msj.text = (f"Seguro que quieres eliminar el artículo {item.nombre}?")
 
     if (padre.sendMsjWarning(padre.tipo_msj)) != 1024:
         return
     
-    if almacen.item:
+    if almacen.eliminadas:
         id =""
         for i,item in enumerate(almacen.articulos):
-                if item.id == almacen.item.id:
+                if item.id == almacen.eliminadas.id:
                         id = i
         delete_articulo(almacen.articulos[id],padre)
         almacen.item =""
     else:
         delete_articulo(almacen.articulos[almacen.eliminadas],padre)
-        
-
+    buscar_articulo(padre)
     render_table(padre,1)
     almacen.eliminadas=""
 
@@ -259,9 +279,10 @@ def insertar_articulo(articulo,padre):
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
+        buscar_articulo(padre)
       
     except:
-        print("almacen linea 264")
+   
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -281,7 +302,7 @@ def buscar_articulo(padre):
     #         almacen.agotado.append(articulo)
 
             
-    # almacen.articulos = articulos
+    almacen.articulos = []
 
     # conn.close() 
     articulos =[]
@@ -299,13 +320,13 @@ def buscar_articulo(padre):
         for fila in data["res"]:
             articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
             articulos.append(articulo)
-            if fila["precio"] == 0:
+            if fila["cantidad"] == 0:
                 almacen.agotado.append(articulo)
 
                 
         almacen.articulos = articulos
     except:
-        print("aca almacenm line: 308")
+        
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -347,9 +368,10 @@ def update_articulo(new_item,padre):
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = info["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
+        buscar_articulo(padre)
     except :
         #msj de conexcion fallida
-        print("almacen linea: 352")
+    
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -380,10 +402,11 @@ def  delete_articulo(articulo, padre):
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
         
+        
 
     except:
         #msj de conexxion fallida
-        print("alamcen lina: 385")
+     
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -429,10 +452,13 @@ def renderVentanaAgotado(padre,item_=False):
             tabla.setItem(item_row,index_column+1,QTableWidgetItem(agotado.nombre))
 
     else:
-       
-        tabla.setRowCount(1)
-        tabla.setItem(0,0,QTableWidgetItem(str(item_.id)))
-        tabla.setItem(0,1,QTableWidgetItem(item_.nombre))
+        
+        tabla.setRowCount(len(item_))
+        index_column = 0
+        for item_row,agotado in enumerate(item_):
+            tabla.setItem(item_row,index_column,QTableWidgetItem(str(agotado.id)))
+            tabla.setItem(item_row,index_column+1,QTableWidgetItem(agotado.nombre))
+        
 
     item.setSizeHint(tabla.sizeHint())
     padre.producto_agotado.lista_agotado.addItem(item)
@@ -442,22 +468,24 @@ def renderVentanaAgotado(padre,item_=False):
 def buscador_agotado(text,padre):
 
     encuentra = False
-
+    agotados = []
     if text == "":
         renderVentanaAgotado(padre)
         return
     for agotado in almacen.agotado:
         
         if text.lower() in agotado.nombre.lower():
-            renderVentanaAgotado(padre,agotado)
-
+            agotados.append(agotado)
             encuentra = True
-            break
+            
 
     if not encuentra:
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "No se encuentra el artículo"
         padre.sendMsjError(padre.tipo_msj)
+        return
+    
+    renderVentanaAgotado(padre,agotados)
 
 
 

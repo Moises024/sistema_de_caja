@@ -3,7 +3,7 @@ import path from "path"
 
 export const addAlmacen = async (req, res) => {
 
-
+   
     try {
         const cursor = await database()
         const data = req.body

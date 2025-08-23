@@ -221,7 +221,7 @@ def delete_de_baseDatos(id, padre):
         return True
     
     except sqlite3.Error as error:
-        print("inventario linea: 208")
+        
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)

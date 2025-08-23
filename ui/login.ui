@@ -243,7 +243,7 @@ font: 26pt &quot;Dubai&quot;;
 font: 87 28.5pt &quot;Segoe UI Black&quot;;</string>
       </property>
       <property name="text">
-       <string>Sistema de facturacion</string>
+       <string>Sistema de facturación</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_6">

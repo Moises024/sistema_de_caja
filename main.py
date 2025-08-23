@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect,QLabel,QWidget
-from PyQt6.QtGui import QAction,QIcon
+from PyQt6.QtGui import QAction,QIcon,QMovie
 from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
 from PyQt6.QtGui import QPixmap
@@ -10,7 +10,7 @@ import time
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usuarios
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja,buscador_articulos_input_caja
-from component.almacen import  conectar_botones_almacen,render_almacen
+from component.almacen import  conectar_botones_almacen,render_almacen,buscar_articulo
 from component.registrar import conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,buscar_facturas
 from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja
@@ -150,6 +150,11 @@ class Ventana(QMainWindow):
         self.timer.timeout.connect(self.update_animation)
         self.active = False
         self.btn_salir = None
+
+        #pantalla loading 
+        self.loading = loadUi("./ui/loading.ui")
+     #    self.gif = QMovie("./img/loading.gif")
+        
         
         #pantalla detalles 
         self.pantalla_detalles  = loadUi("./ui/PantallaDetalles.ui")
@@ -410,6 +415,7 @@ class Ventana(QMainWindow):
                     self.current_window = window
                     
                if id == self.ALMACEN_CODE:
+                    buscar_articulo(self)
                     render_almacen(self)
                     window.cantidad_articulo.setText("")
                     window.precio_articulo.setText("")
@@ -429,6 +435,7 @@ class Ventana(QMainWindow):
                          self.btn_salir.setParent(None)
                          self.btn_salir.deleteLater()
                          self.btn_salir = None
+                         
                     if self.usuario.rol != 3:
                               container_user = self.main_window.header.findChild(QWidget,"container_user",)
                               container_user.setFixedWidth(300)
@@ -445,13 +452,21 @@ class Ventana(QMainWindow):
                               ''')                         
                     connectar_botones_main(self.botones_main_window,self)
                     self.current_window.hide()  
-                    window.showFullScreen() 
+                  
+                    self.loading.show()
+                    # self.loading.loading.clear()
+                    # self.loading.loading.setText("aparecer por favor")
+                    # 
+                    
+                    window.showFullScreen()
+                   
 
                     self.current_window =window
                     self.main_window.header.setFixedWidth(self.main_window.width())
                     self.main_window.root.setFixedSize(self.main_window.width(),self.main_window.height())
                     self.main_window.container_user.findChild(QLabel,"user").setText(self.usuario.nombre + " " + self.usuario.apellido )
                     activeLink(self,{"id":0})
+                    self.loading.hide() 
                     
 
     #Función donde se simula el teclado
@@ -530,10 +545,12 @@ if __name__ == "__main__":
     tecla_listener = TeclaListener(ventana)
     app.installEventFilter(tecla_listener)
     ventana.hide()
+    
     sys.exit(app.exec())
          
 
 """1- pantalla de cargar (inicio del sistema y generar factura)
    2- Ajustar el diseño a detalles
+   
    
 """
