@@ -3,6 +3,22 @@ from PyQt6.QtCore import pyqtSignal,Qt
 from PyQt6.QtGui import QCursor,QPixmap
 import asyncio
 from component.almacen import render_almacen,buscar_articulo
+def cargando(padre):
+    padre.main_window.cargando.show()
+    padre.main_window.cargando.move(0,0)
+    padre.main_window.cargando.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    padre.main_window.cargando.setFixedSize(padre.main_window.width(),padre.main_window.height())
+    padre.main_window.cargando.setText("Cargando...")
+    padre.main_window.cargando.setStyleSheet('''
+    QLabel{
+                
+                font-size:30px;      
+                color:#fff;
+                background-color:rgba(0, 0, 0, 150);                                 }
+''')
+    padre.main_window.cargando.raise_()
+def cargando_hide (padre):
+    padre.main_window.cargando.hide()
 class labels:
     names=[]
     clicked_bottons=[]
@@ -17,11 +33,7 @@ class Create_link(QLabel):
         super().mousePressEvent(event)
 
 
-async def findData(padre,id):
-    if padre.ALMACEN_CODE == id:
-        asyncio.create_task(buscar_articulo(padre))
-        asyncio.create_task(render_almacen(padre))
-
+       
 def connectar_botones_main(botones,padre):
     if len(array_label.clicked_bottons) > 0:
         for i,label in enumerate(array_label.clicked_bottons):
@@ -92,16 +104,23 @@ def activeLink(padre,label):
                             }
         
         ''')
+        
+       
     if label["id"] == 0:
+        
         padre.change_window(padre.caja,padre.CAJA_CODE)
     if label["id"]== 1 and padre.usuario.rol  == 3:
+        cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
     if label["id"]== 2 and padre.usuario.rol  == 3:
+        cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
-        asyncio.run(findData(padre,padre.ALMACEN_CODE))
+
+        asyncio.create_task(buscar_articulo(padre))
         # buscar_articulo(padre)
         # render_almacen(padre)
     if label["id"] ==3 and padre.usuario.rol  == 3:
+        cargando(padre)
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
 
 def agregar_salir(main_window,padre):

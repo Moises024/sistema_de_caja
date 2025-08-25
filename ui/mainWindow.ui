@@ -210,6 +210,22 @@ border-radius: 15px;</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
+  <widget class="QLabel" name="cargando">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>200</y>
+     <width>171</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: red;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

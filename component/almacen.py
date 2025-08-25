@@ -20,7 +20,9 @@ class contenedorArticulo:
     eliminadas=""
     agotado = []
 almacen = contenedorArticulo()
-
+class Api:
+    session=""
+api = Api()
 #Clase para representar un artículo
 class item:
     
@@ -291,7 +293,7 @@ def insertar_articulo(articulo,padre):
     # conn.close()
 
 async def buscar_articulo(padre):
-    print("start-2")
+  
     # database = db()
     # conn = database.crearConnexion()
     # cursor = conn.cursor()
@@ -309,31 +311,38 @@ async def buscar_articulo(padre):
     # conn.close() 
     articulos =[]
     almacen.agotado = []
-    
+    URL = os.getenv("URL") + "/api/almacen"
+   
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(os.getenv("URL")+"/api/almacen") as resp:
-                data = await resp.json()
-                if not data["ok"]:
+        if api.session != "":
+            if not api.session.closed:
+                await api.session.close()
+        api.session =  aiohttp.ClientSession()
+        async with api.session.get(URL) as resp:
+            print("funcionando")
+            data = await resp.json()
+            if not data["ok"]:
 
-                    padre.tipo_msj.titulo = "Error"
-                    padre.tipo_msj.text = data["res"]
-                    padre.sendMsjError(padre.tipo_msj)
-                    
-                    return
-                for fila in data["res"]:
-                    articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
-                    articulos.append(articulo)
-                    if fila["cantidad"] == 0:
-                        almacen.agotado.append(articulo)
-
-                        
-                almacen.articulos = articulos
+                padre.tipo_msj.titulo = "Error"
+                padre.tipo_msj.text = data["res"]
+                padre.sendMsjError(padre.tipo_msj)
+                
+                return
+            for fila in data["res"]:
+                articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
+                articulos.append(articulo)
+                if fila["cantidad"] == 0: 
+                    almacen.agotado.append(articulo)
+            almacen.articulos = articulos
+            render_table(padre,1)
+            await api.session.close()
+            padre.main_window.cargando.hide()
     except Exception as e:
-        
+        print(e)
         padre.tipo_msj.titulo = "Error"
-        padre.tipo_msj.text = f"Conexión fallida: {e}"
+        padre.tipo_msj.text = f"Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+    
    
     
 

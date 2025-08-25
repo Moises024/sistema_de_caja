@@ -27,6 +27,7 @@ export const getAlmacen = async (req, res) => {
     try {
          const Almacen = await getAlmacenModel()
         const articulos = await Almacen.find({})
+        console.log("awqui")
         res.json({ ok: true, res: articulos })
     } catch (err) {
         console.log(err)

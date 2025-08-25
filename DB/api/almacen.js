@@ -20,6 +20,7 @@ export default function handler(req, res) {
       return updateArticuloCantidad(req, res)
     }
   }
+  console.log("qlkklk")
   return getAlmacen(req, res)
 
 }

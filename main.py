@@ -4,6 +4,8 @@ from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
 from PyQt6.QtGui import QPixmap
 from pathlib import Path
+import qasync
+import asyncio
 import sys
 import math
 import time 
@@ -540,16 +542,22 @@ class Ventana(QMainWindow):
           return 1-(1-t) * (1-t)
 
 
+async def main():
+     app = QApplication(sys.argv)
+     ventana = Ventana()
+     tecla_listener = TeclaListener(ventana)
+     app.installEventFilter(tecla_listener)
+     ventana.hide()
 
+    # Corre el event loop de Qt con asyncio integrado
+     await asyncio.Future()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ventana = Ventana()
-    tecla_listener = TeclaListener(ventana)
-    app.installEventFilter(tecla_listener)
-    ventana.hide()
+   qasync.run(main())
+   
     
-    sys.exit(app.exec())
+    
+ 
          
 
 """1- pantalla de cargar (inicio del sistema y generar factura)
