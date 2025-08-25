@@ -8,9 +8,12 @@ import re
 import requests
 import os
 import json
+import iohttp
 from dotenv import load_dotenv
 load_dotenv()
-
+class Api:
+    session=""
+api=Api()
 class Almacen:
     facturas=[]
     eliminadas=None
@@ -227,7 +230,7 @@ def delete_de_baseDatos(id, padre):
         padre.sendMsjError(padre.tipo_msj)
 
 
-def buscar_facturas(padre):
+async def buscar_facturas(padre):
 #     {'id': 1, 'usuario_id': 1, 'factura': '[{"ID": 29, "nombre": "Fresa", "cantidad": 10, "precio": 20}]', 'total': 200, 'f
 # echa': 1752773175, 'nombre': 'Moises', 'contra': '123', 'apellido': 'Perez', 'rol': 3, 'usuario': 'Moises024'}
     # database = db()
@@ -236,20 +239,25 @@ def buscar_facturas(padre):
     # cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
     # def __init__(self,usuario,no_factura,total,fecha,usuario_id):  
     facturas = []
+    
     try:
-        
-        resp = requests.get(os.getenv("URL")+"/api/inventario")
-        resultado = resp.json()
-        for fila in resultado["res"]:
-            fecha = datetime.datetime.fromisoformat(fila["fecha"].replace("Z", "+00:00"))
-            time =  fecha.timestamp()
-            fecha = datetime.datetime.fromtimestamp(time)
-            fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
-            usuario_id = fila["usuario_id"]["id"]
-            factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
-            facturas.append(factura)
-            almacen.facturas = facturas
-        # conn.close()
+        URL=os.getenv("URL")+"/api/inventario
+        if api.session!="":
+            if not api.session.closed:
+                await api.session.close()
+        api.session = iohttp.createSsesion()
+        async await with api.session.get(URL) as resp:
+             resultado = resp.json()
+             for fila in resultado["res"]:
+                 fecha = datetime.datetime.fromisoformat(fila["fecha"].replace("Z", "+00:00"))
+                 time =  fecha.timestamp()
+                 fecha = datetime.datetime.fromtimestamp(time)
+                 fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
+                 usuario_id = fila["usuario_id"]["id"]
+                 factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
+                 facturas.append(factura)
+             almacen.facturas = facturas
+             await api.session.close()
         padre.numero_orden =  len(almacen.facturas)
         render_table(padre,len(facturas))
     except Exception  as e:
