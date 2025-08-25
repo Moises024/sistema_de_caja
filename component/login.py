@@ -73,6 +73,7 @@ def datos_usuarios(login,padre,main_window):
             user_.nombre = user_data["nombre"]
             user_.apellido = user_data["apellido"] 
             user_.id = user_data["id"] 
+            user_._id = user_data["_id"] 
             user_.rol =user_data["rol"]
             padre.usuario = user_
             input_contra.setText('')

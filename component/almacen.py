@@ -4,6 +4,7 @@ from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
 import threading
 import requests
+import aiohttp
 import os
 from dotenv import load_dotenv
 import json
@@ -289,7 +290,8 @@ def insertar_articulo(articulo,padre):
     
     # conn.close()
 
-def buscar_articulo(padre):
+async def buscar_articulo(padre):
+    print("start-2")
     # database = db()
     # conn = database.crearConnexion()
     # cursor = conn.cursor()
@@ -307,28 +309,30 @@ def buscar_articulo(padre):
     # conn.close() 
     articulos =[]
     almacen.agotado = []
+    
     try:
-        resp = requests.get(os.getenv("URL")+"/api/almacen")
-        data = resp.json()
-        if not data["ok"]:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(os.getenv("URL")+"/api/almacen") as resp:
+                data = await resp.json()
+                if not data["ok"]:
 
-            padre.tipo_msj.titulo = "Error"
-            padre.tipo_msj.text = data["res"]
-            padre.sendMsjError(padre.tipo_msj)
-               
-            return
-        for fila in data["res"]:
-            articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
-            articulos.append(articulo)
-            if fila["cantidad"] == 0:
-                almacen.agotado.append(articulo)
+                    padre.tipo_msj.titulo = "Error"
+                    padre.tipo_msj.text = data["res"]
+                    padre.sendMsjError(padre.tipo_msj)
+                    
+                    return
+                for fila in data["res"]:
+                    articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
+                    articulos.append(articulo)
+                    if fila["cantidad"] == 0:
+                        almacen.agotado.append(articulo)
 
-                
-        almacen.articulos = articulos
-    except:
+                        
+                almacen.articulos = articulos
+    except Exception as e:
         
         padre.tipo_msj.titulo = "Error"
-        padre.tipo_msj.text = "Conexión fallida"
+        padre.tipo_msj.text = f"Conexión fallida: {e}"
         padre.sendMsjError(padre.tipo_msj)
    
     
@@ -413,7 +417,7 @@ def  delete_articulo(articulo, padre):
         # conn.close()
         pass
     
-def render_almacen(padre):
+async def render_almacen(padre):
     render_table(padre,len(almacen.articulos))
 def mostrar_ventana_agotado(padre):
 

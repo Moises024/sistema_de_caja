@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QLabel,QWidget
 from PyQt6.QtCore import pyqtSignal,Qt
 from PyQt6.QtGui import QCursor,QPixmap
-
-
+import asyncio
+from component.almacen import render_almacen,buscar_articulo
 class labels:
     names=[]
     clicked_bottons=[]
@@ -17,6 +17,10 @@ class Create_link(QLabel):
         super().mousePressEvent(event)
 
 
+async def findData(padre,id):
+    if padre.ALMACEN_CODE == id:
+        asyncio.create_task(buscar_articulo(padre))
+        asyncio.create_task(render_almacen(padre))
 
 def connectar_botones_main(botones,padre):
     if len(array_label.clicked_bottons) > 0:
@@ -94,6 +98,9 @@ def activeLink(padre,label):
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
     if label["id"]== 2 and padre.usuario.rol  == 3:
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
+        asyncio.run(findData(padre,padre.ALMACEN_CODE))
+        # buscar_articulo(padre)
+        # render_almacen(padre)
     if label["id"] ==3 and padre.usuario.rol  == 3:
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
 

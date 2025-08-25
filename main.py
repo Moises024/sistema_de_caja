@@ -10,7 +10,7 @@ import time
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usuarios
 from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja,buscador_articulos_input_caja
-from component.almacen import  conectar_botones_almacen,render_almacen,buscar_articulo
+from component.almacen import  conectar_botones_almacen
 from component.registrar import conectar_botones_registrar
 from component.inventario import conectar_botones_inventario,buscar_facturas
 from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja
@@ -153,7 +153,7 @@ class Ventana(QMainWindow):
 
         #pantalla loading 
         self.loading = loadUi("./ui/loading.ui")
-     #    self.gif = QMovie("./img/loading.gif")
+        #self.gif = QMovie("./img/loading.gif")
         
         
         #pantalla detalles 
@@ -388,7 +388,7 @@ class Ventana(QMainWindow):
                     buscar_facturas(self)
                     # self.caja.no_orden.setText(str(self.numero_orden+1))
                if id == self.INVENTARIO_CODE:
-                    buscar_facturas(self) 
+                     
                     window.msj_1.setText("")
                     window.msj_2.setText("")
                     window.msj_3.setText("")
@@ -398,6 +398,7 @@ class Ventana(QMainWindow):
                     self.main_window.root.layout().addWidget(window)
                     self.inventario.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
                     self.current_window = window
+                    buscar_facturas(self)
                     
 
                if id == 7:
@@ -415,8 +416,7 @@ class Ventana(QMainWindow):
                     self.current_window = window
                     
                if id == self.ALMACEN_CODE:
-                    buscar_articulo(self)
-                    render_almacen(self)
+                    
                     window.cantidad_articulo.setText("")
                     window.precio_articulo.setText("")
                     window.nombre_articulo.setText("")
@@ -425,6 +425,9 @@ class Ventana(QMainWindow):
                     self.main_window.root.layout().addWidget(window)
                     self.almacen.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
                     self.current_window = window
+                    
+                    # buscar_articulo(self)
+                    # render_almacen(self)
                
                if id == self.MAIN_WINDOW:
                     

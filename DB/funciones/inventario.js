@@ -1,11 +1,19 @@
-import { database } from "../module/db.js"
+import getFacturaModel from "../module/facturas.js"
+import getUsuarioModel from "../module/usuarios.js"
 export const addInventario = async (req, res) => {
 
 
     try {
-        const cursor = await database()
+        const Facturas = await getFacturaModel()
         const data = req.body
-        await cursor.connection.run("INSERT INTO facturas(usuario_id,factura,total,fecha) VALUES(?, ?, ?, ?) ", data)
+        const data_factura = {
+            usuario_id: data[0],
+            factura: data[1],
+            total: data[2]
+        }
+        const factura = await new Facturas(data_factura)
+        
+        await factura.save()
         res.json({ ok: true, res: "Factura agregada correctamente." })
     } catch (error) {
         res.json({ ok: true, res: "No se pudo agregar dicha factura.", error })
@@ -14,21 +22,27 @@ export const addInventario = async (req, res) => {
 export const getInventario = async (req, res) => {
 
     try {
-        const cursor = await database()
-        const data = await cursor.connection.all("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
+        await getUsuarioModel(); 
+        const Facturas = await getFacturaModel()
+        const data = await Facturas.find({}).populate({
+            path: "usuario_id",
+            select: "nombre usuario rol apellido id "
+
+        })
         res.json({ ok: true, res: data })
     } catch (error) {
-        res.json({ ok: true, res: "No se pudo agregar dicha factura.", error })
+        console.log(error)
+        res.json({ ok: true, res: "No se pudo encontrar dicha factura.", error })
     }
 }
 export const delInventario = async (req, res) => {
 
-    
+
     try {
-        const cursor = await database()
+        const Facturas = await getFacturaModel()
         const data = req.body
-       
-        const result =  await cursor.connection.run("DELETE FROM facturas WHERE id_factura=?", [data._id])
+        await Facturas.findOneAndDelete({ id: data._id })
+
         res.json({ ok: true, res: "Factura eliminado correctamente" })
     } catch (err) {
         res.json({ ok: false, res: "No se pudo eliminar el factura.", error: err })

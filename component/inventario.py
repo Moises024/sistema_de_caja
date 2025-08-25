@@ -241,12 +241,12 @@ def buscar_facturas(padre):
         resp = requests.get(os.getenv("URL")+"/api/inventario")
         resultado = resp.json()
         for fila in resultado["res"]:
-        
-            time =  int(fila["fecha"])
+            fecha = datetime.datetime.fromisoformat(fila["fecha"].replace("Z", "+00:00"))
+            time =  fecha.timestamp()
             fecha = datetime.datetime.fromtimestamp(time)
             fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
-            usuario_id = fila["usuario_id"]
-            factura = Item(fila["nombre"] +" "+fila["apellido"], fila["id_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
+            usuario_id = fila["usuario_id"]["id"]
+            factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
             facturas.append(factura)
             almacen.facturas = facturas
         # conn.close()

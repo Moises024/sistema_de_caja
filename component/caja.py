@@ -334,9 +334,10 @@ def buscar_articulos():
     try:
         resp = requests.get(os.getenv("URL")+"/api/almacen")
         result = resp.json()
-    
+        if not result['ok']:
+            print(result['res'])
+            return 
         for item in result['res']:
-            
             almacen.db_almacen.append(item)
             almacen.articulos.append({"ID":item["id"],"nombre":item["nombre"],"cantidad":1,"precio":item["precio"]})
         # conn.close()
@@ -375,11 +376,14 @@ def generar_facturas(padre):
                 data = []
                 data.append(item["cantidad"])
                 data.append(item["ID"])
-                data.append(item["cantidad"])
+                
                 resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
                 info = resp.json()
                 if not info["ok"]:
                     #msj errior al cliente 
+                    padre.tipo_msj.titulo = "Error"
+                    padre.tipo_msj.text = info["res"]
+                    padre.sendMsjError(padre.tipo_msj)
                     print(info["res"])
                     return
               
@@ -396,7 +400,7 @@ def generar_facturas(padre):
                 }
             data = []
         
-            data.append(usuario.id)
+            data.append(usuario._id)
             data.append(factura)
             data.append(precio_total)
             data.append(fecha)

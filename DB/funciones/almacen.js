@@ -1,13 +1,20 @@
-import { database } from "../module/db.js"
+import getAlmacenModel from "../module/almacen.js"
 import path from "path"
 
 export const addAlmacen = async (req, res) => {
 
    
     try {
-        const cursor = await database()
+        const Almacen = await getAlmacenModel()
         const data = req.body
-        cursor.connection.run("INSERT INTO articulos(nombre,cantidad,precio,tipo) VALUES(?, ?, ?, ?)", data)
+        const data_almacen = {
+            nombre:data[0],
+            cantidad:data[1],
+            precio:data[2]
+        }
+        const articulo = await new Almacen(data_almacen)
+        await articulo.save()
+        
         res.json({ ok: true, res: "Artículo agregado correctamente" })
     } catch (err) {
         res.json({ ok: false, res: "No se pudo agregar el artículo.", error: err })
@@ -18,8 +25,8 @@ export const getAlmacen = async (req, res) => {
 
 
     try {
-        const cursor = await database()
-        const articulos = await cursor.connection.all("SELECT * FROM articulos")
+         const Almacen = await getAlmacenModel()
+        const articulos = await Almacen.find({})
         res.json({ ok: true, res: articulos })
     } catch (err) {
         console.log(err)
@@ -32,11 +39,12 @@ export const getAlmacen = async (req, res) => {
 export const delArticulo = async (req, res) => {
 
     try {
-        const cursor = await database()
+         const Almacen = await getAlmacenModel()
         const data = req.body
-        await cursor.connection.run("DELETE FROM articulos WHERE id=?", [data._id])
+        await Almacen.findOneAndDelete({id:data._id})
         res.json({ ok: true, res: "Artículo eliminado correctamente." })
     } catch (err) {
+        console.log(err)
         res.json({ ok: false, res: "No se pudo eliminar el artículo." })
     }
 
@@ -44,9 +52,13 @@ export const delArticulo = async (req, res) => {
 export const updateArticulo = async (req, res) => {
 
     try {
-        const cursor = await database()
+  
         const data = req.body
-        await cursor.connection.run("UPDATE articulos set nombre=?, cantidad=?, precio=? where lower(nombre)=lower(?) ", data)
+        const Almacen = await getAlmacenModel()
+        await Almacen.updateOne({nombre:data[0]},{$set:{
+            precio:data[2],
+            cantidad:data[1]
+        }})
         res.json({ ok: true, res: "Artículo actualizado correctamente." })
     } catch (err) {
         res.json({ ok: false, res: "No se pudo actualizar el artículo." })
@@ -58,11 +70,14 @@ export const updateArticulo = async (req, res) => {
 export const updateArticuloCantidad = async (req, res) => {
 
     try {
-        const cursor = await database()
+        
         const data = req.body
-        await cursor.connection.run("UPDATE articulos SET cantidad = cantidad - ? WHERE id =? and cantidad > 0 and cantidad >= ? ",data)
+        console.log(data,"Actualidzar un ncantadiad")
+        const Almacen = await getAlmacenModel()
+        const update = await Almacen.updateOne({id:data[1]},{$inc:{cantidad:-data[0]}})
+        console.log(update)
         res.json({ ok: true, res: "Artículo actualizado correctamente." })
     } catch (err) {
-        res.json({ ok: false, res: "No se pudo actualizar el artículo." })
+        res.json({ ok: false, res: `"No se pudo actualizar el artículo." ${err}` })
     }
 }

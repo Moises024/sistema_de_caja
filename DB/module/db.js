@@ -1,18 +1,17 @@
-import sqlite3 from "sqlite3"
-import { open } from 'sqlite';
-import path from "path"
-sqlite3.verbose()
-export const database = async () => {
-    
-    const new_path = path.join(path.resolve(),"/DataBase/Datos.db")
-   
-    try {
-       const  db = await open({filename:new_path,driver:sqlite3.Database})
-      
-        return { ok: true, connection:db  }
 
-    } catch (err) {
+import mongoose from "mongoose"
+import { configDotenv } from "dotenv"
+configDotenv()
+ const dataBase =  async ()=>{
+   try{
+        const connect =  await mongoose.connect(process.env.URI,{})
+        return  mongoose.connection
+
+    }catch(err){
         console.log(err)
-        return { ok: false, res: err }
-    }
+        console.log( "no conectado")
+   }
+   
 }
+
+export default dataBase
