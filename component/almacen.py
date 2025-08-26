@@ -252,7 +252,7 @@ def conectar_botones_almacen(botones,padre):
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 
 
-def insertar_articulo(articulo,padre):
+async def insertar_articulo(articulo,padre):
     # database = db()
     # conn = database.crearConnexion() 
     # cursor = conn.cursor()
@@ -282,7 +282,7 @@ def insertar_articulo(articulo,padre):
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
-        buscar_articulo(padre)
+        await buscar_articulo(padre)
       
     except:
    
@@ -337,11 +337,16 @@ async def buscar_articulo(padre):
             render_table(padre,1)
             await api.session.close()
             padre.main_window.cargando.hide()
+            padre.caja.raise_()
+            
     except Exception as e:
         print(e)
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = f"Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+        padre.main_window.cargando.hide()
+        padre.caja.raise_()
+        
     
    
     

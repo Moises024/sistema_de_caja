@@ -1,15 +1,15 @@
 from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
 from PyQt6.QtCore import Qt
-from component.db import db
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QCursor
-from component.almacen import buscar_articulo
 import sqlite3
 import time
 import json
 import requests
 import os
+import aiohttp
 from dotenv import load_dotenv
+import asyncio
 load_dotenv()
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
@@ -25,6 +25,9 @@ class items:
     articulos=[]
     db_almacen = []
 almacen = items()
+class Api:
+    session =""
+api= Api()
 
 
 class tecla:
@@ -295,7 +298,7 @@ def conectar_botones_caja(botones,padre,caja):
  botones[16].clicked.connect(lambda:back(caja))
  botones[17].clicked.connect(lambda:devuelta(caja,padre))
  botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
- botones[19].clicked.connect(lambda:generar_facturas(padre))
+ botones[19].clicked.connect(lambda: generar_facturas(padre))
  for boton in botones:
     boton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
@@ -324,33 +327,46 @@ def limpiar_lista(caja,padre):
 def celda_click(row,column):
     vari.row_aliminada = row
 
-def buscar_articulos():
     #ID
     almacen.articulos = []
     almacen.db_almacen = []
     # baseDeDatos = db()
     # conn = baseDeDatos.crearConnexion()
     # cursor = conn.cursor()
+async def buscar_articulos(padre):
+    URL = os.getenv("URL") + "/api/almacen"
     try:
-        resp = requests.get(os.getenv("URL")+"/api/almacen")
-        result = resp.json()
-        if not result['ok']:
-            print(result['res'])
-            return 
-        for item in result['res']:
-            almacen.db_almacen.append(item)
-            almacen.articulos.append({"ID":item["id"],"nombre":item["nombre"],"cantidad":1,"precio":item["precio"]})
-        # conn.close()
+        if api.session != "":
+            if not api.session.closed:
+                await api.session.close()
+        api.session = aiohttp.ClientSession()
+        async with api.session.get(URL) as resp:
+            result = await resp.json()
+            if not result['ok']:
+                print(result['res'])
+                return 
+            for item in result['res']:
+                almacen.db_almacen.append(item)
+                almacen.articulos.append({"ID":item["id"],"nombre":item["nombre"],"cantidad":1,"precio":item["precio"]})
+            padre.main_window.cargando.hide()
+            padre.caja.raise_()
+            # conn.close()
     except sqlite3.Error as err:
         print(err)
+        padre.main_window.cargando.hide()
+        padre.caja.raise_()
         
     
     
 
 def generar_facturas(padre):
+        padre.caja.lower()
+        padre.main_window.cargando.show()
         if vari.gen_factura == False:
             padre.tipo_msj.titulo = "Warning"
             padre.tipo_msj.text = "No ha generado la devuelta"
+            padre.main_window.cargando.hide()
+            padre.caja.raise_()
             padre.sendMsjWarningSingle(padre.tipo_msj)
             return
         
@@ -364,7 +380,7 @@ def generar_facturas(padre):
         # cursor = conn.cursor()
        
         try:
-           
+            
             for item in padre.articulos:
                             
                 # cursor.execute("UPDATE articulos SET cantidad = cantidad - ? WHERE id =? and cantidad > 0 and cantidad >= ? ",(item["cantidad"],item["ID"],item["cantidad"]))
@@ -409,25 +425,27 @@ def generar_facturas(padre):
             if not info["ok"]:
                 #msj erro al clienete 
                 return
-            buscar_articulo(padre)
-            buscar_articulos()
             vari.render =False
             vari.mont_pagado=0
             vari.monto_total=0
             vari.gen_factura = False
-
+            padre.main_window.cargando.hide()
+            padre.caja.raise_()
             padre.tipo_msj.titulo = "Éxito"
+            
             padre.tipo_msj.text = "Factura generada correctamente"
             padre.sendMsjSuccess(padre.tipo_msj)
             limpiar_completo(padre, padre.caja)
-            buscar_articulos()
             padre.articulos =[]
             contenedor = QWidget()
             padre.caja.sugerencias.setWidget(contenedor)
             padre.caja.detalles.findChild(QLabel,"unidades").setText(str(0))
+            asyncio.create_task(buscar_articulos(padre))
             # conn.commit()
         except sqlite3.Error as err:
             print(err)
+            padre.main_window.cargando.hide()
+            padre.caja.raise_()
             return
         
        
@@ -540,8 +558,4 @@ def connect_label(label,padre):
     label[0].setOpenExternalLinks(False)
     label[0].clicked.connect(lambda:buscar_click(padre,label[1]))
     
-    
-def actualizar_datos_caja():
-    buscar_articulos()
-
     

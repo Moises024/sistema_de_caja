@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QMessageBox,QGraphicsOpacityEffect,QLabel,QWidget
-from PyQt6.QtGui import QAction,QIcon,QMovie
+from PyQt6.QtGui import QAction,QIcon
 from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
 from PyQt6.QtGui import QPixmap
@@ -11,10 +11,10 @@ import math
 import time 
 import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usuarios
-from component.caja import conectar_acciones_caja,conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,actualizar_datos_caja,buscador_articulos_input_caja
+from component.caja import conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,buscador_articulos_input_caja
 from component.almacen import  conectar_botones_almacen
 from component.registrar import conectar_botones_registrar
-from component.inventario import conectar_botones_inventario,buscar_facturas
+from component.inventario import conectar_botones_inventario
 from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja
 from component.main_window import connectar_botones_main,activeLink,agregar_salir
 
@@ -384,11 +384,7 @@ class Ventana(QMainWindow):
                     self.caja.contenedor.move(int(self.caja.width()/2)-int(window.contenedor.width()/2),int(self.caja.height()/2) - int(window.contenedor.height()/2))
                     self.caja.contenedor.setStyleSheet("background-color:transparent;")
                     self.current_window =window
-                    actualizar_datos_caja()
                     
-                    # self.caja.nombre_usuario.setText(self.usuario.nombre + " " + self.usuario.apellido)
-                    buscar_facturas(self)
-                    # self.caja.no_orden.setText(str(self.numero_orden+1))
                if id == self.INVENTARIO_CODE:
                      
                     window.msj_1.setText("")
@@ -400,7 +396,7 @@ class Ventana(QMainWindow):
                     self.main_window.root.layout().addWidget(window)
                     self.inventario.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
                     self.current_window = window
-                    buscar_facturas(self)
+                    
                     
 
                if id == 7:

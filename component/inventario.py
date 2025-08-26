@@ -8,7 +8,7 @@ import re
 import requests
 import os
 import json
-import iohttp
+import aiohttp
 from dotenv import load_dotenv
 load_dotenv()
 class Api:
@@ -241,13 +241,13 @@ async def buscar_facturas(padre):
     facturas = []
     
     try:
-        URL=os.getenv("URL")+"/api/inventario
+        URL= os.getenv("URL")+"/api/inventario"
         if api.session!="":
             if not api.session.closed:
                 await api.session.close()
-        api.session = iohttp.createSsesion()
-        async await with api.session.get(URL) as resp:
-             resultado = resp.json()
+        api.session = aiohttp.ClientSession()
+        async with api.session.get(URL) as resp:
+             resultado = await resp.json()
              for fila in resultado["res"]:
                  fecha = datetime.datetime.fromisoformat(fila["fecha"].replace("Z", "+00:00"))
                  time =  fecha.timestamp()
@@ -260,11 +260,16 @@ async def buscar_facturas(padre):
              await api.session.close()
         padre.numero_orden =  len(almacen.facturas)
         render_table(padre,len(facturas))
+        await api.session.close()
+        padre.main_window.cargando.hide()
+       
     except Exception  as e:
         print("inventari linea; 239",e)
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+        padre.main_window.cargando.hide()
+        
         
 
 def agregar_Datos_tabla(tabla,datos):

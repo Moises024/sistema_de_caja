@@ -2,7 +2,10 @@ from PyQt6.QtWidgets import QLabel,QWidget
 from PyQt6.QtCore import pyqtSignal,Qt
 from PyQt6.QtGui import QCursor,QPixmap
 import asyncio
-from component.almacen import render_almacen,buscar_articulo
+from component.almacen import buscar_articulo
+from component.inventario import buscar_facturas
+from component.caja import buscar_articulos
+
 def cargando(padre):
     padre.main_window.cargando.show()
     padre.main_window.cargando.move(0,0)
@@ -107,22 +110,25 @@ def activeLink(padre,label):
         
        
     if label["id"] == 0:
+        cargando(padre)
         
         padre.change_window(padre.caja,padre.CAJA_CODE)
+        padre.caja.lower()
+        asyncio.create_task(buscar_articulos(padre))
     if label["id"]== 1 and padre.usuario.rol  == 3:
         cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
+        asyncio.create_task(buscar_facturas(padre))
     if label["id"]== 2 and padre.usuario.rol  == 3:
         cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
-
         asyncio.create_task(buscar_articulo(padre))
         # buscar_articulo(padre)
         # render_almacen(padre)
     if label["id"] ==3 and padre.usuario.rol  == 3:
         cargando(padre)
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
-
+        padre.main_window.cargando.hide()
 def agregar_salir(main_window,padre):
     
     pixmap = QPixmap("./img/apagar.png")
