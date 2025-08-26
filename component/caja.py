@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
+from PyQt6.QtWidgets import QApplication,QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QCursor
@@ -10,6 +10,7 @@ import os
 import aiohttp
 from dotenv import load_dotenv
 import asyncio
+
 load_dotenv()
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
@@ -298,7 +299,7 @@ def conectar_botones_caja(botones,padre,caja):
  botones[16].clicked.connect(lambda:back(caja))
  botones[17].clicked.connect(lambda:devuelta(caja,padre))
  botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
- botones[19].clicked.connect(lambda: generar_facturas(padre))
+ botones[19].clicked.connect(lambda: asyncio.create_task(generar_facturas(padre)))
  for boton in botones:
     boton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
@@ -335,6 +336,8 @@ def celda_click(row,column):
     # cursor = conn.cursor()
 async def buscar_articulos(padre):
     URL = os.getenv("URL") + "/api/almacen"
+    almacen.articulos = []
+    almacen.db_almacen = []
     try:
         if api.session != "":
             if not api.session.closed:
@@ -359,9 +362,13 @@ async def buscar_articulos(padre):
     
     
 
-def generar_facturas(padre):
+async def generar_facturas(padre):
+      
+        padre.caja.repaint()  # fuerza el repintado
         padre.caja.lower()
         padre.main_window.cargando.show()
+        await asyncio.sleep(0.5)
+        
         if vari.gen_factura == False:
             padre.tipo_msj.titulo = "Warning"
             padre.tipo_msj.text = "No ha generado la devuelta"

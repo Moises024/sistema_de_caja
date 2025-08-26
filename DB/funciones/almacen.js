@@ -21,20 +21,13 @@ export const addAlmacen = async (req, res) => {
     }
 }
 export const getAlmacen = async (req, res) => {
-
-
-
     try {
-         const Almacen = await getAlmacenModel()
-        const articulos = await Almacen.find({})
-        console.log("awqui")
+        const Almacen = await getAlmacenModel()
+        const articulos = await Almacen.find({}).sort({id:-1})
         res.json({ ok: true, res: articulos })
     } catch (err) {
         console.log(err)
-
-
-          res.json({ ok: false, res: "No se pudieron conseguir los artículos. ", error: err,path:path.resolve() })
-    
+        res.json({ ok: false, res: "No se pudieron conseguir los artículos. ", error: err,path:path.resolve() })
     }
 }
 export const delArticulo = async (req, res) => {

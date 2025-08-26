@@ -8,6 +8,7 @@ import aiohttp
 import os
 from dotenv import load_dotenv
 import json
+import asyncio
 load_dotenv()
 
 class Thread_:
@@ -101,6 +102,7 @@ def limpiar_lista(tabla,cola):
 
 #Función para almacenar el índice del artículo a eliminar
 def agrear_lista_elimar(row,c):
+    
     if  len(almacen.item) > 0 :
         for i,item in enumerate(almacen.item):
             if i == row:
@@ -218,7 +220,6 @@ def eliminar(padre):
     else:
         item = almacen.eliminadas
 
-    print(item)
     padre.tipo_msj.titulo = "Warning"
     padre.tipo_msj.text = (f"Seguro que quieres eliminar el artículo {item.nombre}?")
 
@@ -234,8 +235,8 @@ def eliminar(padre):
         almacen.item =""
     else:
         delete_articulo(almacen.articulos[almacen.eliminadas],padre)
-    buscar_articulo(padre)
-    render_table(padre,1)
+    asyncio.create_task(buscar_articulo(padre))
+    
     almacen.eliminadas=""
 
 # Función para conectar acciones de los botones en la interfaz de almacenamiento
@@ -252,7 +253,7 @@ def conectar_botones_almacen(botones,padre):
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 
 
-async def insertar_articulo(articulo,padre):
+def insertar_articulo(articulo,padre):
     # database = db()
     # conn = database.crearConnexion() 
     # cursor = conn.cursor()
@@ -282,7 +283,7 @@ async def insertar_articulo(articulo,padre):
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
-        await buscar_articulo(padre)
+        asyncio.create_task(buscar_articulo(padre))
       
     except:
    
@@ -386,7 +387,7 @@ def update_articulo(new_item,padre):
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = info["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
-        buscar_articulo(padre)
+        asyncio.create_task(buscar_articulo(padre))
     except :
         #msj de conexcion fallida
     

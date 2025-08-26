@@ -24,7 +24,9 @@ export const getInventario = async (req, res) => {
     try {
         await getUsuarioModel(); 
         const Facturas = await getFacturaModel()
-        const data = await Facturas.find({}).populate({
+        const data = await Facturas.find({})
+        .sort({_id:-1})
+        .populate({
             path: "usuario_id",
             select: "nombre usuario rol apellido id "
 

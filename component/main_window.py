@@ -6,7 +6,7 @@ from component.almacen import buscar_articulo
 from component.inventario import buscar_facturas
 from component.caja import buscar_articulos
 
-def cargando(padre):
+async def cargando(padre):
     padre.main_window.cargando.show()
     padre.main_window.cargando.move(0,0)
     padre.main_window.cargando.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -64,7 +64,7 @@ def connectar_botones_main(botones,padre):
                     height:100%;
                     color:#f1f1f1;
             }
-            QLabel::hover{
+            QLabel::hover{ 
                             background-color:#232f42;
 
                             }
@@ -73,9 +73,9 @@ def connectar_botones_main(botones,padre):
         connet_click(label,padre)
     
 def connet_click(label,padre):
-         label["link"].clicked.connect(lambda:activeLink(padre,label))
+         label["link"].clicked.connect(lambda:asyncio.create_task(activeLink(padre,label)))
 
-def activeLink(padre,label):
+async def activeLink(padre,label):
     for link in array_label.clicked_bottons:
         if label["id"] == link["id"]:
             link["link"].setStyleSheet('''
@@ -110,23 +110,23 @@ def activeLink(padre,label):
         
        
     if label["id"] == 0:
-        cargando(padre)
+        await cargando(padre)
         
         padre.change_window(padre.caja,padre.CAJA_CODE)
         padre.caja.lower()
         asyncio.create_task(buscar_articulos(padre))
     if label["id"]== 1 and padre.usuario.rol  == 3:
-        cargando(padre)
+        await cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
         asyncio.create_task(buscar_facturas(padre))
     if label["id"]== 2 and padre.usuario.rol  == 3:
-        cargando(padre)
+        await cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
         asyncio.create_task(buscar_articulo(padre))
         # buscar_articulo(padre)
         # render_almacen(padre)
     if label["id"] ==3 and padre.usuario.rol  == 3:
-        cargando(padre)
+        await cargando(padre)
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
         padre.main_window.cargando.hide()
 def agregar_salir(main_window,padre):

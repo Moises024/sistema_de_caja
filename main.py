@@ -466,7 +466,7 @@ class Ventana(QMainWindow):
                     self.main_window.header.setFixedWidth(self.main_window.width())
                     self.main_window.root.setFixedSize(self.main_window.width(),self.main_window.height())
                     self.main_window.container_user.findChild(QLabel,"user").setText(self.usuario.nombre + " " + self.usuario.apellido )
-                    activeLink(self,{"id":0})
+                    asyncio.create_task(activeLink(self,{"id":0}))
                     self.loading.hide() 
                     
 
