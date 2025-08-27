@@ -9,6 +9,7 @@ import os
 from dotenv import load_dotenv
 import json
 import asyncio
+
 load_dotenv()
 
 class Thread_:
@@ -129,7 +130,14 @@ def render_table(padre,cantida,item=False):
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.almacen.tabla_articulo.height())
     tabla.cellClicked.connect(agrear_lista_elimar)
-   
+    tabla.setStyleSheet('''
+    QScrollBar:vertical{
+                background: #1e1e1e;
+                width: 12px;
+                margin: 0px 0px 0px 0px;      
+                        }
+''')
+    tabla.verticalHeader().setVisible(False)
     #Si no hay un artículo específico, renderiza todos los artículos
     if not item:
         tabla.setRowCount(len(almacen.articulos))
@@ -161,7 +169,7 @@ def render_table(padre,cantida,item=False):
     
 #Función para agregar un nuevo artículo al inventario    
 def agregar(padre):
-    
+    from component.main_window import cargando
     nombre = padre.almacen.nombre_articulo.text()
     precio = padre.almacen.precio_articulo.text()
     cantidad = padre.almacen.cantidad_articulo.text()
@@ -187,16 +195,16 @@ def agregar(padre):
             break
 
         
-    if bandera == True:
-       
+    if bandera == True:  
         update_articulo(new_item,padre)
     else:
-        
+
         #llamar a la db
         insertar_articulo(new_item,padre)
         #almacen.articulos.append(new_item)
 
     render_table(padre,1)
+    padre.main_window.cargando.hide()
 
 
 #Función para eliminar un artículo del inventario
@@ -244,7 +252,7 @@ def conectar_botones_almacen(botones,padre):
    
     botones[0].clicked.connect(lambda:agregar(padre))
     botones[1].clicked.connect(lambda:eliminar(padre))   
-    botones[2].clicked.connect(lambda:render_table(padre,len(almacen.articulos)))   
+    botones[2].clicked.connect(lambda:asyncio.create_task(buscar_articulo(padre)))   
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))

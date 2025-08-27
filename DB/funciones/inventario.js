@@ -12,7 +12,7 @@ export const addInventario = async (req, res) => {
             total: data[2]
         }
         const factura = await new Facturas(data_factura)
-        
+
         await factura.save()
         res.json({ ok: true, res: "Factura agregada correctamente." })
     } catch (error) {
@@ -22,15 +22,15 @@ export const addInventario = async (req, res) => {
 export const getInventario = async (req, res) => {
 
     try {
-        await getUsuarioModel(); 
+        await getUsuarioModel();
         const Facturas = await getFacturaModel()
         const data = await Facturas.find({})
-        .sort({_id:-1})
-        .populate({
-            path: "usuario_id",
-            select: "nombre usuario rol apellido id "
+            .sort({ _id: -1 })
+            .populate({
+                path: "usuario_id",
+                select: "nombre usuario rol apellido id "
 
-        })
+            })
         res.json({ ok: true, res: data })
     } catch (error) {
         console.log(error)
@@ -48,5 +48,22 @@ export const delInventario = async (req, res) => {
         res.json({ ok: true, res: "Factura eliminado correctamente" })
     } catch (err) {
         res.json({ ok: false, res: "No se pudo eliminar el factura.", error: err })
+    }
+}
+export const getInventarioUsuario = async (req, res) => {
+    try {
+        const datos = req.body
+        await getUsuarioModel();
+        const Facturas = await getFacturaModel()
+        const data = await Facturas.find({
+            fecha: {
+                $gte: datos[0],
+                $lte: datos[1]
+            }, usuario_id: datos[2]
+        })
+        res.json({ ok: true, res: data })
+    } catch (error) {
+        console.log(error)
+        res.json({ ok: true, res: "No se pudo encontrar dicha factura.", error })
     }
 }

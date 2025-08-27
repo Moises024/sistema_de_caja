@@ -4,11 +4,18 @@ import sqlite3
 import datetime
 from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
+import aiohttp
+import os
+import json
+
 
 class Almacen:
     facturas=[]
     total_vendido=0
 almacen = Almacen()
+class Api:
+    session=""
+api =Api()
 class Item:
     
     def __init__(self,no_factura,usuario,precio,fecha):
@@ -50,23 +57,33 @@ def render(padre,cantidad):
     padre.cierre_caja_cola = Item_
     padre.cierre_caja.total_vendido.setText(str(almacen.total_vendido))
 
-def render_cierre_Caja(padre):
-    conn = db().crearConnexion()
-    cursor = conn.cursor()
+async def render_cierre_Caja(padre):
+  
     almacen.facturas = []
     almacen.total_vendido=0
     tiempo_inicio_str = datetime.datetime.strptime(str(padre.tiempo_inicio),'%Y-%m-%d %H:%M:%S.%f')
     tiempo_salida_str = datetime.datetime.strptime(str(padre.tiempo_salida),'%Y-%m-%d %H:%M:%S.%f')
     tiempo_inicio = int(tiempo_inicio_str.timestamp())
     tiempo_salida = int(tiempo_salida_str.timestamp())
+    URL = os.getenv("URL") + "/api/inventario"
+    if api.session !="":
+        if not api.session.closed:
+            await api.session.close()
+    api.session = aiohttp.ClientSession()
+    data = [tiempo_inicio,tiempo_salida] 
+    headers = {
+        "Content-Type":"Aplication/json",
+        "id":"4"
+    }
     try:
-        cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id  WHERE fecha >= ? and fecha <= ?",[tiempo_inicio,tiempo_salida])
-        result = cursor.fetchall()
-        for factura in result:
-            item = Item(factura[0],factura[6],factura[3],datetime.datetime.fromtimestamp(factura[4]))
-            almacen.total_vendido += int(factura[3])
-            almacen.facturas.append(item)
-        render(padre,len(almacen.facturas))
+        async with api.session.post(URL,data= json.dumps(data),headers=headers) as resp:
+        # cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id  WHERE fecha >= ? and fecha <= ?",[tiempo_inicio,tiempo_salida])
+            result = await resp.json()
+            for factura in result:
+                item = Item(factura[0],factura[6],factura[3],datetime.datetime.fromtimestamp(factura[4]))
+                almacen.total_vendido += int(factura[3])
+                almacen.facturas.append(item)
+            render(padre,len(almacen.facturas))
     except sqlite3.Error as e:
         print(e)
         return

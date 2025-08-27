@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QWidget,QVBoxLayout
+from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QWidget,QVBoxLayout,QFrame
 from component.db import db
-from PyQt6.QtGui import QCursor
+from PyQt6.QtGui import QCursor,QColor, QFont
 from PyQt6.QtCore import Qt
 import sqlite3
 import datetime
@@ -10,6 +10,7 @@ import os
 import json
 import aiohttp
 from dotenv import load_dotenv
+import asyncio
 load_dotenv()
 class Api:
     session=""
@@ -31,21 +32,42 @@ class Item:
 
 def agrear_lista_elimar(row,c,padre):
     if c == 5 :
-
+        if  padre.pantalla_detalles.isVisible():
+            padre.pantalla_detalles.hide()
         detalles = json.loads(almacen.facturas[row].detalles)
         ventanita = QWidget()
        
         layout = QVBoxLayout(ventanita)
-       
+
         padre.pantalla_detalles.no_factura.setText(str(almacen.facturas[row].no_factura))
         for detalle in detalles:
-            texto = "Nombre: " +str(detalle["nombre"]) +" Cantidad: " +str(detalle["cantidad"]) +" Precio: " + str(detalle["precio"])
-            label_1  = QLabel(texto)
-            
+          
+            label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
+            label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
+            label_3  = QLabel("Precio: " + str(detalle["precio"]))
+            linea = QFrame()
+            linea.setFrameShape(QFrame.Shape.HLine)
+            linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
+            linea.setStyleSheet("color: gray;")
             layout.addWidget(label_1)
+            layout.addWidget(label_2)
+            layout.addWidget(label_3)
+            layout.addWidget(linea)
           
             
         padre.pantalla_detalles.detalles.setWidget(ventanita) 
+        padre.pantalla_detalles.findChild(QWidget).setStyleSheet('''
+        QLabel{
+                font-family:Dubai;
+                padding-left:5px;
+                color:black;
+                font-size:18px;
+                                                            }
+        QLabel::hover{
+                    background-color:#232f42;
+                    color:#fff;                                           }
+''')
+        
         #aqui
         padre.pantalla_detalles.show()
         return
@@ -67,7 +89,14 @@ def render_table(padre,cantidad,item=""):
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.inventario.tabla_factura.height())
     tabla.cellClicked.connect(lambda row ,c:agrear_lista_elimar(row,c,padre))
-
+    tabla.setStyleSheet('''
+    QScrollBar:vertical{
+                background: #1e1e1e;
+                width: 12px;
+                margin: 0px 0px 0px 0px;      
+                        }
+''')
+    tabla.verticalHeader().setVisible(False)
     #Si no hay un artículo específico, renderiza todos los artículos
     if item == "":
         tabla.setRowCount(len(almacen.facturas))
@@ -102,7 +131,7 @@ def eliminar(padre):
     padre.tipo_msj.text = f"Seguro que quieres eliminar la factura con el NO. orden {no_factura}?"
     resp = padre.sendMsjWarning(padre.tipo_msj)
     if resp != 1024:
-        return
+        return 
     if almacen.item:
         id = ""
         for i,iten in enumerate(almacen.facturas):
@@ -148,7 +177,7 @@ def buscar_usuario(text,padre):
 
 def conectar_botones_inventario(botones,inventario,padre):
     botones[0].clicked.connect(lambda:hacer_inventario(padre))
-    botones[1].clicked.connect(lambda:render_table(padre,len(almacen.facturas)))
+    botones[1].clicked.connect(lambda:asyncio.create_task(buscar_facturas(padre)))
     botones[2].clicked.connect(lambda:eliminar(padre))
     inventario.input_factura.textChanged.connect(lambda text:buscar_usuario(text,padre))
     for btn in botones:
@@ -174,7 +203,7 @@ def hacer_inventario(padre):
         padre.tipo_msj.titulo = "Warninig"
         padre.tipo_msj.text = "Debe agregar la fecha en este formato DD/MM/YYYY"
         padre.sendMsjWarningSingle(padre.tipo_msj)
-        return
+        return 
         
     fecha_int_inicio = int(fecha_inicio.timestamp())
     fecha_int_final = int(fecha_final.timestamp()) + int(24*60*60)
@@ -231,19 +260,12 @@ def delete_de_baseDatos(id, padre):
 
 
 async def buscar_facturas(padre):
-#     {'id': 1, 'usuario_id': 1, 'factura': '[{"ID": 29, "nombre": "Fresa", "cantidad": 10, "precio": 20}]', 'total': 200, 'f
-# echa': 1752773175, 'nombre': 'Moises', 'contra': '123', 'apellido': 'Perez', 'rol': 3, 'usuario': 'Moises024'}
-    # database = db()
-    # conn = database.crearConnexion()
-    # cursor = conn.cursor()
-    # cursor.execute("SELECT * FROM facturas JOIN usuarios ON usuarios.id = facturas.usuario_id order by facturas.fecha desc")
-    # def __init__(self,usuario,no_factura,total,fecha,usuario_id):  
     facturas = []
     
     try:
         URL= os.getenv("URL")+"/api/inventario"
         if api.session!="":
-            if not api.session.closed:
+            if not api.session.closed: 
                 await api.session.close()
         api.session = aiohttp.ClientSession()
         async with api.session.get(URL) as resp:
@@ -274,6 +296,7 @@ async def buscar_facturas(padre):
 
 def agregar_Datos_tabla(tabla,datos):
     for i,articulo in enumerate(datos):
+            
             index=0
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.usuario_id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.no_factura)))
@@ -281,3 +304,7 @@ def agregar_Datos_tabla(tabla,datos):
             tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.total)))
             tabla.setItem(i,index+4,QTableWidgetItem(str(articulo.fecha))) 
             tabla.setItem(i,index+5,QTableWidgetItem("ver")) 
+            accion = tabla.item(i,index+5)
+            accion.setForeground(QColor("white")) 
+            accion.setBackground(QColor("#232f42"))
+            accion.setTextAlignment(Qt.AlignmentFlag.AlignCenter)

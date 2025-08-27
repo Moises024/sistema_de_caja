@@ -13,7 +13,7 @@ import datetime
 from component.login import conectar_acciones_login,conectar_botones_login,datos_usuarios
 from component.caja import conectar_botones_caja,limpiar_lista,keys, back,vari,devuelta,click_ok_caja,buscador_articulos_input_caja
 from component.almacen import  conectar_botones_almacen
-from component.registrar import conectar_botones_registrar
+from component.registrar import conectar_botones_registrar 
 from component.inventario import conectar_botones_inventario
 from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja
 from component.main_window import connectar_botones_main,activeLink,agregar_salir
@@ -362,7 +362,7 @@ class Ventana(QMainWindow):
                if id == self.CERRAR_SESION_CODE:
                        self.clean_Window()
                        self.tiempo_salida = datetime.datetime.now()
-                       render_cierre_Caja(self)
+                       asyncio.create_task(render_cierre_Caja(self))
                        self.main_window.root.layout().addWidget(window)
                        window.setParent(self.main_window)
                        window.btn_cerrar.move(int(window.width()-window.btn_cerrar.width()),0)
