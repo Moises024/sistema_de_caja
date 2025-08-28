@@ -9,7 +9,8 @@ export const addInventario = async (req, res) => {
         const data_factura = {
             usuario_id: data[0],
             factura: data[1],
-            total: data[2]
+            total: data[2],
+            fecha:data[3]
         }
         const factura = await new Facturas(data_factura)
 
@@ -52,18 +53,19 @@ export const delInventario = async (req, res) => {
 }
 export const getInventarioUsuario = async (req, res) => {
     try {
-        const datos = req.body
+        const data = req.body
         await getUsuarioModel();
         const Facturas = await getFacturaModel()
-        const data = await Facturas.find({
+        const datos = await Facturas.find({
             fecha: {
-                $gte: datos[0],
-                $lte: datos[1]
-            }, usuario_id: datos[2]
+                $gte: data[0],
+                $lte: data[1]
+            }, usuario_id: data[2]
         })
-        res.json({ ok: true, res: data })
+    
+        res.json({ ok: true, res: datos })
     } catch (error) {
         console.log(error)
-        res.json({ ok: true, res: "No se pudo encontrar dicha factura.", error })
+        res.json({ ok: false, res: "No se pudo encontrar dicha factura.", error })
     }
 }

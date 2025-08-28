@@ -3,6 +3,7 @@ import { addInventario,getInventario,delInventario, getInventarioUsuario } from 
 
  export default function handler(req,res){
     cors(req,res)
+    
     if(req.method === "POST"){
         if(parseInt(req.headers["id"]) === 0)
         {
@@ -13,6 +14,7 @@ import { addInventario,getInventario,delInventario, getInventarioUsuario } from 
             return delInventario(req,res)
         }
          if(parseInt(req.headers["id"])=== 4){
+            
         return getInventarioUsuario(req,res) 
     }
 

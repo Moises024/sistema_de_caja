@@ -19,7 +19,7 @@ const getFacturaModel = async () => {
     },
     factura: { type: String, required: true },
     total: { type: Number, required: true },
-    fecha: { type: Date, default: Date.now },
+    fecha: { type: Number,required:true },
   });
 
   facturaSchema.plugin(AutoIncrement, { inc_field: 'no_factura' });

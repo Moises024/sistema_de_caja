@@ -5,9 +5,12 @@ import sqlite3
 import os
 import requests
 import json
+import asyncio
 from dotenv import load_dotenv
 load_dotenv()
-def registrar_usuario(registrar,padre):
+async def registrar_usuario(registrar,padre,cargando):
+    await cargando(padre)
+    await asyncio.sleep(2)
     nombre = registrar.input_nombre
     apellido = registrar.input_apellido
     contra = registrar.input_contra
@@ -20,14 +23,15 @@ def registrar_usuario(registrar,padre):
             padre.tipo_msj.text = "Rellene el campo"
             padre.sendMsjWarningSingle(padre.tipo_msj)
             input.setFocus()
+            padre.main_window.cargando.hide()
             return
         else:
              array_input[index] = input.text()
 
     #llamar data base
-    baseDeDatos = db()
-    conn = baseDeDatos.crearConnexion()
-    cursor = conn.cursor()
+    # baseDeDatos = db()
+    # conn = baseDeDatos.crearConnexion()
+    # cursor = conn.cursor()
     is_name = False
     is_usuario = False
     
@@ -82,6 +86,7 @@ def registrar_usuario(registrar,padre):
         if not res["ok"]:
             print(res['res'])
             return
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = res["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
@@ -95,11 +100,13 @@ def registrar_usuario(registrar,padre):
         if err.sqlite_errorcode == 2067 :
             if err.args[0] == 'UNIQUE constraint failed: usuarios.contra':
                 padre.tipo_msj.text = "Ingrese otra contraseña"
+                
         else:
             padre.tipo_msj.text = "No se pudo crear el usuario"
-        conn.close()
+        # conn.close()
         padre.tipo_msj.titulo = "Error"
         padre.sendMsjError(padre.tipo_msj)
+        padre.main_window.cargando.hide()
         return
     # conn.close()
 
@@ -107,6 +114,7 @@ def registrar_usuario(registrar,padre):
     
     
 def conectar_botones_registrar(botones,registrar,padre):
-    botones[0].clicked.connect(lambda:registrar_usuario(registrar,padre))
+    from component.main_window import cargando
+    botones[0].clicked.connect(lambda:asyncio.create_task(registrar_usuario(registrar,padre,cargando)))
     for btn in botones:
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))

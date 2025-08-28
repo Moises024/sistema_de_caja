@@ -15,8 +15,8 @@ from component.caja import conectar_botones_caja,limpiar_lista,keys, back,vari,d
 from component.almacen import  conectar_botones_almacen
 from component.registrar import conectar_botones_registrar 
 from component.inventario import conectar_botones_inventario
-from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja
-from component.main_window import connectar_botones_main,activeLink,agregar_salir
+from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja,limpiar_lista as limpiar_cerrar_caja
+from component.main_window import connectar_botones_main,activeLink,agregar_salir,cargando
 
 from PyQt6.QtCore import Qt, QObject, QEvent
 
@@ -26,13 +26,19 @@ from PyQt6.QtCore import Qt, QObject, QEvent
 class msj():
     titulo =""
     text =""
-
+def manejar_errores_task(futuro):
+    try:
+        futuro.result()
+    except Exception as e:
+        print(f"❌ Error en la tarea: {e}")
+        # Aquí puedes mostrar un mensaje en la GUI si quieres
 class TeclaListener(QObject):
    
      def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
         self.key =""
+
      def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
                 
@@ -102,10 +108,12 @@ class TeclaListener(QObject):
                 if event.key() == Qt.Key.Key_Enter and self.parent.release_enter or event.key() == Qt.Key.Key_Return and self.parent.release_enter:
                 
                     if self.parent.login.isVisible():
-                        self.parent.release_enter = False
-                        datos_usuarios(self.parent.login,self.parent,self.parent.main_window)
-                    #     self.parent.userValidate( self.parent.login, self.parent.caja)
-                        return True
+                         self.parent.release_enter = False
+                        
+                         task =asyncio.create_task(datos_usuarios(self.parent.login,self.parent,self.parent.main_window))
+                         task.add_done_callback(manejar_errores_task)
+                    #    self.parent.userValidate( self.parent.login, self.parent.caja)
+                         return True
      
             # Ejemplo: si presiona Enter
             
@@ -354,13 +362,17 @@ class Ventana(QMainWindow):
                         self.main_window.hide()
                         self.login.showFullScreen()
                         self.animation(1000,time.time()*1000,self.login.frame_2.pos().x(),1000,self.login.frame_2)
-                        activeLink(self,{"id":None})
+                        asyncio.create_task(activeLink(self,{"id":None}))
                         self.current_window = window  
                                             
                    else:
                        return 
                if id == self.CERRAR_SESION_CODE:
+                       
+                       limpiar_cerrar_caja(self)
+
                        self.clean_Window()
+                       window.total_vendido.setText("")
                        self.tiempo_salida = datetime.datetime.now()
                        asyncio.create_task(render_cierre_Caja(self))
                        self.main_window.root.layout().addWidget(window)
@@ -550,7 +562,7 @@ async def main():
 
 if __name__ == "__main__":
    qasync.run(main())
-   
+
     
     
  

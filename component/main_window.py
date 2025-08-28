@@ -20,8 +20,7 @@ async def cargando(padre):
                 background-color:rgba(0, 0, 0, 150);                                 }
 ''')
     padre.main_window.cargando.raise_()
-def cargando_hide (padre):
-    padre.main_window.cargando.hide()
+
 class labels:
     names=[]
     clicked_bottons=[]

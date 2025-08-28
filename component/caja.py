@@ -280,30 +280,30 @@ def is_already_exist(item,padre):
 
 #Acciones de los botones
 def conectar_botones_caja(botones,padre,caja):
- botones[0].clicked.connect( lambda:padre.change_window(padre.cierre_caja,padre.CERRAR_SESION_CODE))
- botones[1].clicked.connect(lambda:teclado(caja))
- botones[2].clicked.connect(lambda:teclado(caja))
- botones[3].clicked.connect(lambda:teclado(caja))
- botones[4].clicked.connect(lambda:teclado(caja))
- botones[5].clicked.connect(lambda:teclado(caja))
- botones[6].clicked.connect(lambda:teclado(caja))
- botones[7].clicked.connect(lambda:teclado(caja))
- botones[8].clicked.connect(lambda:teclado(caja))
- botones[9].clicked.connect(lambda:teclado(caja))
- botones[10].clicked.connect(lambda:teclado(caja))
- botones[11].clicked.connect(lambda:teclado(caja))
- botones[12].clicked.connect(lambda:teclado(caja))
- botones[13].clicked.connect(lambda:teclado(caja))
- botones[14].clicked.connect(lambda:teclado(caja))
- botones[15].clicked.connect(lambda:teclado(caja))
- botones[16].clicked.connect(lambda:back(caja))
- botones[17].clicked.connect(lambda:devuelta(caja,padre))
- botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
- botones[19].clicked.connect(lambda: asyncio.create_task(generar_facturas(padre)))
- for boton in botones:
-    boton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    botones[0].clicked.connect( lambda:padre.change_window(padre.cierre_caja,padre.CERRAR_SESION_CODE))
+    botones[1].clicked.connect(lambda:teclado(caja))
+    botones[2].clicked.connect(lambda:teclado(caja))
+    botones[3].clicked.connect(lambda:teclado(caja))
+    botones[4].clicked.connect(lambda:teclado(caja))
+    botones[5].clicked.connect(lambda:teclado(caja))
+    botones[6].clicked.connect(lambda:teclado(caja))
+    botones[7].clicked.connect(lambda:teclado(caja))
+    botones[8].clicked.connect(lambda:teclado(caja))
+    botones[9].clicked.connect(lambda:teclado(caja))
+    botones[10].clicked.connect(lambda:teclado(caja))
+    botones[11].clicked.connect(lambda:teclado(caja))
+    botones[12].clicked.connect(lambda:teclado(caja))
+    botones[13].clicked.connect(lambda:teclado(caja))
+    botones[14].clicked.connect(lambda:teclado(caja))
+    botones[15].clicked.connect(lambda:teclado(caja))
+    botones[16].clicked.connect(lambda:back(caja))
+    botones[17].clicked.connect(lambda:devuelta(caja,padre))
+    botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
+    botones[19].clicked.connect(lambda: asyncio.create_task(generar_facturas(padre)))
+    for boton in botones:
+        boton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
-
+    
 def buscador_articulos_input_caja(padre):
     padre.caja.input_buscar.textChanged.connect(lambda text:sugerencia(text ,padre))
     
@@ -314,7 +314,7 @@ def conectar_acciones_caja(acciones,padre):
     acciones[1].triggered.connect(lambda:padre.change_window(padre.almacen,padre.ALMACEN_CODE))
     acciones[2].triggered.connect(lambda:padre.change_window(padre.inventario,padre.INVENTARIO_CODE))
     acciones[3].triggered.connect(lambda:padre.change_window(padre.registrar,padre.REGISTRAR_CODE))
-
+    
 def limpiar_lista(caja,padre):
              # 1. Remover el widget visual
         if padre.cola_item_caja:
@@ -509,6 +509,7 @@ def buscar_click(padre,item):
         padre.ventana_cantidad.hide()
         
     padre.ventana_cantidad.show()
+    padre.ventana_cantidad.btn_ok.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     padre.ventana_cantidad.input_cantidad.setFocus()
     padre.key_number = False
    
