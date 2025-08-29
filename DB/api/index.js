@@ -3,7 +3,9 @@ import Usuario from "../module/usuarios.js"
 export default function handler(req, res) {
     cors(req, res)
     console.log(Usuario)
-   const crearUsuario =  async () => {
+   
+    const crearUsuario =  async () => {
+        
         const usuario_data = {
             nombre: "Moises",
             apellido: "Zabala",

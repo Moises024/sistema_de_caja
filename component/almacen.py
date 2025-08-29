@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
-
 from PyQt6.QtGui import QCursor
 from PyQt6.QtCore import Qt
 import threading
@@ -16,15 +15,18 @@ class Thread_:
     Hilos=[]
     stop_event = threading.Event()
 thread_ = Thread_()
+
 class contenedorArticulo:
     articulos=[]
     item=""
     eliminadas=""
     agotado = []
 almacen = contenedorArticulo()
+
 class Api:
     session=""
 api = Api()
+
 #Clase para representar un artículo
 class item:
     
@@ -33,8 +35,6 @@ class item:
         self.nombre = nombre
         self.precio = precio
         self.cantidad = cantidad
-
-
 
 
 #Función para verificar si un valor es un entero    
@@ -47,8 +47,7 @@ def isInt(valor):
 
 #Función para buscar un artículo en el inventario        
 def buscar(text,padre):
-    
-   
+       
     if text == "":
        
         render_table(padre,len(almacen.articulos))
@@ -88,7 +87,6 @@ def buscar(text,padre):
    
     # render_table(padre,len(almacen.articulos))
    
-    
     
 
 #Función para limpiar la lista de artículos en la interfaz
@@ -138,6 +136,7 @@ def render_table(padre,cantida,item=False):
                         }
 ''')
     tabla.verticalHeader().setVisible(False)
+    
     #Si no hay un artículo específico, renderiza todos los artículos
     if not item:
         tabla.setRowCount(len(almacen.articulos))
@@ -161,7 +160,6 @@ def render_table(padre,cantida,item=False):
             tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.precio))) 
        
  
-
     Item_.setSizeHint(tabla.sizeHint())
     padre.almacen.tabla_articulo.addItem(Item_)
     padre.almacen.tabla_articulo.setItemWidget(Item_,tabla)
@@ -181,7 +179,7 @@ def agregar(padre):
     #Verifica si los campos están vacíos
     if nombre == '' or precio.strip() == "" or cantidad =="":
 
-        padre.tipo_msj.titulo = "Warning"
+        padre.tipo_msj.titulo = "Aviso"
         padre.tipo_msj.text = "Por favor rellena los campos"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
@@ -211,7 +209,7 @@ def agregar(padre):
 def eliminar(padre):
     if almacen.eliminadas == "":
         padre.tipo_msj.text ="Selecciona un articulo para eliminar"
-        padre.tipo_msj.titulo ="Warning"
+        padre.tipo_msj.titulo ="Aviso"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
     item = ""
@@ -228,7 +226,7 @@ def eliminar(padre):
     else:
         item = almacen.eliminadas
 
-    padre.tipo_msj.titulo = "Warning"
+    padre.tipo_msj.titulo = "Aviso"
     padre.tipo_msj.text = (f"Seguro que quieres eliminar el artículo {item.nombre}?")
 
     if (padre.sendMsjWarning(padre.tipo_msj)) != 1024:
@@ -256,6 +254,7 @@ def conectar_botones_almacen(botones,padre):
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
+    
     for btn in botones:
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
@@ -328,7 +327,6 @@ async def buscar_articulo(padre):
                 await api.session.close()
         api.session =  aiohttp.ClientSession()
         async with api.session.get(URL) as resp:
-            print("funcionando")
             data = await resp.json()
             if not data["ok"]:
 
@@ -356,21 +354,9 @@ async def buscar_articulo(padre):
         padre.main_window.cargando.hide()
         padre.caja.raise_()
         
-    
-   
-    
-
 
 def update_articulo(new_item,padre):
-    # database = db()
-    # conn = database.crearConnexion()
-    # cursor = conn.cursor()
-    # cursor.execute("UPDATE articulos SET nombre=?, cantidad=?, precio=? where nombre=?",(new_item.nombre,new_item.cantidad,new_item.precio,new_item.nombre))
-    # try:
-    #     conn.commit()
-    # except sqlite3.Error as err:
-    #     print(err)
-    # conn.close()
+    
     data = []
     data.append(new_item.nombre)
     data.append(new_item.cantidad)
@@ -430,7 +416,6 @@ def  delete_articulo(articulo, padre):
         padre.sendMsjSuccess(padre.tipo_msj)
         
         
-
     except:
         #msj de conexxion fallida
      
@@ -515,5 +500,3 @@ def buscador_agotado(text,padre):
     renderVentanaAgotado(padre,agotados)
 
 
-
-        

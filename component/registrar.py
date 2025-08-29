@@ -8,6 +8,7 @@ import json
 import asyncio
 from dotenv import load_dotenv
 load_dotenv()
+
 async def registrar_usuario(registrar,padre,cargando):
     await cargando(padre)
     await asyncio.sleep(2)
@@ -19,7 +20,7 @@ async def registrar_usuario(registrar,padre,cargando):
     
     for index,input in enumerate(array_input):
         if input.text() =='':
-            padre.tipo_msj.titulo = "Error"
+            padre.tipo_msj.titulo = "Aviso"
             padre.tipo_msj.text = "Rellene el campo"
             padre.sendMsjWarningSingle(padre.tipo_msj)
             input.setFocus()
@@ -83,6 +84,7 @@ async def registrar_usuario(registrar,padre,cargando):
         }
         resp = requests.post(os.getenv("URL")+"/api/user",data=json.dumps(data),headers=headers)
         res = resp.json()
+        
         if not res["ok"]:
             print(res['res'])
             return
@@ -111,8 +113,6 @@ async def registrar_usuario(registrar,padre,cargando):
     # conn.close()
 
 
-    
-    
 def conectar_botones_registrar(botones,registrar,padre):
     from component.main_window import cargando
     botones[0].clicked.connect(lambda:asyncio.create_task(registrar_usuario(registrar,padre,cargando)))

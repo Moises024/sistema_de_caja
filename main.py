@@ -21,17 +21,17 @@ from component.main_window import connectar_botones_main,activeLink,agregar_sali
 from PyQt6.QtCore import Qt, QObject, QEvent
 
 
-
-
 class msj():
     titulo =""
     text =""
+
 def manejar_errores_task(futuro):
     try:
         futuro.result()
     except Exception as e:
         print(f"❌ Error en la tarea: {e}")
         # Aquí puedes mostrar un mensaje en la GUI si quieres
+
 class TeclaListener(QObject):
    
      def __init__(self, parent=None):
@@ -169,10 +169,13 @@ class Ventana(QMainWindow):
         #pantalla detalles 
         self.pantalla_detalles  = loadUi("./ui/PantallaDetalles.ui")
         self.pantalla_detalles.setWindowIcon(QIcon("./img/logo.png"))
+        
         # venan cantidad
         self.ventana_cantidad = loadUi("./ui/IngresarCantidad.ui")
+        
         # conectar btn ventana_cantidad
         self.ventana_cantidad.btn_ok.clicked.connect(lambda:click_ok_caja(self))
+        
         # ventana producto agotado 
         self.producto_agotado = loadUi("./ui/ProductosAgotados.ui")
 
@@ -198,6 +201,7 @@ class Ventana(QMainWindow):
         caja = loadUi("./ui/Facturar.ui")
         self.almacen = loadUi("./ui/almacen.ui")
         self.caja = caja
+        
         #main Window 
         self.main_window = loadUi("./ui/mainWindow.ui")
         self.botones_main_window = [self.main_window.nav_1,self.main_window.nav_2,self.main_window.nav_3,self.main_window.nav_4]
@@ -211,6 +215,7 @@ class Ventana(QMainWindow):
         self.registrar = loadUi("./ui/registrar.ui")
         botones_registrar = [self.registrar.btn_registrar]
         conectar_botones_registrar(botones_registrar,self.registrar,self)
+        
         #cargar el ui
         login = loadUi("./ui/login.ui")
         self.login = login
@@ -289,11 +294,13 @@ class Ventana(QMainWindow):
              self.bandera = False
              return
         lista = list(valor)
+
         if self.tecla["key"] == "back":
              self.borrar(login)
              self.release = True
 
              self.tecla["key"] =""
+
         if lista:
             if lista[-1] != "*":
                 self.password += lista[-1]
@@ -351,9 +358,10 @@ class Ventana(QMainWindow):
                
                     
                if id == self.LOGIN_CODE:
-                   self.tipo_msj.titulo ="Warning"
+                   self.tipo_msj.titulo ="Aviso"
                    self.tipo_msj.text ="¿Deseas cerrar sesión?"
                    res = self.sendMsjWarning(self.tipo_msj)
+                   
                    if res == QMessageBox.StandardButton.Ok:
                         self.bandera = False
                         self.release = True
@@ -367,6 +375,7 @@ class Ventana(QMainWindow):
                                             
                    else:
                        return 
+               
                if id == self.CERRAR_SESION_CODE:
                        
                        limpiar_cerrar_caja(self)
@@ -380,7 +389,6 @@ class Ventana(QMainWindow):
                        window.btn_cerrar.move(int(window.width()-window.btn_cerrar.width()),0)
                        window.move(int(self.main_window.width()/2)-int(window.width()/2),int(self.main_window.height()/2)-int(window.height()/2))
                        self.current_window = window
-
 
 
                self.clear_input(self.inputs)  
@@ -408,8 +416,7 @@ class Ventana(QMainWindow):
                     self.main_window.root.layout().addWidget(window)
                     self.inventario.contenedor.move(int(self.main_window.width()/2)-int(window.contenedor.width()/2),int(self.main_window.height()/2)-int(window.contenedor.height()/2))
                     self.current_window = window
-                    
-                    
+                      
 
                if id == 7:
                     self.release_enter=True
@@ -487,6 +494,7 @@ class Ventana(QMainWindow):
             input = login.input_login
             self.tecla["valor"] += str(number)
             input.setText(self.tecla["valor"])
+     
      def clean_Window(self):
                self.current_window.setParent(None) 
                self.main_window.root.layout().removeWidget(self.current_window)
@@ -508,9 +516,11 @@ class Ventana(QMainWindow):
      def clear_input(self,inputs):
          for input in inputs:
               input.setText("")
+         
          if self.cola_item :
             limpiar_lista(self.caja,self)
             self.articulos =[]
+     
      def clearActions(self,menu,acciones):
 
           for accion in acciones:
@@ -519,8 +529,10 @@ class Ventana(QMainWindow):
           
      def cerrar_popUp(self):
           for ventana in self.popUp:
+               
                if ventana.isVisible():
                     ventana.hide()
+     
      def animation(self,start,start_time,end,duration,obj):
           self.start = start
           self.end = end
@@ -563,13 +575,3 @@ async def main():
 if __name__ == "__main__":
    qasync.run(main())
 
-    
-    
- 
-         
-
-"""1- pantalla de cargar (inicio del sistema y generar factura)
-   2- Ajustar el diseño a detalles
-   
-   
-"""

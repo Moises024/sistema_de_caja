@@ -1,4 +1,3 @@
-
 import datetime
 import sqlite3
 from PyQt6.QtGui import QCursor
@@ -8,21 +7,25 @@ import aiohttp
 import asyncio
 from dotenv import load_dotenv 
 load_dotenv()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+
 class usuario:
     id=""
     nombre=""
     apellido =""
     rol=""
 user_ = usuario()
+
 class Api:
     session=""
 api= Api()
+
 async def datos_usuarios(login,padre,main_window):
     usuario = False
     contra = False
     user_data = False
     input_usuario = login.input_nombre_usuario
     input_contra = login.input_login
+    
     if input_usuario.text() == "":
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Por favor rellena el campo de usuario"
@@ -30,6 +33,7 @@ async def datos_usuarios(login,padre,main_window):
         input_usuario.setFocus()
         padre.release_enter =  True
         return
+    
     if input_contra.text() == "":
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Por favor rellena el campo de contraseña"
@@ -37,11 +41,13 @@ async def datos_usuarios(login,padre,main_window):
         input_contra.setFocus()
         padre.release_enter =  True
         return
+    
     contra_ = padre.password
     usuario_ = input_usuario.text()
     # dataDataBase = db()
     # conn = dataDataBase.crearConnexion()
     # cursor = conn.cursor()
+    
     URL = os.getenv("URL") + "/api/user"
     if api.session != "":
         if not api.session.closed:

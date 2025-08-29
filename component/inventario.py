@@ -12,9 +12,11 @@ import aiohttp
 from dotenv import load_dotenv
 import asyncio
 load_dotenv()
+
 class Api:
     session=""
 api=Api()
+
 class Almacen:
     facturas=[]
     eliminadas=None
@@ -98,6 +100,7 @@ def render_table(padre,cantidad,item=""):
 ''')
     tabla.verticalHeader().setVisible(False)
     #Si no hay un artículo específico, renderiza todos los artículos
+    
     if item == "":
         tabla.setRowCount(len(almacen.facturas))
         agregar_Datos_tabla(tabla,almacen.facturas)
@@ -114,7 +117,7 @@ def render_table(padre,cantidad,item=""):
 def eliminar(padre):
     
     if almacen.eliminadas == None:
-       padre.tipo_msj.titulo = "Warning"
+       padre.tipo_msj.titulo = "Aviso"
        padre.tipo_msj.text = "Debe seleccionar una factura"
        padre.sendMsjWarning(padre.tipo_msj) #msj
        return
@@ -125,11 +128,13 @@ def eliminar(padre):
         item = almacen.item
     else:
         item = almacen.facturas[almacen.eliminadas]
+    
     #msj de que si esta seguro eliminar ese articulos
     no_factura = item.no_factura
-    padre.tipo_msj.titulo = "Warning"
+    padre.tipo_msj.titulo = "Aviso"
     padre.tipo_msj.text = f"Seguro que quieres eliminar la factura con el NO. orden {no_factura}?"
     resp = padre.sendMsjWarning(padre.tipo_msj)
+    
     if resp != 1024:
         return 
     if almacen.item:
@@ -172,6 +177,7 @@ def buscar_usuario(text,padre):
         padre.tipo_msj.text = "Usuario/id no encontrado"
         padre.sendMsjError(padre.tipo_msj)
         return
+   
     render_table(padre,len(nuevo_almacen),nuevo_almacen)
 
 
@@ -200,7 +206,7 @@ def hacer_inventario(padre):
         fecha_inicio = datetime.datetime.strptime(mes,"%d/%m/%Y")
         fecha_final = datetime.datetime.strptime(ano,"%d/%m/%Y") 
     except:
-        padre.tipo_msj.titulo = "Warninig"
+        padre.tipo_msj.titulo = "Aviso"
         padre.tipo_msj.text = "Debe agregar la fecha en este formato DD/MM/YYYY"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return 
@@ -270,13 +276,13 @@ async def buscar_facturas(padre):
         api.session = aiohttp.ClientSession()
         async with api.session.get(URL) as resp:
              resultado = await resp.json()
+             
              for fila in resultado["res"]:
-                
-                 fecha = datetime.datetime.fromtimestamp(fila["fecha"])
-                 fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
-                 usuario_id = fila["usuario_id"]["id"]
-                 factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
-                 facturas.append(factura)
+                fecha = datetime.datetime.fromtimestamp(fila["fecha"])
+                fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
+                usuario_id = fila["usuario_id"]["id"]
+                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
+                facturas.append(factura)
              almacen.facturas = facturas
              await api.session.close()
         padre.numero_orden =  len(almacen.facturas)
@@ -285,12 +291,10 @@ async def buscar_facturas(padre):
         padre.main_window.cargando.hide()
        
     except Exception  as e:
-        print("inventari linea; 239",e)
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
         padre.main_window.cargando.hide()
-        
         
 
 def agregar_Datos_tabla(tabla,datos):

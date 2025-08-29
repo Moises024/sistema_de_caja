@@ -26,6 +26,7 @@ class labels:
     clicked_bottons=[]
 array_label = labels()
 array_label.names=["Facturar","Inventario","Almacén","Registrar"]
+
 class Create_link(QLabel):
     clicked = pyqtSignal()
     def __init__(self,parent=None):
@@ -34,13 +35,13 @@ class Create_link(QLabel):
         self.clicked.emit()
         super().mousePressEvent(event)
 
-
        
 def connectar_botones_main(botones,padre):
     if len(array_label.clicked_bottons) > 0:
         for i,label in enumerate(array_label.clicked_bottons):
             label["link"].deleteLater()
     array_label.clicked_bottons = []
+   
     for i,label in enumerate(botones):
         text = array_label.names[i]
         label.setText('')
@@ -114,24 +115,27 @@ async def activeLink(padre,label):
         padre.change_window(padre.caja,padre.CAJA_CODE)
         padre.caja.lower()
         asyncio.create_task(buscar_articulos(padre))
+   
     if label["id"]== 1 and padre.usuario.rol  == 3:
         await cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
         asyncio.create_task(buscar_facturas(padre))
+   
     if label["id"]== 2 and padre.usuario.rol  == 3:
         await cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
         asyncio.create_task(buscar_articulo(padre))
         # buscar_articulo(padre)
         # render_almacen(padre)
+   
     if label["id"] ==3 and padre.usuario.rol  == 3:
         await cargando(padre)
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
         padre.main_window.cargando.hide()
+
 def agregar_salir(main_window,padre):
     
     pixmap = QPixmap("./img/apagar.png")
-    
     
     salir = Create_link("Salir")
     contenedor_user = main_window.header.findChild(QWidget,"container_user",)
@@ -162,4 +166,3 @@ def agregar_salir(main_window,padre):
     parent.move(width_user-parent.width(),int(int(parent.height()/2)-6))
     salir.clicked.connect(padre.salir)
     
-

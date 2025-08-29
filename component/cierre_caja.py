@@ -10,14 +10,15 @@ import json
 import asyncio
 
 
-
 class Almacen:
     facturas=[]
     total_vendido=0
 almacen = Almacen()
+
 class Api:
     session=""
 api =Api()
+
 class Item:
     
     def __init__(self,no_factura,usuario,precio,fecha):
@@ -39,7 +40,7 @@ def render(padre,cantidad):
     if padre.cierre_caja_cola:
         limpiar_lista(padre)
    
-    tabla.setHorizontalHeaderLabels(["NO. FACTURA","USUARIO","PRECIO","FECHA"])
+    tabla.setHorizontalHeaderLabels(["NO. FACTURA","USUARIO","TOTAL","FECHA"])
     tabla.resizeColumnsToContents()
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)

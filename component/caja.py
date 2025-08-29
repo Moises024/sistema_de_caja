@@ -15,8 +15,10 @@ load_dotenv()
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
     clicked = pyqtSignal()
+    
     def __init__(self, parent=None):
         super().__init__(parent)
+    
     def mousePressEvent(self,event):
         self.clicked.emit()
         super().mousePressEvent(event)
@@ -26,6 +28,7 @@ class items:
     articulos=[]
     db_almacen = []
 almacen = items()
+
 class Api:
     session =""
 api= Api()
@@ -68,7 +71,7 @@ def back(caja):
 def devuelta(caja,padre):
    
    if caja.precio_total.text() == "" or caja.monto_pagado.text() == "" and not vari.render:
-        padre.tipo_msj.titulo = "Warning"
+        padre.tipo_msj.titulo = "Aviso"
         padre.tipo_msj.text = f"No se puede hacer dicha operación"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         vari.render =False
@@ -87,15 +90,16 @@ def devuelta(caja,padre):
    #Alerta de cuando ingresamos un pago menor que el total
    if vari.mont_pagado < vari.monto_total and not vari.render:
         msj = vari.monto_total - vari.mont_pagado
-        padre.tipo_msj.titulo = "Warning"
+        padre.tipo_msj.titulo = "Aviso"
         padre.tipo_msj.text = f"Faltan {msj} pesos por cobrar"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         vari.render =False
         vari.monto_total=0
         caja.devuelta_2.setText("")
         return
+   
    if  vari.monto_total ==0:
-        padre.tipo_msj.titulo = "Warning"
+        padre.tipo_msj.titulo = "Aviso"
         padre.tipo_msj.text = f"no hay articulos en el carrito de compras"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         caja.devuelta_2.setText("")
@@ -116,10 +120,9 @@ def devuelta(caja,padre):
 
 #Aparición de los productos en la lista
 def buscar_item(caja,padre,item_buscado =False):
-    tabla_pointer=0
+  
     tabla_row =1
     informacion = caja.input_buscar.text()
-    unidades=0
     item = QListWidgetItem()
 
     #Crea una tabla para mostrar los artículos
@@ -168,23 +171,21 @@ def buscar_item(caja,padre,item_buscado =False):
 
 ''')
     bandera = False
-    index=0
-    total =0 
     numero_articulo =""
-    cuenta_articulo =1
-
     #Buscar productos en el almacén
+    if vari.render:
+        bandera= True
+        vari.row_aliminada =""
+        vari.render = False
+        if padre.cola_item_caja:
+            limpiar_lista(caja,padre)
+
     if item_buscado == False:
         for item_dic in almacen.articulos:
         
             #Si se encuentra en el almacén lo mandará a la lista
-            if item_dic["nombre"] == informacion or informacion == item_dic["ID"] or vari.render:
-                if vari.render:
-                    vari.row_aliminada =""
-                    vari.render = False
-                    if padre.cola_item_caja:
-                        limpiar_lista(caja,padre)
-                else:
+            if item_dic["nombre"] == informacion or informacion == item_dic["ID"]:
+              
                     id = is_already_exist(item_dic,padre)
 
                     if  id == "False":
@@ -193,7 +194,7 @@ def buscar_item(caja,padre,item_buscado =False):
                     else:
                         numero_articulo = id
 
-                bandera =True
+                    bandera =True
     else:
         bandera = True
         if len(item_buscado) > 1:
@@ -208,8 +209,17 @@ def buscar_item(caja,padre,item_buscado =False):
         return
     
     #Actualiza la tabla con los artículos encontrados
+    render_table(padre,tabla,numero_articulo,caja,item,tabla_row)
+
+def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
+    index=0
+    total =0 
+    cuenta_articulo =1
+    unidades=0
+    tabla_pointer=0
     for i,articulo in enumerate(padre.articulos):
         tabla.setRowCount(tabla_row)
+        
         if numero_articulo == i:
             cuenta_articulo = int(articulo["cantidad"]) +1
             articulo["cantidad"] = cuenta_articulo
@@ -220,6 +230,7 @@ def buscar_item(caja,padre,item_buscado =False):
             tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
             
             unidades +=articulo["cantidad"]
+        
         else:    
             
             tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
@@ -334,6 +345,7 @@ def celda_click(row,column):
     # baseDeDatos = db()
     # conn = baseDeDatos.crearConnexion()
     # cursor = conn.cursor()
+
 async def buscar_articulos(padre):
     URL = os.getenv("URL") + "/api/almacen"
     almacen.articulos = []
@@ -343,11 +355,13 @@ async def buscar_articulos(padre):
             if not api.session.closed:
                 await api.session.close()
         api.session = aiohttp.ClientSession()
+        
         async with api.session.get(URL) as resp:
             result = await resp.json()
             if not result['ok']:
                 print(result['res'])
                 return 
+            
             for item in result['res']:
                 almacen.db_almacen.append(item)
                 almacen.articulos.append({"ID":item["id"],"nombre":item["nombre"],"cantidad":1,"precio":item["precio"]})
@@ -360,8 +374,6 @@ async def buscar_articulos(padre):
         padre.caja.raise_()
         
     
-    
-
 async def generar_facturas(padre):
       
         padre.caja.repaint()  # fuerza el repintado
@@ -370,7 +382,7 @@ async def generar_facturas(padre):
         await asyncio.sleep(0.5)
         
         if vari.gen_factura == False:
-            padre.tipo_msj.titulo = "Warning"
+            padre.tipo_msj.titulo = "Aviso"
             padre.tipo_msj.text = "No ha generado la devuelta"
             padre.main_window.cargando.hide()
             padre.caja.raise_()
@@ -402,6 +414,7 @@ async def generar_facturas(padre):
                 
                 resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
                 info = resp.json()
+                
                 if not info["ok"]:
                     #msj errior al cliente 
                     padre.tipo_msj.titulo = "Error"
@@ -429,6 +442,7 @@ async def generar_facturas(padre):
             data.append(fecha)
             resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps(data),headers=headers)
             info = resp.json()
+           
             if not info["ok"]:
                 #msj erro al clienete 
                 return
@@ -442,6 +456,7 @@ async def generar_facturas(padre):
             
             padre.tipo_msj.text = "Factura generada correctamente"
             padre.sendMsjSuccess(padre.tipo_msj)
+            
             limpiar_completo(padre, padre.caja)
             padre.articulos =[]
             contenedor = QWidget()
@@ -458,7 +473,6 @@ async def generar_facturas(padre):
        
         # conn.close()
         
-       
 
 def limpiar_completo(padre, caja):
     limpiar_lista(caja, padre)
@@ -499,7 +513,6 @@ def sugerencia(texto,padre):
                     color:#fff;                                           }
 ''')
 
-    
 
 def buscar_click(padre,item):
    
@@ -529,6 +542,7 @@ def click_ok_caja(padre):
         padre.tipo_msj.text = "Solo se permiten números"
         padre.sendMsjError(padre.tipo_msj)
         return
+    
     for articulo in almacen.db_almacen:
         
         if global_variable.item_global["ID"] == articulo["id"]:
@@ -545,6 +559,7 @@ def click_ok_caja(padre):
     global_variable.item_global["cantidad"] = cantidad
     bandera = False
     no_value = False
+    
     if len(padre.articulos) == 0:
         
         padre.articulos.append(global_variable.item_global)
