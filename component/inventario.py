@@ -271,9 +271,8 @@ async def buscar_facturas(padre):
         async with api.session.get(URL) as resp:
              resultado = await resp.json()
              for fila in resultado["res"]:
-                 fecha = datetime.datetime.fromisoformat(fila["fecha"].replace("Z", "+00:00"))
-                 time =  fecha.timestamp()
-                 fecha = datetime.datetime.fromtimestamp(time)
+                
+                 fecha = datetime.datetime.fromtimestamp(fila["fecha"])
                  fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
                  usuario_id = fila["usuario_id"]["id"]
                  factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
