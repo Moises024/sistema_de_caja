@@ -32,6 +32,7 @@ export const getInventario = async (req, res) => {
                 select: "nombre usuario rol apellido id "
 
             })
+        
         res.json({ ok: true, res: data })
     } catch (error) {
         console.log(error)
@@ -44,8 +45,11 @@ export const delInventario = async (req, res) => {
     try {
         const Facturas = await getFacturaModel()
         const data = req.body
-        await Facturas.findOneAndDelete({ id: data._id })
-
+        const eliminado = await Facturas.findOneAndDelete({ no_factura: data._id })
+        if(!eliminado){
+            res.json({ ok: false, res: "No se pudo eliminar el factura.", error: err })
+            return
+        }
         res.json({ ok: true, res: "Factura eliminado correctamente" })
     } catch (err) {
         res.json({ ok: false, res: "No se pudo eliminar el factura.", error: err })

@@ -114,7 +114,7 @@ def render_table(padre,cantidad,item=""):
     padre.inventario.tabla_factura.setItemWidget(Item_,tabla)
     padre.cola_item = Item_
 
-def eliminar(padre):
+async def eliminar(padre):
     
     if almacen.eliminadas == None:
        padre.tipo_msj.titulo = "Aviso"
@@ -143,10 +143,10 @@ def eliminar(padre):
             if iten.no_factura == item.no_factura :
                 id = i
         
-        if delete_de_baseDatos(almacen.facturas[id].no_factura,padre):
+        if await delete_de_baseDatos(almacen.facturas[id].no_factura,padre):
             del almacen.facturas[id]
     else:
-        if delete_de_baseDatos(almacen.facturas[almacen.eliminadas].no_factura,padre):
+        if await delete_de_baseDatos(almacen.facturas[almacen.eliminadas].no_factura,padre):
             del almacen.facturas[almacen.eliminadas]
 
     render_table(padre,len(almacen.facturas))
@@ -184,7 +184,7 @@ def buscar_usuario(text,padre):
 def conectar_botones_inventario(botones,inventario,padre):
     botones[0].clicked.connect(lambda:hacer_inventario(padre))
     botones[1].clicked.connect(lambda:asyncio.create_task(buscar_facturas(padre)))
-    botones[2].clicked.connect(lambda:eliminar(padre))
+    botones[2].clicked.connect(lambda:asyncio.create_task(eliminar(padre)))
     inventario.input_factura.textChanged.connect(lambda text:buscar_usuario(text,padre))
     for btn in botones:
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -232,13 +232,13 @@ def limpiar_lista(padre):
     fila =  padre.inventario.tabla_factura.row(padre.cola_item)
     padre.inventario.tabla_factura.takeItem(fila)
 
-def delete_de_baseDatos(id, padre):
-    # database = db()
-    # conn = database.crearConnexion()
-    # cursor = conn.cursor()
+async def delete_de_baseDatos(id, padre):
+    from component.main_window import cargando
+    await cargando(padre)
+    await asyncio.sleep(2)
+    
     try:
-        # cursor.execute("DELETE FROM facturas where id =?",[id])
-        # conn.commit()
+
         headers = {
             "Content-Type":"Application/json",
             "id":"1"
@@ -253,6 +253,7 @@ def delete_de_baseDatos(id, padre):
             padre.sendMsjError(padre.tipo_msj)
             
             return False
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
@@ -263,9 +264,12 @@ def delete_de_baseDatos(id, padre):
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+        padre.main_window.cargando.hide()
 
 
 async def buscar_facturas(padre):
+    from component.main_window import cargando
+    await cargando(padre)
     facturas = []
     
     try:

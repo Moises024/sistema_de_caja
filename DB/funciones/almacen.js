@@ -66,14 +66,11 @@ export const updateArticuloCantidad = async (req, res) => {
     try {
         
         const data = req.body
-       
-        console.log(data,"Actualidzar un ncantadiad")
-       
+
         const Almacen = await getAlmacenModel()
        
-        const update = await Almacen.updateOne({id:data[1]},{$inc:{cantidad:-data[0]}})
-        
-        console.log(update)
+         await Almacen.updateOne({id:data[1]},{$inc:{cantidad:-data[0]}})
+       
         res.json({ ok: true, res: "Artículo actualizado correctamente." })
     } catch (err) {
         res.json({ ok: false, res: `"No se pudo actualizar el artículo." ${err}` })

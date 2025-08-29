@@ -166,8 +166,10 @@ def render_table(padre,cantida,item=False):
     padre.cola_item_almacen = Item_
     
 #Función para agregar un nuevo artículo al inventario    
-def agregar(padre):
+async def agregar(padre):
     from component.main_window import cargando
+    await cargando(padre)
+    await asyncio.sleep(0.5)
     nombre = padre.almacen.nombre_articulo.text()
     precio = padre.almacen.precio_articulo.text()
     cantidad = padre.almacen.cantidad_articulo.text()
@@ -194,11 +196,11 @@ def agregar(padre):
 
         
     if bandera == True:  
-        update_articulo(new_item,padre)
+        await update_articulo(new_item,padre)
     else:
 
         #llamar a la db
-        insertar_articulo(new_item,padre)
+        await insertar_articulo(new_item,padre)
         #almacen.articulos.append(new_item)
 
     render_table(padre,1)
@@ -206,7 +208,7 @@ def agregar(padre):
 
 
 #Función para eliminar un artículo del inventario
-def eliminar(padre):
+async def eliminar(padre):
     if almacen.eliminadas == "":
         padre.tipo_msj.text ="Selecciona un articulo para eliminar"
         padre.tipo_msj.titulo ="Aviso"
@@ -237,20 +239,20 @@ def eliminar(padre):
         for i,item in enumerate(almacen.articulos):
                 if item.id == almacen.eliminadas.id:
                         id = i
-        delete_articulo(almacen.articulos[id],padre)
+        await delete_articulo(almacen.articulos[id],padre)
         almacen.item =""
     else:
-        delete_articulo(almacen.articulos[almacen.eliminadas],padre)
-    asyncio.create_task(buscar_articulo(padre))
+        await delete_articulo(almacen.articulos[almacen.eliminadas],padre)
+    await buscar_articulo(padre)
     
     almacen.eliminadas=""
 
 # Función para conectar acciones de los botones en la interfaz de almacenamiento
 def conectar_botones_almacen(botones,padre):
    
-    botones[0].clicked.connect(lambda:agregar(padre))
-    botones[1].clicked.connect(lambda:eliminar(padre))   
-    botones[2].clicked.connect(lambda:asyncio.create_task(buscar_articulo(padre)))   
+    botones[0].clicked.connect(lambda:asyncio.create_task(agregar(padre)))
+    botones[1].clicked.connect(lambda:asyncio.create_task(eliminar(padre)))   
+    botones[2].clicked.connect(lambda:asyncio.create_task(buscar_articulo(padre,True)))   
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
@@ -260,11 +262,10 @@ def conectar_botones_almacen(botones,padre):
 # Función para conectar acciones de los menús en la interfaz de almacenamiento
 
 
-def insertar_articulo(articulo,padre):
-    # database = db()
-    # conn = database.crearConnexion() 
-    # cursor = conn.cursor()
-    # cursor.execute("INSERT INTO articulos(nombre,cantidad,precio) values(?,?,?)",(articulo.nombre,articulo.cantidad,articulo.precio))
+async def insertar_articulo(articulo,padre):
+    from component.main_window import cargando
+    await cargando(padre)
+    await asyncio.sleep(0.5)
     
     try:
         # conn.commit()
@@ -283,40 +284,32 @@ def insertar_articulo(articulo,padre):
             padre.tipo_msj.titulo = "Error"
             padre.tipo_msj.text = data["res"]
             padre.sendMsjError(padre.tipo_msj)
-            
+            padre.main_window.cargando.hide()
             #aqui poner mens de error
             return
         #aqui pone rmsj de exito
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
         asyncio.create_task(buscar_articulo(padre))
       
     except:
-   
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+       
     
     # conn.close()
 
-async def buscar_articulo(padre):
-  
-    # database = db()
-    # conn = database.crearConnexion()
-    # cursor = conn.cursor()
-    # cursor.execute("SELECT * FROM articulos")
-   
-    # for fila in cursor.fetchall():
-    #     articulo=item(fila[1],fila[3],fila[2],fila[0])
-    #     articulos.append(articulo)
-    #     if fila[2] == 0:
-    #         almacen.agotado.append(articulo)
-
-            
+async def buscar_articulo(padre,id=False):
+    if id :
+        from component.main_window import cargando
+        await cargando(padre)
+        await asyncio.sleep(0.5)
+      
     almacen.articulos = []
-
-    # conn.close() 
     articulos =[]
     almacen.agotado = []
     URL = os.getenv("URL") + "/api/almacen"
@@ -343,8 +336,9 @@ async def buscar_articulo(padre):
             almacen.articulos = articulos
             render_table(padre,1)
             await api.session.close()
-            padre.main_window.cargando.hide()
             padre.caja.raise_()
+            padre.main_window.cargando.hide()
+            
             
     except Exception as e:
         print(e)
@@ -355,8 +349,10 @@ async def buscar_articulo(padre):
         padre.caja.raise_()
         
 
-def update_articulo(new_item,padre):
-    
+async def update_articulo(new_item,padre):
+    from component.main_window import cargando
+    await cargando(padre)
+    await asyncio.sleep(0.5)
     data = []
     data.append(new_item.nombre)
     data.append(new_item.cantidad)
@@ -377,24 +373,25 @@ def update_articulo(new_item,padre):
             padre.tipo_msj.text = info["res"]
             padre.sendMsjError(padre.tipo_msj)
             return
-         
+        await buscar_articulo(padre)
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = info["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
-        asyncio.create_task(buscar_articulo(padre))
+        
     except :
         #msj de conexcion fallida
     
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+        padre.main_window.cargando.hide()
     
 
-def  delete_articulo(articulo, padre):
-    # database = db()
-    # conn = database.crearConnexion()
-    # cursor = conn.cursor()
-    # cursor.execute("DELETE FROM articulos WHERE nombre=?",(articulo.nombre,))
+async def  delete_articulo(articulo, padre):
+    from component.main_window import cargando
+    await cargando(padre)
+    await asyncio.sleep(0.5)
     try:
         headers={
             "Content-type": "Application/json" ,
@@ -411,6 +408,7 @@ def  delete_articulo(articulo, padre):
             return
         
             #msj de exitos
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
@@ -422,6 +420,7 @@ def  delete_articulo(articulo, padre):
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
+        padre.main_window.cargando.hide()
         # conn.close()
         pass
     
