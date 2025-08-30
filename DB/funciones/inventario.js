@@ -73,3 +73,16 @@ export const getInventarioUsuario = async (req, res) => {
         res.json({ ok: false, res: "No se pudo encontrar dicha factura.", error })
     }
 }
+export const getInventarioNumber = async (req, res) => {
+    try {
+        await getUsuarioModel();
+        const Facturas = await getFacturaModel()
+        const datos = await Facturas.find({})
+          
+    
+        res.json({ ok: true, res: datos[datos.length -1]["no_factura"]+1})
+    } catch (error) {
+        console.log(error)
+        res.json({ ok: false, res: "No se pudo encontrar dicha factura.", error })
+    }
+}

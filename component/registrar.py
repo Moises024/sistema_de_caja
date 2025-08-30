@@ -20,11 +20,11 @@ async def registrar_usuario(registrar,padre,cargando):
     
     for index,input in enumerate(array_input):
         if input.text() =='':
+            padre.main_window.cargando.hide()
             padre.tipo_msj.titulo = "Aviso"
             padre.tipo_msj.text = "Rellene el campo"
             padre.sendMsjWarningSingle(padre.tipo_msj)
             input.setFocus()
-            padre.main_window.cargando.hide()
             return
         else:
              array_input[index] = input.text()

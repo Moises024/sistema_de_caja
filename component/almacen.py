@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView
-from PyQt6.QtGui import QCursor
+from PyQt6.QtGui import QCursor, QIcon
 from PyQt6.QtCore import Qt
 import threading
 import requests
@@ -8,7 +8,8 @@ import os
 from dotenv import load_dotenv
 import json
 import asyncio
-
+from PyQt6.QtGui import QCursor,QColor
+from component.funciones import formatearDigitos
 load_dotenv()
 
 class Thread_:
@@ -100,7 +101,23 @@ def limpiar_lista(tabla,cola):
 
 
 #Función para almacenar el índice del artículo a eliminar
-def agrear_lista_elimar(row,c):
+def agrear_lista_elimar(row,c,padre):
+    print(row,c)
+    if c == 4:
+        if padre.ventana_actualizar_agotados.isVisible():
+            padre.ventana_actualizar_agotados.hide()
+        padre.ventana_actualizar_agotados.show()
+        padre.ventana_actualizar_agotados.btn_actualizar_2.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        
+        item_ = almacen.articulos[row]
+        padre.ventana_actualizar_agotados.nombre_articulo_2.setText(item_.nombre)
+        padre.ventana_actualizar_agotados.nombre_articulo_2.setReadOnly(True)
+
+        padre.ventana_actualizar_agotados.cantidad_articulo_2.setText(str(item_.cantidad))
+        padre.ventana_actualizar_agotados.precio_articulo_2.setText(str(item_.precio)) 
+       
+        padre.ventana_actualizar_agotados.btn_actualizar_2.clicked.connect(lambda:filtrar_valores(padre))
+        padre.ventana_actualizar_agotados.setWindowIcon(QIcon("./img/logo.png"))
     
     if  len(almacen.item) > 0 :
         for i,item in enumerate(almacen.item):
@@ -112,22 +129,41 @@ def agrear_lista_elimar(row,c):
 
 #Función para renderizar la tabla de artículos en la interfaz   
 
+def filtrar_valores(param1):
+        nombre = param1.ventana_actualizar_agotados.nombre_articulo_2.text()
+        cantidad = param1.ventana_actualizar_agotados.cantidad_articulo_2.text()
+        precio = param1.ventana_actualizar_agotados.precio_articulo_2.text()
+         
+        if nombre == "" or cantidad == "" or precio == "":
+            
+            param1.tipo_msj.titulo = "Aviso"
+            param1.tipo_msj.text = "Rellene los campos"
+            param1.sendMsjWarning(param1.tipo_msj)
+            return
+        param2 = []
+        param2.append(nombre)
+        param2.append(precio)
+        param2.append(cantidad)
 
+        param1.ventana_actualizar_agotados.close()
+
+        asyncio.create_task(agregar(param1,param2))
 def render_table(padre,cantida,item=False):
     
     
     Item_ = QListWidgetItem()
-    tabla = QTableWidget(0,4)
+    tabla = QTableWidget(0,5)
 
     if padre.cola_item_almacen:
         limpiar_lista(padre.almacen.tabla_articulo,padre.cola_item_almacen)
-    tabla.setHorizontalHeaderLabels(["ID","NOMBRE","CANTIDAD","PRECIO"])
+    tabla.setHorizontalHeaderLabels(["ID","NOMBRE","CANTIDAD","PRECIO","ACCION"])
     tabla.resizeColumnsToContents()
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.almacen.tabla_articulo.height())
-    tabla.cellClicked.connect(agrear_lista_elimar)
+    tabla.cellClicked.connect(lambda row,c:agrear_lista_elimar(row,c,padre))
+    
     tabla.setStyleSheet('''
     QScrollBar:vertical{
                 background: #1e1e1e;
@@ -146,8 +182,13 @@ def render_table(padre,cantida,item=False):
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.nombre)))
             tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.cantidad)))
-            tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.precio))) 
-
+            tabla.setItem(i,index+3,QTableWidgetItem(formatearDigitos(str(articulo.precio)))) 
+            tabla.setItem(i,index+4,QTableWidgetItem(str("Actualizar"))) 
+            accion = tabla.item(i,index+4)
+            accion.setForeground(QColor("white")) 
+            accion.setBackground(QColor("#232f42"))
+            accion.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+          
     else:
        
         index=0
@@ -158,6 +199,7 @@ def render_table(padre,cantida,item=False):
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.nombre)))
             tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.cantidad)))
             tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.precio))) 
+            tabla.setItem(i,index+4,QTableWidgetItem(formatearDigitos(str("Actualizar")))) 
        
  
     Item_.setSizeHint(tabla.sizeHint())
@@ -166,13 +208,18 @@ def render_table(padre,cantida,item=False):
     padre.cola_item_almacen = Item_
     
 #Función para agregar un nuevo artículo al inventario    
-async def agregar(padre):
+async def agregar(padre,propiedades=False):
     from component.main_window import cargando
     await cargando(padre)
     await asyncio.sleep(0.5)
-    nombre = padre.almacen.nombre_articulo.text()
-    precio = padre.almacen.precio_articulo.text()
-    cantidad = padre.almacen.cantidad_articulo.text()
+    if not propiedades:
+        nombre = padre.almacen.nombre_articulo.text()
+        precio = padre.almacen.precio_articulo.text()
+        cantidad = padre.almacen.cantidad_articulo.text()
+    else:
+        nombre = propiedades[0]
+        precio = str(propiedades[1])
+        cantidad = str(propiedades[2])
     
     cantidad = cantidad.strip()
     nombre = nombre.strip()
@@ -181,6 +228,7 @@ async def agregar(padre):
     #Verifica si los campos están vacíos
     if nombre == '' or precio.strip() == "" or cantidad =="":
 
+        padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Aviso"
         padre.tipo_msj.text = "Por favor rellena los campos"
         padre.sendMsjWarningSingle(padre.tipo_msj)
@@ -256,6 +304,7 @@ def conectar_botones_almacen(botones,padre):
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
+    padre.producto_agotado.btn_actualizar.clicked.connect(lambda:renderVentanaAgotado(padre))
     
     for btn in botones:
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -350,6 +399,7 @@ async def buscar_articulo(padre,id=False):
         
 
 async def update_articulo(new_item,padre):
+    print(vars(new_item))
     from component.main_window import cargando
     await cargando(padre)
     await asyncio.sleep(0.5)

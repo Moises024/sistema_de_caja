@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QWidget,QVBoxLayout,QFrame
 from component.db import db
-from PyQt6.QtGui import QCursor,QColor, QFont
+from PyQt6.QtGui import QCursor,QColor
 from PyQt6.QtCore import Qt
 import sqlite3
 import datetime
@@ -10,6 +10,7 @@ import os
 import json
 import aiohttp
 from dotenv import load_dotenv
+from component.funciones import formatearDigitos
 import asyncio
 load_dotenv()
 
@@ -46,7 +47,7 @@ def agrear_lista_elimar(row,c,padre):
           
             label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
             label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
-            label_3  = QLabel("Precio: " + str(detalle["precio"]))
+            label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
             linea = QFrame()
             linea.setFrameShape(QFrame.Shape.HLine)
             linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
@@ -308,7 +309,7 @@ def agregar_Datos_tabla(tabla,datos):
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.usuario_id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.no_factura)))
             tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.usuario)))
-            tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.total)))
+            tabla.setItem(i,index+3,QTableWidgetItem(formatearDigitos(str(articulo.total))))
             tabla.setItem(i,index+4,QTableWidgetItem(str(articulo.fecha))) 
             tabla.setItem(i,index+5,QTableWidgetItem("ver")) 
             accion = tabla.item(i,index+5)

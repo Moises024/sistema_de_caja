@@ -161,6 +161,8 @@ class Ventana(QMainWindow):
         self.active = False
         self.btn_salir = None
 
+        #pantalla actualizar_agatados 
+        self.ventana_actualizar_agotados = loadUi("./ui/Actualizar_agotados.ui")
         #pantalla loading 
         self.loading = loadUi("./ui/loading.ui")
         #self.gif = QMovie("./img/loading.gif")
@@ -403,6 +405,7 @@ class Ventana(QMainWindow):
                     self.caja.setFixedSize(self.main_window.width(),self.main_window.height())
                     self.caja.contenedor.move(int(self.caja.width()/2)-int(window.contenedor.width()/2),int(self.caja.height()/2) - int(window.contenedor.height()/2))
                     self.caja.contenedor.setStyleSheet("background-color:transparent;")
+
                     self.current_window =window
                     
                if id == self.INVENTARIO_CODE:

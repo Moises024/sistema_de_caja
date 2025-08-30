@@ -132,7 +132,7 @@ background-color: #004cc5;
     <rect>
      <x>350</x>
      <y>450</y>
-     <width>71</width>
+     <width>151</width>
      <height>41</height>
     </rect>
    </property>
@@ -145,7 +145,7 @@ background-color: #004cc5;
     <string notr="true">background-color:transparent;</string>
    </property>
    <property name="text">
-    <string>0</string>
+    <string/>
    </property>
   </widget>
  </widget>

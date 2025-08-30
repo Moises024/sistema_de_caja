@@ -1,5 +1,5 @@
 import {cors} from "../funciones/cors.js"
-import { addInventario,getInventario,delInventario, getInventarioUsuario } from "../funciones/inventario.js"
+import { addInventario,getInventario,delInventario, getInventarioUsuario,getInventarioNumber } from "../funciones/inventario.js"
 
  export default function handler(req,res){
     cors(req,res)
@@ -20,6 +20,10 @@ import { addInventario,getInventario,delInventario, getInventarioUsuario } from 
 
         return
     }
-   
+    if(parseInt(req.headers["id"])=== 1)
+    {
+        return getInventarioNumber(req,res)
+
+    }
  return getInventario(req,res) 
  }

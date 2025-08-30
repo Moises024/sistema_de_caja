@@ -8,6 +8,7 @@ import aiohttp
 import os
 import json
 import asyncio
+from component.funciones import formatearDigitos
 
 
 class Almacen:
@@ -52,14 +53,14 @@ def render(padre,cantidad):
         index=0
         tabla.setItem(i,index,QTableWidgetItem(str(factura.no_factura)))
         tabla.setItem(i,index+1,QTableWidgetItem(str(factura.usuario)))
-        tabla.setItem(i,index+2,QTableWidgetItem(str(factura.precio)))
+        tabla.setItem(i,index+2,QTableWidgetItem(formatearDigitos(str(factura.precio))))
         tabla.setItem(i,index+3,QTableWidgetItem(str(factura.fecha)))
 
     Item_.setSizeHint(tabla.sizeHint())
     padre.cierre_caja.list_caja.addItem(Item_)
     padre.cierre_caja.list_caja.setItemWidget(Item_,tabla)
     padre.cierre_caja_cola = Item_
-    padre.cierre_caja.total_vendido.setText(str(almacen.total_vendido))
+    padre.cierre_caja.total_vendido.setText(formatearDigitos(str(almacen.total_vendido)))
     padre.main_window.cargando.hide()
     
 async def render_cierre_Caja(padre):

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication,QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
+from PyQt6.QtWidgets import QListWidgetItem,QTableWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QVBoxLayout,QWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QCursor
@@ -10,7 +10,7 @@ import os
 import aiohttp
 from dotenv import load_dotenv
 import asyncio
-
+from component.funciones import formatearDigitos
 load_dotenv()
 #convertir el label a aclickebel
 class ClickLabel(QLabel):
@@ -59,12 +59,12 @@ def teclado(caja):
     else:
         keys.valor += valor
     vari. mont_pagado = int(keys.valor)
-    caja.monto_pagado.setText(keys.valor)
+    caja.monto_pagado.setText(formatearDigitos(keys.valor))
 
 #Función para eliminar el último carácter del valor ingresado
 def back(caja):
     keys.valor= keys.valor[:-1]
-    caja.monto_pagado.setText(keys.valor)
+    caja.monto_pagado.setText(formatearDigitos(keys.valor))
     caja.devuelta_2.setText("")
 
 #Alerta de cuando no se ingresa el pago
@@ -112,8 +112,8 @@ def devuelta(caja,padre):
    vari.gen_factura = True
 
    if not vari.render:
-        caja.devuelta_2.setText(str(monto_devolver))
-        caja.monto_pagado.setText(str(vari.mont_pagado))
+        caja.devuelta_2.setText(formatearDigitos(str(monto_devolver)))
+        caja.monto_pagado.setText(formatearDigitos(str(vari.mont_pagado)))
    else:
         caja.devuelta_2.setText("")
         caja.monto_pagado.setText("")
@@ -227,7 +227,7 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
            
             tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"0"))
-            tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
+            tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
             
             unidades +=articulo["cantidad"]
         
@@ -235,7 +235,7 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             
             tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
             tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
-            tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{str(articulo["precio"])}"))
+            tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
             tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"0"))
             unidades +=articulo["cantidad"]
         tabla_row +=1
@@ -244,9 +244,9 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
         total += int(articulo["precio"])*int(articulo["cantidad"])
        
     tabla.cellClicked.connect(celda_click)
-    caja.total.setText(str(total))
+    caja.total.setText(formatearDigitos(str(total)))
     padre.caja.detalles.findChild(QLabel,"unidades").setText(str(unidades))
-    padre.inputs[2].setText(str(total))
+    padre.inputs[2].setText(formatearDigitos(str(total)))
 
     # Limpia la lista si hay artículos
     if(tabla_pointer >= 1 and padre.cola_item_caja):
@@ -362,11 +362,22 @@ async def buscar_articulos(padre):
                 print(result['res'])
                 return 
             
-            for item in result['res']:
+            for i,item in enumerate(result['res']):
                 almacen.db_almacen.append(item)
                 almacen.articulos.append({"ID":item["id"],"nombre":item["nombre"],"cantidad":1,"precio":item["precio"]})
             padre.main_window.cargando.hide()
             padre.caja.raise_()
+            header={
+                "Conten-Type":"Application/json",
+                "id":"1"
+            }
+            api_ = requests.get(os.getenv("URL")+"/api/inventario",headers=header)
+            resp = api_.json()
+            if not resp["ok"]:
+                print("no me dio el numero de articulos")
+                return
+            padre.caja.no_orden.setText(str(resp["res"])) 
+            
             # conn.close()
     except sqlite3.Error as err:
         print(err)

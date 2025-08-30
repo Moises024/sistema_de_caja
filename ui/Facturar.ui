@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1131</width>
-    <height>561</height>
+    <height>603</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,9 +20,9 @@
    <property name="geometry">
     <rect>
      <x>-1</x>
-     <y>19</y>
+     <y>39</y>
      <width>1071</width>
-     <height>531</height>
+     <height>561</height>
     </rect>
    </property>
    <widget class="QLabel" name="precio_total">
@@ -156,7 +156,7 @@ background-color: rgb(255, 255, 255);
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>10</y>
+      <y>50</y>
       <width>231</width>
       <height>41</height>
      </rect>
@@ -828,9 +828,9 @@ background-color: rgb(255, 255, 255);
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>50</y>
+      <y>100</y>
       <width>231</width>
-      <height>221</height>
+      <height>201</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -846,7 +846,7 @@ background-color:transparent;</string>
        <x>0</x>
        <y>0</y>
        <width>231</width>
-       <height>221</height>
+       <height>201</height>
       </rect>
      </property>
     </widget>
@@ -903,26 +903,6 @@ border-bottom-right-radius:10px;
       <string/>
      </property>
     </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>30</y>
-       <width>41</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">color: rgb(107, 107, 107);
-	background: transparent;
-	font-size: 20px;
-	font-weight: 200;
-	text-align:end;</string>
-     </property>
-     <property name="text">
-      <string>UND</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
@@ -947,9 +927,9 @@ border-bottom-right-radius:10px;
     <widget class="QLabel" name="label_12">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>160</x>
        <y>30</y>
-       <width>131</width>
+       <width>151</width>
        <height>31</height>
       </rect>
      </property>
@@ -968,9 +948,9 @@ border-bottom-right-radius:10px;
     <widget class="QLabel" name="total">
      <property name="geometry">
       <rect>
-       <x>320</x>
+       <x>290</x>
        <y>30</y>
-       <width>71</width>
+       <width>101</width>
        <height>31</height>
       </rect>
      </property>
@@ -989,7 +969,7 @@ border-bottom-right-radius:10px;
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>10</y>
+      <y>50</y>
       <width>41</width>
       <height>41</height>
      </rect>
@@ -1005,6 +985,59 @@ border-bottom-right-radius:10px;
     </property>
     <property name="scaledContents">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>101</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel {
+	color: white;
+	background: transparent;
+	font-size: 20px;
+	font-weight: pold;
+
+}</string>
+    </property>
+    <property name="text">
+     <string>No. orden:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="no_orden">
+    <property name="geometry">
+     <rect>
+      <x>106</x>
+      <y>10</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel {
+	color: white;
+	background: transparent;
+	font-size: 20px;
+	font-weight: pold;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
    <zorder>detalles</zorder>
@@ -1027,6 +1060,8 @@ border-bottom-right-radius:10px;
    <zorder>sugerencias</zorder>
    <zorder>lista_articulo</zorder>
    <zorder>icon_buscar</zorder>
+   <zorder>label_3</zorder>
+   <zorder>no_orden</zorder>
   </widget>
  </widget>
  <resources/>
