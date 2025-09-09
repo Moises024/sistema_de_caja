@@ -338,10 +338,10 @@ def limpiar_lista(caja,padre):
 
 def celda_click(row,column):
     vari.row_aliminada = row
-
+   
     #ID
-    almacen.articulos = []
-    almacen.db_almacen = []
+    # almacen.articulos = []
+    # almacen.db_almacen = []
     # baseDeDatos = db()
     # conn = baseDeDatos.crearConnexion()
     # cursor = conn.cursor()
@@ -553,11 +553,12 @@ def click_ok_caja(padre):
         padre.tipo_msj.text = "Solo se permiten números"
         padre.sendMsjError(padre.tipo_msj)
         return
-    
+  
     for articulo in almacen.db_almacen:
         
         if global_variable.item_global["ID"] == articulo["id"]:
             items_almacen = articulo
+
             if int(articulo["cantidad"]) < cantidad:
                 is_pass=False
 

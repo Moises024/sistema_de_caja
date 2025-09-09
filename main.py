@@ -160,7 +160,9 @@ class Ventana(QMainWindow):
         self.timer.timeout.connect(self.update_animation)
         self.active = False
         self.btn_salir = None
-
+        
+        #pantalla de Ventana Costo
+        self.ventana_costo = loadUi("./ui/ventana_de_costo.ui")
         #pantalla actualizar_agatados 
         self.ventana_actualizar_agotados = loadUi("./ui/Actualizar_agotados.ui")
         #pantalla loading 
@@ -266,7 +268,7 @@ class Ventana(QMainWindow):
         
 
         #variables de almacen
-        botones_almacen = [self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar,self.almacen.btn_agotado]
+        botones_almacen = [self.almacen.btn_agregar,self.almacen.btn_eliminar,self.almacen.btn_actualizar,self.almacen.btn_agotado,self.almacen.btn_calcular]
         
 
         #Funciones de almacen

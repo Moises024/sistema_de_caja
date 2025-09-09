@@ -10,7 +10,8 @@ export const addAlmacen = async (req, res) => {
         const data_almacen = {
             nombre:data[0],
             cantidad:data[1],
-            precio:data[2]
+            precio:data[2],
+            costo:data[3]
         }
         const articulo = await new Almacen(data_almacen)
         await articulo.save()

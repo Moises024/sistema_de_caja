@@ -114,17 +114,17 @@ async def activeLink(padre,label):
         
         padre.change_window(padre.caja,padre.CAJA_CODE)
         padre.caja.lower()
-        asyncio.create_task(buscar_articulos(padre))
+        await buscar_articulos(padre)
    
     if label["id"]== 1 and padre.usuario.rol  == 3:
         await cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
-        asyncio.create_task(buscar_facturas(padre))
-   
+        await buscar_facturas(padre)
+
     if label["id"]== 2 and padre.usuario.rol  == 3:
         await cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
-        asyncio.create_task(buscar_articulo(padre))
+        await buscar_articulo(padre)
         # buscar_articulo(padre)
         # render_almacen(padre)
    

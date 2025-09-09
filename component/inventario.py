@@ -224,7 +224,7 @@ def hacer_inventario(padre):
 
     padre.inventario.msj_1.setText(f"El inventario desde el { mes}")
     padre.inventario.msj_2.setText(f"hasta el {ano} es de:")
-    padre.inventario.msj_3.setText(f"${str(inventario)}")
+    padre.inventario.msj_3.setText  (f"$" + formatearDigitos(str(inventario)))
     
 def limpiar_lista(padre): 
          # 1. Remover el widget visual

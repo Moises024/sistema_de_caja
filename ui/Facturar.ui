@@ -786,9 +786,9 @@ border-radius: 10px;
    <widget class="QLabel" name="devuelta_2">
     <property name="geometry">
      <rect>
-      <x>960</x>
+      <x>950</x>
       <y>60</y>
-      <width>71</width>
+      <width>81</width>
       <height>31</height>
      </rect>
     </property>

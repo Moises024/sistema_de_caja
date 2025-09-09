@@ -5,6 +5,7 @@ import threading
 import requests
 import aiohttp
 import os
+from qasync import asyncSlot
 from dotenv import load_dotenv
 import json
 import asyncio
@@ -27,15 +28,19 @@ almacen = contenedorArticulo()
 class Api:
     session=""
 api = Api()
-
+class Variable:
+    mi_funcion = ''
+    mi_funcion_on=False
+variable = Variable()
 #Clase para representar un artículo
 class item:
     
-    def __init__(self,nombre,precio,cantidad,id=""):
+    def __init__(self,nombre,precio,cantidad,costo,id=""):
         self.id =id 
         self.nombre = nombre
         self.precio = precio
         self.cantidad = cantidad
+        self.costo = costo
 
 
 #Función para verificar si un valor es un entero    
@@ -50,7 +55,7 @@ def isInt(valor):
 def buscar(text,padre):
        
     if text == "":
-       
+        almacen.item = ""
         render_table(padre,len(almacen.articulos))
      
         return
@@ -102,23 +107,40 @@ def limpiar_lista(tabla,cola):
 
 #Función para almacenar el índice del artículo a eliminar
 def agrear_lista_elimar(row,c,padre):
-    print(row,c)
-    if c == 4:
+    
+    if c == 5:
+        if padre.ventana_costo.isVisible():
+            padre.ventana_costo.hide()
+
         if padre.ventana_actualizar_agotados.isVisible():
             padre.ventana_actualizar_agotados.hide()
         padre.ventana_actualizar_agotados.show()
         padre.ventana_actualizar_agotados.btn_actualizar_2.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        item_ = ""
+        if almacen.item == "":
+            item_ = almacen.articulos[row]
+        else:
+            item_ = almacen.item[row]
         
-        item_ = almacen.articulos[row]
         padre.ventana_actualizar_agotados.nombre_articulo_2.setText(item_.nombre)
         padre.ventana_actualizar_agotados.nombre_articulo_2.setReadOnly(True)
 
         padre.ventana_actualizar_agotados.cantidad_articulo_2.setText(str(item_.cantidad))
         padre.ventana_actualizar_agotados.precio_articulo_2.setText(str(item_.precio)) 
-       
-        padre.ventana_actualizar_agotados.btn_actualizar_2.clicked.connect(lambda:filtrar_valores(padre))
+        
+        
+        if variable.mi_funcion_on :
+            padre.ventana_actualizar_agotados.btn_actualizar_2.clicked.disconnect(variable.mi_funcion)
+            variable.mi_funcion_on  = False 
+        variable.mi_funcion = lambda:filtrar_valores(padre,item_)
+        padre.ventana_actualizar_agotados.btn_actualizar_2.clicked.connect(variable.mi_funcion)
+        variable.mi_funcion_on = True
         padre.ventana_actualizar_agotados.setWindowIcon(QIcon("./img/logo.png"))
-    
+        
+    if c == 6:
+       showVentanaCosto(padre,row)
+        
+
     if  len(almacen.item) > 0 :
         for i,item in enumerate(almacen.item):
             if i == row:
@@ -128,8 +150,9 @@ def agrear_lista_elimar(row,c,padre):
         almacen.eliminadas = row
 
 #Función para renderizar la tabla de artículos en la interfaz   
-
-def filtrar_valores(param1):
+@asyncSlot()
+async def filtrar_valores(param1,item_):
+        
         nombre = param1.ventana_actualizar_agotados.nombre_articulo_2.text()
         cantidad = param1.ventana_actualizar_agotados.cantidad_articulo_2.text()
         precio = param1.ventana_actualizar_agotados.precio_articulo_2.text()
@@ -144,32 +167,47 @@ def filtrar_valores(param1):
         param2.append(nombre)
         param2.append(precio)
         param2.append(cantidad)
-
+        param2.append(item_.costo)
         param1.ventana_actualizar_agotados.close()
+        await asyncio.sleep(0.5)
+        await agregar(param1,param2)
 
-        asyncio.create_task(agregar(param1,param2))
 def render_table(padre,cantida,item=False):
     
     
     Item_ = QListWidgetItem()
-    tabla = QTableWidget(0,5)
+    tabla = QTableWidget(0,7)
 
     if padre.cola_item_almacen:
         limpiar_lista(padre.almacen.tabla_articulo,padre.cola_item_almacen)
-    tabla.setHorizontalHeaderLabels(["ID","NOMBRE","CANTIDAD","PRECIO","ACCION"])
+    tabla.setHorizontalHeaderLabels(["ID","NOMBRE","CANTIDAD","PRECIO","COSTO","ACCION",""])
     tabla.resizeColumnsToContents()
     tabla.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
     tabla.horizontalHeader().setStretchLastSection(True)
-    tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    # tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.almacen.tabla_articulo.height())
     tabla.cellClicked.connect(lambda row,c:agrear_lista_elimar(row,c,padre))
+    tabla.horizontalHeaderItem(5).setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignCenter )
     
+    tabla.setColumnWidth(0,int((5/100)*tabla.width()))
+    tabla.setColumnWidth(1,int((30/100)*tabla.width()))
+    tabla.setColumnWidth(2,int((15/100)*tabla.width()))
+    tabla.setColumnWidth(3,int((15/100)*tabla.width()))
+    tabla.setColumnWidth(4,int((15/100)*tabla.width()))
+    tabla.setColumnWidth(5,int((10/100)*tabla.width()))
+    tabla.setColumnWidth(6,int((10/100)*tabla.width()))
     tabla.setStyleSheet('''
     QScrollBar:vertical{
                 background: #1e1e1e;
                 width: 12px;
                 margin: 0px 0px 0px 0px;      
                         }
+    QHeaderView::section {
+        border: none;  /* Quita la línea separadora */
+        padding: 4px;
+        background-color: lightgray;
+    }
+
 ''')
     tabla.verticalHeader().setVisible(False)
     
@@ -181,13 +219,19 @@ def render_table(padre,cantida,item=False):
             index=0
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.nombre)))
-            tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.cantidad)))
+            tabla.setItem(i,index+2,QTableWidgetItem(formatearDigitos(str(articulo.cantidad))))
             tabla.setItem(i,index+3,QTableWidgetItem(formatearDigitos(str(articulo.precio)))) 
-            tabla.setItem(i,index+4,QTableWidgetItem(str("Actualizar"))) 
-            accion = tabla.item(i,index+4)
+            tabla.setItem(i,index+4,QTableWidgetItem(formatearDigitos(str(articulo.costo)))) 
+            tabla.setItem(i,index+5,QTableWidgetItem(str("Actualizar"))) 
+            tabla.setItem(i,index+6,QTableWidgetItem(str("Ver"))) 
+            accion = tabla.item(i,index+5)
+            accion_2 = tabla.item(i,index+6)
             accion.setForeground(QColor("white")) 
-            accion.setBackground(QColor("#232f42"))
+            accion.setBackground(QColor("#232f42")) 
             accion.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            accion_2.setForeground(QColor("white")) 
+            accion_2.setBackground(QColor("#232f42"))
+            accion_2.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
           
     else:
        
@@ -197,9 +241,19 @@ def render_table(padre,cantida,item=False):
         for i,articulo in enumerate(item):
             tabla.setItem(i,index,QTableWidgetItem(str(articulo.id)))
             tabla.setItem(i,index+1,QTableWidgetItem(str(articulo.nombre)))
-            tabla.setItem(i,index+2,QTableWidgetItem(str(articulo.cantidad)))
-            tabla.setItem(i,index+3,QTableWidgetItem(str(articulo.precio))) 
-            tabla.setItem(i,index+4,QTableWidgetItem(formatearDigitos(str("Actualizar")))) 
+            tabla.setItem(i,index+2,QTableWidgetItem(formatearDigitos(str(articulo.cantidad))))
+            tabla.setItem(i,index+3,QTableWidgetItem(formatearDigitos(str(articulo.precio)))) 
+            tabla.setItem(i,index+4,QTableWidgetItem(formatearDigitos(str(articulo.costo)))) 
+            tabla.setItem(i,index+5,QTableWidgetItem(str("Actualizar"))) 
+            tabla.setItem(i,index+6,QTableWidgetItem(str("Ver"))) 
+            accion = tabla.item(i,index+5)
+            accion_2 = tabla.item(i,index+6)
+            accion.setForeground(QColor("white")) 
+            accion.setBackground(QColor("#232f42")) 
+            accion.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            accion_2.setForeground(QColor("white")) 
+            accion_2.setBackground(QColor("#232f42"))
+            accion_2.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
        
  
     Item_.setSizeHint(tabla.sizeHint())
@@ -216,13 +270,15 @@ async def agregar(padre,propiedades=False):
         nombre = padre.almacen.nombre_articulo.text()
         precio = padre.almacen.precio_articulo.text()
         cantidad = padre.almacen.cantidad_articulo.text()
+        costo = padre.almacen.costo.text()
     else:
         nombre = propiedades[0]
         precio = str(propiedades[1])
         cantidad = str(propiedades[2])
-    
+        costo = str(propiedades[3])
     cantidad = cantidad.strip()
     nombre = nombre.strip()
+
     bandera = False
 
     #Verifica si los campos están vacíos
@@ -233,16 +289,16 @@ async def agregar(padre,propiedades=False):
         padre.tipo_msj.text = "Por favor rellena los campos"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
-    new_item = item(nombre,precio,cantidad)
+    new_item = item(nombre,precio,cantidad,costo)
     
     for articulo in  almacen.articulos:
         if articulo.nombre.lower() == nombre.lower():
             bandera = True
             nueva_cant = int(cantidad) + int(articulo.cantidad)
-            new_item = item(articulo.nombre,precio,nueva_cant)
+            new_item = item(articulo.nombre,precio,nueva_cant,articulo.costo)
             break
 
-        
+   
     if bandera == True:  
         await update_articulo(new_item,padre)
     else:
@@ -300,8 +356,9 @@ def conectar_botones_almacen(botones,padre):
    
     botones[0].clicked.connect(lambda:asyncio.create_task(agregar(padre)))
     botones[1].clicked.connect(lambda:asyncio.create_task(eliminar(padre)))   
-    botones[2].clicked.connect(lambda:asyncio.create_task(buscar_articulo(padre,True)))   
+    botones[2].clicked.connect(lambda:asyncio.create_task(actualizar_tabla(padre)))   
     botones[3].clicked.connect(lambda:mostrar_ventana_agotado(padre))
+    botones[4].clicked.connect(lambda:showVentanaCosto(padre,0,True))
     padre.producto_agotado.buscador_agotado.textChanged.connect(lambda text:buscador_agotado(text,padre))
     padre.almacen.input_articulo.textChanged.connect(lambda text:buscar(text,padre))
     padre.producto_agotado.btn_actualizar.clicked.connect(lambda:renderVentanaAgotado(padre))
@@ -322,6 +379,8 @@ async def insertar_articulo(articulo,padre):
         data.append(articulo.nombre)
         data.append(articulo.cantidad)
         data.append(articulo.precio)
+        data.append(articulo.costo)
+
         headers={
             "Content-Type":"Application/json",
             "id":"0"
@@ -337,11 +396,12 @@ async def insertar_articulo(articulo,padre):
             #aqui poner mens de error
             return
         #aqui pone rmsj de exito
+        await buscar_articulo(padre)
         padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Éxito"
         padre.tipo_msj.text = data["res"]
         padre.sendMsjSuccess(padre.tipo_msj)
-        asyncio.create_task(buscar_articulo(padre))
+        
       
     except:
         padre.main_window.cargando.hide()
@@ -351,7 +411,7 @@ async def insertar_articulo(articulo,padre):
        
     
     # conn.close()
-
+@asyncSlot()
 async def buscar_articulo(padre,id=False):
     if id :
         from component.main_window import cargando
@@ -378,7 +438,7 @@ async def buscar_articulo(padre,id=False):
                 
                 return
             for fila in data["res"]:
-                articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["id"])
+                articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["costo"],fila["id"])
                 articulos.append(articulo)
                 if fila["cantidad"] == 0: 
                     almacen.agotado.append(articulo)
@@ -388,9 +448,9 @@ async def buscar_articulo(padre,id=False):
             padre.caja.raise_()
             padre.main_window.cargando.hide()
             
-            
     except Exception as e:
         print(e)
+        await api.session.close()
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = f"Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -399,7 +459,7 @@ async def buscar_articulo(padre,id=False):
         
 
 async def update_articulo(new_item,padre):
-    print(vars(new_item))
+  
     from component.main_window import cargando
     await cargando(padre)
     await asyncio.sleep(0.5)
@@ -411,27 +471,34 @@ async def update_articulo(new_item,padre):
     
 
     try:
+        if api.session != "":
+            if not api.session.closed:
+                await api.session.close()
+        api.session =  aiohttp.ClientSession()
         headers={
             "Content-Type" : "Application/json",
             "id":"2"
         }
-        resp = requests.post(os.getenv("URL")+"/api/almacen",data=json.dumps(data),headers=headers)
-        info = resp.json()
-        if not info["ok"]:
-        
-            padre.tipo_msj.titulo = "Error"
+        URL = os.getenv("URL")+"/api/almacen"
+        async with api.session.post(URL,data=json.dumps(data),headers=headers) as resp:
+       
+            info = await resp.json()
+            if not info["ok"]:
+            
+                padre.tipo_msj.titulo = "Error"
+                padre.tipo_msj.text = info["res"]
+                padre.sendMsjError(padre.tipo_msj)
+                return
+            await buscar_articulo(padre)
+            padre.main_window.cargando.hide()
+            padre.tipo_msj.titulo = "Éxito"
             padre.tipo_msj.text = info["res"]
-            padre.sendMsjError(padre.tipo_msj)
-            return
-        await buscar_articulo(padre)
-        padre.main_window.cargando.hide()
-        padre.tipo_msj.titulo = "Éxito"
-        padre.tipo_msj.text = info["res"]
-        padre.sendMsjSuccess(padre.tipo_msj)
+            padre.sendMsjSuccess(padre.tipo_msj)
+            await api.session.close()
         
     except :
         #msj de conexcion fallida
-    
+        await api.session.close()
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Conexión fallida"
         padre.sendMsjError(padre.tipo_msj)
@@ -476,6 +543,7 @@ async def  delete_articulo(articulo, padre):
     
 async def render_almacen(padre):
     render_table(padre,len(almacen.articulos))
+    
 def mostrar_ventana_agotado(padre):
 
     if padre.producto_agotado.isVisible():
@@ -549,3 +617,34 @@ def buscador_agotado(text,padre):
     renderVentanaAgotado(padre,agotados)
 
 
+def showVentanaCosto(padre,row,general=False):
+
+    if padre.ventana_actualizar_agotados.isVisible():
+        padre.ventana_actualizar_agotados.hide()
+
+    if padre.ventana_costo.isVisible():
+        padre.ventana_costo.hide()
+        
+    padre.ventana_costo.show()
+    if general:
+        costo_general = 0
+        cantida_pacas = 0
+        for item_ in almacen.articulos:
+            cantida_pacas += item_.cantidad 
+            costo_general += item_.cantidad * item_.costo
+        padre.ventana_costo.titulo_costo.setText("Costo General")
+        padre.ventana_costo.valor_costo.setText(formatearDigitos((costo_general)))
+        padre.ventana_costo.valor_pacas.setText(formatearDigitos((cantida_pacas)))
+        return
+    item_ = ""
+    if almacen.item == "":
+        item_ = almacen.articulos[row]
+    else:
+        item_ = almacen.item[row]
+    padre.ventana_costo.titulo_costo.setText("Costo " + str(item_.nombre))
+    padre.ventana_costo.valor_costo.setText(formatearDigitos((item_.costo * item_.cantidad)))
+    padre.ventana_costo.valor_pacas.setText(formatearDigitos((item_.cantidad)))
+    
+async def actualizar_tabla(padre):
+    almacen.item = ""
+    await buscar_articulo(padre,True)

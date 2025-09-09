@@ -15,7 +15,9 @@ const getAlmacenModel = async () => {
     nombre: { type: String, required: true },
     cantidad: { type: Number, required: true },
     precio: { type: Number, required: true },
+    costo: { type: Number, required: true },
     tipo: { type: String, default: null },
+
   });
 
   almacenSchema.plugin(AutoIncrement, { inc_field: 'id' });
