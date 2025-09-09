@@ -568,6 +568,7 @@ def click_ok_caja(padre):
         padre.tipo_msj.text = f"No tienes suficientes {items_almacen["nombre"]}, solo tienes {items_almacen["cantidad"]} en el almacén"
         padre.sendMsjError(padre.tipo_msj)
         return
+    padre.key_number = True
     global_variable.item_global["cantidad"] = cantidad
     bandera = False
     no_value = False

@@ -110,6 +110,7 @@ async def activeLink(padre,label):
         
        
     if label["id"] == 0:
+        padre.key_number = True
         await cargando(padre)
         
         padre.change_window(padre.caja,padre.CAJA_CODE)
@@ -117,11 +118,13 @@ async def activeLink(padre,label):
         await buscar_articulos(padre)
    
     if label["id"]== 1 and padre.usuario.rol  == 3:
+        padre.key_number = False
         await cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
         await buscar_facturas(padre)
 
     if label["id"]== 2 and padre.usuario.rol  == 3:
+        padre.key_number = False
         await cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
         await buscar_articulo(padre)
@@ -129,6 +132,7 @@ async def activeLink(padre,label):
         # render_almacen(padre)
    
     if label["id"] ==3 and padre.usuario.rol  == 3:
+        padre.key_number = False
         await cargando(padre)
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)
         padre.main_window.cargando.hide()

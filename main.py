@@ -16,9 +16,9 @@ from component.almacen import  conectar_botones_almacen
 from component.registrar import conectar_botones_registrar 
 from component.inventario import conectar_botones_inventario
 from component.cierre_caja import conectar_botones_cierre_caja,render_cierre_Caja,limpiar_lista as limpiar_cerrar_caja
-from component.main_window import connectar_botones_main,activeLink,agregar_salir,cargando
+from component.main_window import connectar_botones_main,activeLink,agregar_salir
 
-from PyQt6.QtCore import Qt, QObject, QEvent
+from PyQt6.QtCore import Qt, QObject, QEvent, pyqtSignal
 
 
 class msj():
@@ -41,8 +41,21 @@ class TeclaListener(QObject):
 
      def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
-                
-                if self.parent.caja.isVisible() and  self.parent.key_number :
+                if event.key() == Qt.Key.Key_Period:
+                    if self.parent.active: return True
+                    self.parent.key_number = True 
+                    self.parent.main_window.msg.setText("Números activados")
+                    # animation(self,start,start_time,end,duration,obj,id):
+                    iniciar = {
+                         "start":int(self.parent.main_window.width() + self.parent.main_window.msg.width()),
+                         "end":int(self.parent.main_window.width() - self.parent.main_window.msg.width()),
+                         "duration":1000,
+                         "obj": self.parent.main_window.msg,
+                         "id":1
+                    }
+                    self.parent.animation(iniciar["start"],time.time()*1000,iniciar["end"],iniciar["duration"],iniciar["obj"],iniciar["id"])
+                    self.parent.active =True
+                if self.parent.caja.isVisible() and  self.parent.key_number:
                      if event.key() == Qt.Key.Key_1:
                           keys.valor += "1"
                           self.parent.caja.monto_pagado.setText(keys.valor)
@@ -157,7 +170,11 @@ class Ventana(QMainWindow):
         self.CERRAR_SESION_CODE = 6 
         self.MAIN_WINDOW =10 
         self.timer = QTimer()
+        self.animation_timer = QTimer()
+        self.animation_timer_reverse = QTimer()
         self.timer.timeout.connect(self.update_animation)
+        self.animation_timer.timeout.connect(self.move_all_animation)
+        self.animation_timer_reverse.timeout.connect(self.move_all_animation_reverse)
         self.active = False
         self.btn_salir = None
         
@@ -204,10 +221,11 @@ class Ventana(QMainWindow):
         archivo.addAction(salir_accion)  
         caja = loadUi("./ui/Facturar.ui")
         self.almacen = loadUi("./ui/almacen.ui")
-        self.caja = caja
+        self.caja = caja 
         
         #main Window 
         self.main_window = loadUi("./ui/mainWindow.ui")
+       
         self.botones_main_window = [self.main_window.nav_1,self.main_window.nav_2,self.main_window.nav_3,self.main_window.nav_4]
         
         #cagar inventario 
@@ -246,7 +264,7 @@ class Ventana(QMainWindow):
         
         login.frame.move(math.floor(login.width()/2)-math.floor(login.frame.width()/2),math.floor(login.height()/2)-math.floor(login.frame.height()/2))
        
-        self.animation(1000,time.time()*1000,login.frame_2.pos().x(),1000,login.frame_2)
+        self.animation(1000,time.time()*1000,login.frame_2.pos().x(),1000,login.frame_2,0)
         login.wallpaper.move(0,0)
         login.wallpaper.setFixedSize(login.width(),login.height())
        
@@ -373,7 +391,7 @@ class Ventana(QMainWindow):
                         self.clean_Window()
                         self.main_window.hide()
                         self.login.showFullScreen()
-                        self.animation(1000,time.time()*1000,self.login.frame_2.pos().x(),1000,self.login.frame_2)
+                        self.animation(1000,time.time()*1000,self.login.frame_2.pos().x(),1000,self.login.frame_2,0)
                         asyncio.create_task(activeLink(self,{"id":None}))
                         self.current_window = window  
                                             
@@ -484,7 +502,7 @@ class Ventana(QMainWindow):
                     # 
                     
                     window.showFullScreen()
-                   
+                    window.msg.move(window.width(),window.header.height())
 
                     self.current_window =window
                     self.main_window.header.setFixedWidth(self.main_window.width())
@@ -538,14 +556,18 @@ class Ventana(QMainWindow):
                if ventana.isVisible():
                     ventana.hide()
      
-     def animation(self,start,start_time,end,duration,obj):
+     def animation(self,start,start_time,end,duration,obj,id):
           self.start = start
           self.end = end
           self.duration = duration
           self.obj = obj
           self.start_time = start_time
-          self.active = True
-          self.timer.start(16)  # Aproximadamente 60 FPS
+          if id == 0:
+               self.timer.start(16)  # Aproximadamente 60 FPS
+          if id == 1 :
+               self.animation_timer.start(16)
+          if id == -1:
+               self.animation_timer_reverse.start(16)
          
      def update_animation(self):
           t = (int(time.time() * 1000) - self.start_time)/self.duration
@@ -566,7 +588,42 @@ class Ventana(QMainWindow):
      def esaseOut(self,t):
           return 1-(1-t) * (1-t)
 
+     def move_all_animation(self):
 
+          t = (int(time.time() * 1000) - self.start_time)/self.duration
+          easy = self.esaseOut(t)
+          if t >= 1:
+               self.animation_timer.stop()
+               self.active =False
+               asyncio.create_task(self.call_reverse())
+               
+               
+          x = int(self.start + (self.end - self.start) * easy)
+
+          self.obj.move(x,self.main_window.header.height())
+
+     def move_all_animation_reverse(self):
+
+          t = (int(time.time() * 1000) - self.start_time)/self.duration
+          easy = self.esaseOut(t)
+          if t >= 1:
+               self.animation_timer_reverse.stop()
+               self.active =False
+               
+          x = int(self.start + (self.end - self.start) * easy)
+         
+          self.obj.move(x,self.main_window.header.height())
+     async def call_reverse(self):
+          await asyncio.sleep(2)
+          iniciar = {
+                              "start":int(self.main_window.width() - self.main_window.msg.width()),
+                              "end":int(self.main_window.width() + self.main_window.msg.width()),
+                              "duration":2000,
+                              "obj": self.main_window.msg,
+                              "id":-1
+                         }
+               
+          self.animation(iniciar["start"],time.time() *1000,iniciar["end"],iniciar["duration"],iniciar["obj"],iniciar["id"])
 async def main():
      app = QApplication(sys.argv)
      ventana = Ventana()
@@ -577,6 +634,15 @@ async def main():
     # Corre el event loop de Qt con asyncio integrado
      await asyncio.Future()
 
+class ClickableWidget(QWidget):
+     clicked = pyqtSignal()
+     def __init__(self,parent=None):
+          super().__init__(parent)
+
+     def mousePressEvent(self,event):
+          self.clicked.emit()
+          super().mousePressEvent(event)
+     
 if __name__ == "__main__":
    qasync.run(main())
 
