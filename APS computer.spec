@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='APS computer',
+    name='APS Computer',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -460,6 +460,7 @@ class Ventana(QMainWindow):
                     window.cantidad_articulo.setText("")
                     window.precio_articulo.setText("")
                     window.nombre_articulo.setText("")
+                    window.costo.setText("")
                     self.clean_Window()
                     self.almacen.setParent(self.main_window)
                     self.main_window.root.layout().addWidget(window)

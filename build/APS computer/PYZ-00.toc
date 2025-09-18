@@ -1,5 +1,5 @@
 ('C:\\Users\\Cristopher Bueno\\Desktop\\sistema de '
- 'caja\\sistema_de_caja\\build\\APS computer\\PYZ-00.pyz',
+ 'caja\\sistema_de_caja\\build\\APS Computer\\PYZ-00.pyz',
  [('PyQt6',
    'C:\\Users\\Cristopher '
    'Bueno\\AppData\\Roaming\\Python\\Python312\\site-packages\\PyQt6\\__init__.py',

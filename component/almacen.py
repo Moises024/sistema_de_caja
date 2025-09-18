@@ -282,7 +282,7 @@ async def agregar(padre,propiedades=False):
     bandera = False
 
     #Verifica si los campos están vacíos
-    if nombre == '' or precio.strip() == "" or cantidad =="":
+    if nombre == '' or precio.strip() == "" or cantidad ==""or costo == "":
 
         padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Aviso"
@@ -437,6 +437,7 @@ async def buscar_articulo(padre,id=False):
                 padre.sendMsjError(padre.tipo_msj)
                 
                 return
+           
             for fila in data["res"]:
                 articulo=item(fila["nombre"],fila["precio"],fila["cantidad"],fila["costo"],fila["id"])
                 articulos.append(articulo)
@@ -444,6 +445,7 @@ async def buscar_articulo(padre,id=False):
                     almacen.agotado.append(articulo)
             almacen.articulos = articulos
             render_table(padre,1)
+         
             await api.session.close()
             padre.caja.raise_()
             padre.main_window.cargando.hide()
