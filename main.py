@@ -147,7 +147,7 @@ class Ventana(QMainWindow):
         self.bandera           = False
         self.release           = True
         self.release_enter     = True
-        self.tabla_column      = 4
+        self.tabla_column      = 5
         self.tabla_pointer     = 0
         self.articulos         = []
         self.usuario           = ""

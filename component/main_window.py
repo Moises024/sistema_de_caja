@@ -4,7 +4,8 @@ from PyQt6.QtGui import QCursor,QPixmap
 import asyncio
 from component.almacen import buscar_articulo
 from component.inventario import buscar_facturas
-from component.caja import buscar_articulos
+from component.caja import buscar_articulos,limpiar_completo
+
 
 async def cargando(padre):
     padre.main_window.cargando.show()
@@ -110,6 +111,7 @@ async def activeLink(padre,label):
         
        
     if label["id"] == 0:
+        limpiar_completo(padre,padre.caja)
         padre.key_number = True
         await cargando(padre)
         
@@ -118,12 +120,15 @@ async def activeLink(padre,label):
         await buscar_articulos(padre)
    
     if label["id"]== 1 and padre.usuario.rol  == 3:
+        
         padre.key_number = False
         await cargando(padre)
         padre.change_window(padre.inventario,padre.INVENTARIO_CODE)
         await buscar_facturas(padre)
 
     if label["id"]== 2 and padre.usuario.rol  == 3:
+        
+        
         padre.key_number = False
         await cargando(padre)
         padre.change_window(padre.almacen,padre.ALMACEN_CODE)
@@ -132,6 +137,7 @@ async def activeLink(padre,label):
         # render_almacen(padre)
    
     if label["id"] ==3 and padre.usuario.rol  == 3:
+       
         padre.key_number = False
         await cargando(padre)
         padre.change_window(padre.registrar,padre.REGISTRAR_CODE)

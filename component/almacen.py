@@ -173,7 +173,7 @@ async def filtrar_valores(param1,item_):
         await agregar(param1,param2)
 
 def render_table(padre,cantida,item=False):
-    
+   
     
     Item_ = QListWidgetItem()
     tabla = QTableWidget(0,7)

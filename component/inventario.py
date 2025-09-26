@@ -25,13 +25,14 @@ class Almacen:
 almacen= Almacen()
 
 class Item:
-    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles):   
+    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles,costo):   
         self.usuario=usuario
         self.no_factura=no_factura
         self.total=total
         self.fecha=fecha  
         self.usuario_id = usuario_id  
         self.detalles = detalles
+        self.costo = costo
 
 def agrear_lista_elimar(row,c,padre):
     if c == 5 :
@@ -47,7 +48,7 @@ def agrear_lista_elimar(row,c,padre):
           
             label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
             label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
-            label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
+            label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["total"])))
             linea = QFrame()
             linea.setFrameShape(QFrame.Shape.HLine)
             linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
@@ -105,6 +106,7 @@ def render_table(padre,cantidad,item=""):
     if item == "":
         tabla.setRowCount(len(almacen.facturas))
         agregar_Datos_tabla(tabla,almacen.facturas)
+        
     else:
         tabla.setRowCount(len(item))
         agregar_Datos_tabla(tabla,item)
@@ -216,15 +218,27 @@ def hacer_inventario(padre):
     fecha_int_final = int(fecha_final.timestamp()) + int(24*60*60)
     
     inventario =0
+    ganancia = 0
+    compra = 0
+
     for item in almacen.facturas:
         fecha_str = datetime.datetime.strptime(item.fecha,"%d/%m/%Y %H:%M:%S")
         fecha_int = int(fecha_str.timestamp())
         if fecha_int  >= fecha_int_inicio and fecha_int  <= fecha_int_final:
             inventario += int(item.total)
+            facturas = json.loads(item.detalles)
+            for factura_ in facturas:
+                compra += int(int(factura_["costo"]) * int(factura_["cantidad"]))
+   #Jump 
+    ganancia = inventario - compra
+   
+
 
     padre.inventario.msj_1.setText(f"El inventario desde el { mes}")
     padre.inventario.msj_2.setText(f"hasta el {ano} es de:")
     padre.inventario.msj_3.setText  (f"$" + formatearDigitos(str(inventario)))
+    padre.inventario.ganancia_neta_text.setText("Ganancia Neta:")
+    padre.inventario.ganancia_neta.setText(f" ${formatearDigitos(str(ganancia))}")
     
 def limpiar_lista(padre): 
          # 1. Remover el widget visual
@@ -286,7 +300,7 @@ async def buscar_facturas(padre):
                 fecha = datetime.datetime.fromtimestamp(fila["fecha"])
                 fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
                 usuario_id = fila["usuario_id"]["id"]
-                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"])
+                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"],0)
                 facturas.append(factura)
              almacen.facturas = facturas
              await api.session.close()

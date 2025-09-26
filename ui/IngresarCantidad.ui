@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>281</width>
-    <height>206</height>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,7 +62,7 @@ font: 75 20pt &quot;Dubai&quot;;</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>130</y>
+     <y>190</y>
      <width>201</width>
      <height>41</height>
     </rect>
@@ -75,6 +75,30 @@ border-radius: 10px;</string>
    </property>
    <property name="text">
     <string>Ingresar</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="input_descuento">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>130</y>
+     <width>201</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 1px solid #999;
+border-radius: 8px;
+font-size: 18px;</string>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="placeholderText">
+    <string>Descuento</string>
    </property>
   </widget>
  </widget>
