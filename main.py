@@ -433,6 +433,8 @@ class Ventana(QMainWindow):
                     window.msj_1.setText("")
                     window.msj_2.setText("")
                     window.msj_3.setText("")
+                    window.ganancia_neta_text.setText("")
+                    window.ganancia_neta.setText("")
                     self.clean_Window()
                     
                     self.inventario.setParent(self.main_window)

@@ -48,7 +48,10 @@ def agrear_lista_elimar(row,c,padre):
           
             label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
             label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
-            label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["total"])))
+            label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
+            label_4  = QLabel("Descuento: " + formatearDigitos(str(detalle["descuento"])))
+            label_5  = QLabel("Total: " + formatearDigitos(str(detalle["total"])))
+
             linea = QFrame()
             linea.setFrameShape(QFrame.Shape.HLine)
             linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
@@ -56,6 +59,8 @@ def agrear_lista_elimar(row,c,padre):
             layout.addWidget(label_1)
             layout.addWidget(label_2)
             layout.addWidget(label_3)
+            layout.addWidget(label_4)
+            layout.addWidget(label_5)
             layout.addWidget(linea)
           
             

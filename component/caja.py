@@ -134,7 +134,7 @@ def buscar_item(caja,padre,item_buscado =False):
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Custom)
     tabla.setColumnWidth(0,int((20/100) * tabla.width()))
-    tabla.setColumnWidth(1,int((7/100)  * tabla.width()))
+    tabla.setColumnWidth(1,int((8/100)  * tabla.width()))
     tabla.setColumnWidth(2,int((10/100) * tabla.width()))
     tabla.setColumnWidth(3,int((10/100) * tabla.width()))
     tabla.setColumnWidth(4,int((10/100) * tabla.width()))
@@ -164,7 +164,7 @@ def buscar_item(caja,padre,item_buscado =False):
                         border:none;
                         }
          QTableWidget::item::hover{
-                        background-color:#232f4270;
+                        background-color:#232f42
                         color:#f1f1f1;
                         border:none;
                         }
@@ -229,7 +229,7 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
             tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["descuento"]))}"))
-            tabla.setItem(numero_articulo,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["total"]))}"))
+            tabla.setItem(numero_articulo,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]-articulo["descuento"]))}"))
             unidades +=articulo["cantidad"]
         
         else:    
@@ -237,13 +237,15 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
             tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
+            print(articulo["descuento"], articulo["precio"])
             tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["descuento"]))}"))
-            tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["total"]))}"))
+
+            tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]-articulo["descuento"]))}"))
             unidades +=articulo["cantidad"]
         tabla_row +=1
         tabla_pointer+=1 
         index=0
-        total += int(articulo["total"])*int(articulo["cantidad"])
+        total += int((articulo["precio"]-articulo["descuento"])*int(articulo["cantidad"]))
        
     tabla.cellClicked.connect(celda_click)
     caja.total.setText(formatearDigitos(str(total)))
@@ -549,8 +551,11 @@ def click_ok_caja(padre):
     items_almacen = ""
     valor = padre.ventana_cantidad.input_cantidad.text()
     descuento = padre.ventana_cantidad.input_descuento.text()
+    
     if valor == '':
         return
+    if descuento == "":
+        descuento=0
     padre.ventana_cantidad.input_cantidad.setText("")
     padre.ventana_cantidad.input_descuento.setText("")
     cantidad =False 
@@ -580,48 +585,84 @@ def click_ok_caja(padre):
     padre.key_number = True
     # descuento
     descuento = descuento
-    global_variable.item_global["cantidad"] = cantidad
-    bandera = False
-    no_value = False
+    
+   
     item = ""
+    item_ = ""
+    bandera=True
+    
     if len(padre.articulos) == 0:
         if descuento > 0 :
             descuentoAPlicado= math.floor(global_variable.item_global["precio"] - descuento)
             if descuentoAPlicado <= global_variable.item_global["costo"]:
-                padre.tipo_msj.titulo = "Error"
-                padre.tipo_msj.text = f"El sistema no permite una rebaja de ${formatearDigitos(str(descuento))}"
-                padre.sendMsjError(padre.tipo_msj)
-                padre.key_number = False
+                msj_rebaja(padre,devuelta)
                 return
-            item = json.loads(json.dumps(global_variable.item_global))
-            item["total"] = descuentoAPlicado
-            item["descuento"] = descuento
-        padre.articulos.append(item)
-
-        no_value = True
-    else: 
-        for articulo in padre.articulos:
-            if global_variable.item_global["ID"] == articulo["ID"]:
-                    if descuento > 0 :
-                        descuentoAPlicado= math.floor(global_variable.item_global["precio"]- descuento)
-                        if descuentoAPlicado <= global_variable.item_global["costo"]:
-                            padre.tipo_msj.titulo = "Error"
-                            padre.tipo_msj.text = f"El sistema no permite una rebaja de ${formatearDigitos(str(descuento))}"
-                            padre.sendMsjError(padre.tipo_msj)
-                            padre.key_number = False
-                            break
-                        item = json.loads(json.dumps(global_variable.item_global))
-                        item["total"] = descuentoAPlicado
-                        item["descuento"] = descuento
-        
-                    bandera = True
-                   
-            
-    if bandera == False and no_value == False:
-        padre.articulos.append(item)    
-    padre.ventana_cantidad.hide()
-    buscar_item(padre.caja,padre,[item])
+            #convierte el obj de string en un obj y esta copia el obj sin que sea el original solo un copia
+            item_ = json.loads(json.dumps(global_variable.item_global))
+            item_["total"] = descuentoAPlicado
+            item_["descuento"] = descuento
+            item_["cantidad"] = cantidad
+        else:
+            item_ = global_variable.item_global  
+            item_["total"] =  global_variable.item_global["precio"] 
+            item_["descuento"] = descuento
+            item_["cantidad"] = cantidad
     
+    else: 
+        item = global_variable.item_global
+        item_= item
+        articulo = exits_in(padre.articulos,item)
+        if articulo:
+            bandera =False
+            if descuento > 0 :
+                descuentoAPlicado= math.floor(articulo["precio"]- (articulo["descuento"] + descuento))
+                if descuentoAPlicado <= articulo["costo"]:
+                    msj_rebaja(padre,articulo["descuento"] + descuento)
+                    return
+                #usamos el obj original
+                
+                item_ = articulo
+                item_["total"] = descuentoAPlicado
+                item_["descuento"] += descuento
+                item_["cantidad"] += cantidad
+            else:
+                item_ = articulo 
+                item_["total"] =  articulo["precio"]   
+                item_["descuento"] += descuento
+                item_["cantidad"] += cantidad
+
+        else:
+            if descuento > 0 :
+                    descuentoAPlicado= math.floor(global_variable.item_global["precio"]- descuento)
+                    if descuentoAPlicado <= global_variable.item_global["costo"]:
+                        msj_rebaja(padre,descuento)
+                        return
+                    item_["total"] =  descuentoAPlicado 
+                    item_["cantidad"] = cantidad
+                    item_["descuento"] = descuento
+            else:
+                
+                item_["total"] =  global_variable.item_global["precio"] 
+                item_["cantidad"] = cantidad
+                item_["descuento"] = descuento
+            
+      
+          
+             
+                
+            
+                   
+    if bandera:
+        padre.articulos.append(item_)  
+    
+    padre.ventana_cantidad.hide()
+    buscar_item(padre.caja,padre,[item_])
+
+def msj_rebaja(padre,descuento):
+        padre.tipo_msj.titulo = "Error"
+        padre.tipo_msj.text = f"El sistema no permite una rebaja de ${formatearDigitos(descuento)}"
+        padre.sendMsjError(padre.tipo_msj)
+        padre.key_number = False
 def connect_label(label,padre):
     label[0].setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     label[0].setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
@@ -629,3 +670,9 @@ def connect_label(label,padre):
     label[0].clicked.connect(lambda:buscar_click(padre,label[1]))
     
     
+def exits_in(array,item_):
+    exist_ = False
+    for item in array:
+        if item["ID"] == item_["ID"]:
+            exist_= item
+    return exist_
