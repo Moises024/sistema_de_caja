@@ -11,6 +11,7 @@ import json
 import asyncio
 from PyQt6.QtGui import QCursor,QColor
 from component.funciones import formatearDigitos
+
 load_dotenv()
 
 class Thread_:
@@ -123,10 +124,11 @@ def agrear_lista_elimar(row,c,padre):
             item_ = almacen.item[row]
         
         padre.ventana_actualizar_agotados.nombre_articulo_2.setText(item_.nombre)
-        padre.ventana_actualizar_agotados.nombre_articulo_2.setReadOnly(True)
+        # padre.ventana_actualizar_agotados.nombre_articulo_2.setReadOnly(True)
 
         padre.ventana_actualizar_agotados.cantidad_articulo_2.setText(str(item_.cantidad))
         padre.ventana_actualizar_agotados.precio_articulo_2.setText(str(item_.precio)) 
+        padre.ventana_actualizar_agotados.costo.setText(str(item_.costo)) 
         
         
         if variable.mi_funcion_on :
@@ -151,11 +153,12 @@ def agrear_lista_elimar(row,c,padre):
 
 #Función para renderizar la tabla de artículos en la interfaz   
 @asyncSlot()
-async def filtrar_valores(param1,item_):
+async def filtrar_valores(param1,item):
         
         nombre = param1.ventana_actualizar_agotados.nombre_articulo_2.text()
         cantidad = param1.ventana_actualizar_agotados.cantidad_articulo_2.text()
         precio = param1.ventana_actualizar_agotados.precio_articulo_2.text()
+        costo = param1.ventana_actualizar_agotados.costo.text()
          
         if nombre == "" or cantidad == "" or precio == "":
             
@@ -167,7 +170,8 @@ async def filtrar_valores(param1,item_):
         param2.append(nombre)
         param2.append(precio)
         param2.append(cantidad)
-        param2.append(item_.costo)
+        param2.append(costo)
+        param2.append(item.id)
         param1.ventana_actualizar_agotados.close()
         await asyncio.sleep(0.5)
         await agregar(param1,param2)
@@ -266,20 +270,22 @@ async def agregar(padre,propiedades=False):
     from component.main_window import cargando
     await cargando(padre)
     await asyncio.sleep(0.5)
+    id=""
+    bandera = False
     if not propiedades:
         nombre = padre.almacen.nombre_articulo.text()
         precio = padre.almacen.precio_articulo.text()
         cantidad = padre.almacen.cantidad_articulo.text()
         costo = padre.almacen.costo.text()
     else:
+        bandera = True
         nombre = propiedades[0]
         precio = str(propiedades[1])
         cantidad = str(propiedades[2])
         costo = str(propiedades[3])
+        id= int(propiedades[4])
     cantidad = cantidad.strip()
     nombre = nombre.strip()
-
-    bandera = False
 
     #Verifica si los campos están vacíos
     if nombre == '' or precio.strip() == "" or cantidad ==""or costo == "":
@@ -289,17 +295,20 @@ async def agregar(padre,propiedades=False):
         padre.tipo_msj.text = "Por favor rellena los campos"
         padre.sendMsjWarningSingle(padre.tipo_msj)
         return
-    new_item = item(nombre,precio,cantidad,costo)
     
+    new_item = item(nombre,precio,cantidad,costo)
+ 
     for articulo in  almacen.articulos:
-        if articulo.nombre.lower() == nombre.lower():
-            bandera = True
-            nueva_cant = int(cantidad) + int(articulo.cantidad)
-            new_item = item(articulo.nombre,precio,nueva_cant,articulo.costo)
+        if articulo.id == id:
+            
+            nueva_cant = int(cantidad) 
+            
+            new_item = item(nombre,precio,nueva_cant,costo,articulo.id)
             break
 
    
     if bandera == True:  
+      
         await update_articulo(new_item,padre)
     else:
 
@@ -466,10 +475,11 @@ async def update_articulo(new_item,padre):
     await cargando(padre)
     await asyncio.sleep(0.5)
     data = []
+    data.append(new_item.id)
     data.append(new_item.nombre)
     data.append(new_item.cantidad)
     data.append(int(new_item.precio))
-    data.append(new_item.nombre)
+    data.append(int(new_item.costo))
     
 
     try:

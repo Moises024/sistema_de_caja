@@ -237,7 +237,6 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             tabla.setItem(tabla_pointer,index,QTableWidgetItem(articulo["nombre"]))
             tabla.setItem(tabla_pointer,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
-            print(articulo["descuento"], articulo["precio"])
             tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["descuento"]))}"))
 
             tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]-articulo["descuento"]))}"))

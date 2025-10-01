@@ -7,6 +7,7 @@ export const addAlmacen = async (req, res) => {
     try {
         const Almacen = await getAlmacenModel()
         const data = req.body
+        
         const data_almacen = {
             nombre:data[0],
             cantidad:data[1],
@@ -50,9 +51,12 @@ export const updateArticulo = async (req, res) => {
   
         const data = req.body
         const Almacen = await getAlmacenModel()
-        await Almacen.updateOne({nombre:data[0]},{$set:{
-            precio:data[2],
-            cantidad:data[1]
+        console.log(data[0])
+        await Almacen.updateOne({id:data[0]},{$set:{
+            precio:data[3],
+            cantidad:data[2],
+            costo:data[4],
+            nombre:data[1]
         }})
         res.json({ ok: true, res: "Artículo actualizado correctamente." })
     } catch (err) {
