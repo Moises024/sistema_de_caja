@@ -51,7 +51,6 @@ export const updateArticulo = async (req, res) => {
   
         const data = req.body
         const Almacen = await getAlmacenModel()
-        console.log(data[0])
         await Almacen.updateOne({id:data[0]},{$set:{
             precio:data[3],
             cantidad:data[2],

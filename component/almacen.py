@@ -314,7 +314,7 @@ async def agregar(padre,propiedades=False):
 
         #llamar a la db
         await insertar_articulo(new_item,padre)
-        #almacen.articulos.append(new_item)
+        #almacen.articulos.append(new_item)h
 
     render_table(padre,1)
     padre.main_window.cargando.hide()

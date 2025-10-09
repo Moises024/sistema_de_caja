@@ -28,6 +28,7 @@ class ClickLabel(QLabel):
 class items:
     articulos=[]
     db_almacen = []
+    clientes = []
 almacen = items()
 
 class Api:
@@ -125,7 +126,7 @@ def buscar_item(caja,padre,item_buscado =False):
     tabla_row =1
     informacion = caja.input_buscar.text()
     item = QListWidgetItem()
-
+ 
     #Crea una tabla para mostrar los artículos
     tabla = QTableWidget(tabla_row,padre.tabla_column)
     tabla.resizeColumnsToContents()
@@ -313,7 +314,9 @@ def conectar_botones_caja(botones,padre,caja):
     botones[16].clicked.connect(lambda:back(caja))
     botones[17].clicked.connect(lambda:devuelta(caja,padre))
     botones[18].clicked.connect(lambda:eliminar_item(caja,padre))
-    botones[19].clicked.connect(lambda: asyncio.create_task(generar_facturas(padre)))
+    botones[19].clicked.connect(lambda:agregar_cliente(padre))
+    padre.ventana_cliente.btn_ok.clicked.connect(lambda:asyncio.create_task(crearCliente(padre)))
+    #aqui esta to asyncio.create_task(generar_facturas(padre))
     for boton in botones:
         boton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
@@ -380,16 +383,38 @@ async def buscar_articulos(padre):
             if not resp["ok"]:
                 return
             padre.caja.no_orden.setText(str(resp["res"])) 
+            await buscar_clientes()
             
             # conn.close()
     except sqlite3.Error as err:
         print(err)
         padre.main_window.cargando.hide()
         padre.caja.raise_()
+
+async def buscar_clientes():
+    URL = os.getenv("URL") + "/api/cliente"
+
+    try:
+        if api.session != "":
+            if not api.session.closed:
+                await api.session.close()
+        api.session = aiohttp.ClientSession()
         
+        async with api.session.get(URL) as resp:
+            result = await resp.json()
+            if not result['ok']:
+                print(result['res'])
+                return 
+        almacen.clientes = result['res']
+        return almacen.clientes
+    except Exception as e:
+        print("error:" ,e)
+        pass
     
-async def generar_facturas(padre):
-      
+async def generar_facturas(padre,id):
+       # jump
+
+    
         padre.caja.repaint()  # fuerza el repintado
         padre.caja.lower()
         padre.main_window.cargando.show()
@@ -407,11 +432,13 @@ async def generar_facturas(padre):
         fecha = int(time.time())
         usuario = padre.usuario
         
-        factura= json.dumps(padre.articulos)
+        factura = padre.articulos[0:]
+        factura.append({"cliente_id":id})
+        factura= json.dumps(factura)
         # baseDeDatos = db()
         # conn = baseDeDatos.crearConnexion()
         # cursor = conn.cursor()
-       
+      
         try:
             
             for item in padre.articulos:
@@ -481,6 +508,7 @@ async def generar_facturas(padre):
             padre.caja.sugerencias.setWidget(contenedor)
             padre.caja.detalles.findChild(QLabel,"unidades").setText(str(0))
             asyncio.create_task(buscar_articulos(padre))
+            print("aqui todo bien")
             # conn.commit()
         except sqlite3.Error as err:
             print(err)
@@ -675,3 +703,57 @@ def exits_in(array,item_):
         if item["ID"] == item_["ID"]:
             exist_= item
     return exist_
+
+def agregar_cliente(padre):
+    padre.key_number = False
+    if padre.ventana_cliente.isVisible():
+        padre.ventana_cliente.hide()
+    padre.ventana_cliente.show()
+
+
+async def crearCliente(padre):
+    URL = os.getenv("URL") + "/api/cliente"
+    nombre = padre.ventana_cliente.input_cliente_nombre.text()
+    telefono = padre.ventana_cliente.input_cliente_telefono.text()
+    id =""
+    cliente = False
+    for cliente_ in almacen.clientes:
+        if cliente_["telefono"] == telefono:
+            cliente = cliente_
+    if nombre == "" or telefono == " ":
+        # msj de error
+        print("Debe rellenar los campos")
+        return
+    headers = {
+        "Content-Type": "Application/json",
+        "id":"0"
+    }
+    
+    data = []
+    data.append(nombre)
+    data.append(telefono)
+    padre.ventana_cliente.hide()
+
+    if not cliente:
+
+        try:
+            if api.session != "":
+                if not api.session.closed:
+                    await api.session.close()
+            api.session = aiohttp.ClientSession()
+
+            async with api.session.post(URL,data=json.dumps(data),headers=headers) as resp:
+                result = await resp.json()
+                if not result['ok']:
+                    print(result['res'])
+                    return 
+                id =  result['res']
+                print(id)
+                await generar_facturas(padre,id)        
+        except Exception as e:
+            print("error:" ,e)
+            pass
+    else:
+        await generar_facturas(padre,cliente["_id"])   
+
+        

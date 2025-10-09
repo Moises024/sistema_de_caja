@@ -11,6 +11,7 @@ import json
 import aiohttp
 from dotenv import load_dotenv
 from component.funciones import formatearDigitos
+from component.caja import buscar_clientes
 import asyncio
 load_dotenv()
 
@@ -34,34 +35,49 @@ class Item:
         self.detalles = detalles
         self.costo = costo
 
-def agrear_lista_elimar(row,c,padre):
+async def agrear_lista_elimar(row,c,padre):
     if c == 5 :
         if  padre.pantalla_detalles.isVisible():
             padre.pantalla_detalles.hide()
         detalles = json.loads(almacen.facturas[row].detalles)
+        print(detalles)
         ventanita = QWidget()
        
         layout = QVBoxLayout(ventanita)
 
         padre.pantalla_detalles.no_factura.setText(str(almacen.facturas[row].no_factura))
+        
         for detalle in detalles:
-          
-            label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
-            label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
-            label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
-            label_4  = QLabel("Descuento: " + formatearDigitos(str(detalle["descuento"])))
-            label_5  = QLabel("Total: " + formatearDigitos(str(detalle["total"])))
+            try:
+                detalle["nombre"]
+                label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
+                label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
+                label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
+                label_4  = QLabel("Descuento: " + formatearDigitos(str(detalle["descuento"])))
+                label_5  = QLabel("Total: " + formatearDigitos(str(detalle["total"])))
 
-            linea = QFrame()
-            linea.setFrameShape(QFrame.Shape.HLine)
-            linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
-            linea.setStyleSheet("color: gray;")
-            layout.addWidget(label_1)
-            layout.addWidget(label_2)
-            layout.addWidget(label_3)
-            layout.addWidget(label_4)
-            layout.addWidget(label_5)
-            layout.addWidget(linea)
+                linea = QFrame()
+                linea.setFrameShape(QFrame.Shape.HLine)
+                linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
+                linea.setStyleSheet("color: gray;")
+                layout.addWidget(label_1)
+                layout.addWidget(label_2)
+                layout.addWidget(label_3)
+                layout.addWidget(label_4)
+                layout.addWidget(label_5)
+                layout.addWidget(linea)
+            except :
+                clientes = await buscar_clientes()
+                print(clientes)
+                data_cliente =""
+                for cliente in clientes:
+                    if cliente["_id"] == detalle["cliente_id"]:
+                        data_cliente = cliente
+                        break
+                padre.pantalla_detalles.detalle_nombre.setText(data_cliente["nombre"])
+                padre.pantalla_detalles.detalle_telefono.setText(data_cliente["telefono"])
+
+                pass
           
             
         padre.pantalla_detalles.detalles.setWidget(ventanita) 
@@ -97,7 +113,7 @@ def render_table(padre,cantidad,item=""):
     tabla.horizontalHeader().setStretchLastSection(True)
     tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     tabla.setFixedHeight( padre.inventario.tabla_factura.height())
-    tabla.cellClicked.connect(lambda row ,c:agrear_lista_elimar(row,c,padre))
+    tabla.cellClicked.connect(lambda row ,c:asyncio.create_task(agrear_lista_elimar(row,c,padre)))
     tabla.setStyleSheet('''
     QScrollBar:vertical{
                 background: #1e1e1e;

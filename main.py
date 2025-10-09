@@ -177,7 +177,8 @@ class Ventana(QMainWindow):
         self.animation_timer_reverse.timeout.connect(self.move_all_animation_reverse)
         self.active = False
         self.btn_salir = None
-        
+        #pantalla clientes 
+        self.ventana_cliente = loadUi("./ui/cliente.ui")
         #pantalla de Ventana Costo
         self.ventana_costo = loadUi("./ui/ventana_de_costo.ui")
         #pantalla actualizar_agatados 
