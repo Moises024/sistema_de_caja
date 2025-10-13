@@ -3,7 +3,7 @@ from PyQt6.QtGui import QAction,QIcon
 from PyQt6.QtCore import QTimer
 from PyQt6.uic import loadUi 
 from PyQt6.QtGui import QPixmap
-from pathlib import Path
+from PyQt6.QtGui import QCursor
 import qasync
 import asyncio
 import sys
@@ -177,8 +177,10 @@ class Ventana(QMainWindow):
         self.animation_timer_reverse.timeout.connect(self.move_all_animation_reverse)
         self.active = False
         self.btn_salir = None
+        self.cliente_id=""
         #pantalla clientes 
         self.ventana_cliente = loadUi("./ui/cliente.ui")
+        self.ventana_cliente.btn_ok.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         #pantalla de Ventana Costo
         self.ventana_costo = loadUi("./ui/ventana_de_costo.ui")
         #pantalla actualizar_agatados 
@@ -192,10 +194,12 @@ class Ventana(QMainWindow):
         self.pantalla_detalles  = loadUi("./ui/PantallaDetalles.ui")
         self.pantalla_detalles.setWindowIcon(QIcon("./img/logo.png"))
         
+       
         # venan cantidad
         self.ventana_cantidad = loadUi("./ui/IngresarCantidad.ui")
         
         # conectar btn ventana_cantidad
+        
         self.ventana_cantidad.btn_ok.clicked.connect(lambda:click_ok_caja(self))
         
         # ventana producto agotado 
@@ -231,7 +235,7 @@ class Ventana(QMainWindow):
         
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
-        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura]
+        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura,self.pantalla_detalles.btn_detalle_actualizar,self.pantalla_detalles.detalle_copia]
         conectar_botones_inventario(botones_inventario,self.inventario,self)
 
         #cagar regitsro ui

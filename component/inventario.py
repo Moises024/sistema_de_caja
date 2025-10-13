@@ -10,7 +10,7 @@ import os
 import json
 import aiohttp
 from dotenv import load_dotenv
-from component.funciones import formatearDigitos
+from component.funciones import formatearDigitos ,format_us
 from component.caja import buscar_clientes
 import asyncio
 load_dotenv()
@@ -40,15 +40,17 @@ async def agrear_lista_elimar(row,c,padre):
         if  padre.pantalla_detalles.isVisible():
             padre.pantalla_detalles.hide()
         detalles = json.loads(almacen.facturas[row].detalles)
-        print(detalles)
+        print(almacen.facturas[row])
+        clean_cliente(padre)
         ventanita = QWidget()
-       
+        data =[]
         layout = QVBoxLayout(ventanita)
 
         padre.pantalla_detalles.no_factura.setText(str(almacen.facturas[row].no_factura))
-        
+        #######locqueerrs
         for detalle in detalles:
             try:
+                data.append({"factura":detalle})
                 detalle["nombre"]
                 label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
                 label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
@@ -68,16 +70,29 @@ async def agrear_lista_elimar(row,c,padre):
                 layout.addWidget(linea)
             except :
                 clientes = await buscar_clientes()
-                print(clientes)
+                
                 data_cliente =""
                 for cliente in clientes:
+                    
                     if cliente["_id"] == detalle["cliente_id"]:
                         data_cliente = cliente
                         break
-                padre.pantalla_detalles.detalle_nombre.setText(data_cliente["nombre"])
-                padre.pantalla_detalles.detalle_telefono.setText(data_cliente["telefono"])
+                if data_cliente :
+                    padre.pantalla_detalles.detalle_nombre.setText(data_cliente["nombre"])
+                    padre.pantalla_detalles.detalle_telefono.setText(format_us(data_cliente["telefono"]))
+                    padre.pantalla_detalles.detalle_sector.setText(data_cliente["sector"])
+                padre.cliente_id = detalle["cliente_id"]
+                
+                # data_ = {
+                #     "facturas":data,
+                #     "total":
+                # }
+                    
+                # padre.pantalla_detalles.detalle_copia.clicked.connect(print())
 
-                pass
+                
+
+                
           
             
         padre.pantalla_detalles.detalles.setWidget(ventanita) 
@@ -95,12 +110,16 @@ async def agrear_lista_elimar(row,c,padre):
         
         #aqui
         padre.pantalla_detalles.show()
+        print("show")
         return
     if almacen.item :
         almacen.eliminadas = almacen.item 
     else:
         almacen.eliminadas = row
-
+def clean_cliente(padre):
+            padre.pantalla_detalles.detalle_nombre.setText("")
+            padre.pantalla_detalles.detalle_telefono.setText("")
+            padre.pantalla_detalles.detalle_sector.setText("")
 def render_table(padre,cantidad,item=""):
     Item_ = QListWidgetItem()
     tabla = QTableWidget(cantidad,6)
@@ -209,6 +228,10 @@ def conectar_botones_inventario(botones,inventario,padre):
     botones[0].clicked.connect(lambda:hacer_inventario(padre))
     botones[1].clicked.connect(lambda:asyncio.create_task(buscar_facturas(padre)))
     botones[2].clicked.connect(lambda:asyncio.create_task(eliminar(padre)))
+    botones[3].clicked.connect(lambda:asyncio.create_task(actulizar_CLientes(padre)))
+    
+   
+
     inventario.input_factura.textChanged.connect(lambda text:buscar_usuario(text,padre))
     for btn in botones:
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -351,3 +374,41 @@ def agregar_Datos_tabla(tabla,datos):
             accion.setForeground(QColor("white")) 
             accion.setBackground(QColor("#232f42"))
             accion.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
+async def actulizar_CLientes(padre):
+        from component.main_window import cargando
+        await cargando(padre)
+        nombre = padre.pantalla_detalles.detalle_nombre.text()
+        telefono = padre.pantalla_detalles.detalle_telefono.text()
+        sector = padre.pantalla_detalles.detalle_sector.text()
+        if nombre == "" or telefono =="" or sector =="":
+            padre.main_window.cargando.hide()
+            #msj
+            return
+        data =[]
+        data.append(nombre)
+        data.append(re.sub(r'\D', '', telefono))
+        data.append(sector)
+        data.append(padre.cliente_id)
+        headers ={
+            "Content-Type":"Application/json",
+            "id":"1"
+        }
+        URL= os.getenv("URL")+"/api/cliente"
+        if api.session!="":
+            if not api.session.closed: 
+                await api.session.close()
+        api.session = aiohttp.ClientSession()
+        try:
+            async with api.session.post(URL,data=json.dumps(data),headers=headers) as resp:
+                resultado = await resp.json()
+                if not resultado["ok"]:
+                    print(resultado["res"])
+                    #msj error
+                    return
+                print(resultado["res"])
+                padre.main_window.cargando.hide()
+        except Exception as e:
+            print("errror: ",e)
+            padre.main_window.cargando.hide()
+            

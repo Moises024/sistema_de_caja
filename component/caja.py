@@ -87,7 +87,7 @@ def devuelta(caja,padre):
 
    #Calcula el monto total a cobrar
    for articulo in padre.articulos:
-        vari.monto_total+= int(articulo["total"])*int(articulo["cantidad"])
+        vari.monto_total+= int(articulo["total"])
        
    vari.mont_pagado = int(vari.mont_pagado)
    keys.valor =""
@@ -227,6 +227,7 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
     tabla_pointer=0
     
     for i,articulo in enumerate(padre.articulos):
+        
         tabla.setRowCount(tabla_row)
         
         if numero_articulo == i:
@@ -236,7 +237,7 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             tabla.setItem(numero_articulo,index+1,QTableWidgetItem(f"x{articulo["cantidad"]}"))
             tabla.setItem(numero_articulo,index+2,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
             tabla.setItem(numero_articulo,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["descuento"]))}"))
-            tabla.setItem(numero_articulo,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]-articulo["descuento"]))}"))
+            tabla.setItem(numero_articulo,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["total"]))}"))
             unidades +=articulo["cantidad"]
         
         else:    
@@ -246,12 +247,12 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
             tabla.setItem(tabla_pointer,index+2,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]))}"))
             tabla.setItem(tabla_pointer,index+3,QTableWidgetItem(f"{formatearDigitos(str(articulo["descuento"]))}"))
 
-            tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["precio"]-articulo["descuento"]))}"))
+            tabla.setItem(tabla_pointer,index+4,QTableWidgetItem(f"{formatearDigitos(str(articulo["total"]))}"))
             unidades +=articulo["cantidad"]
         tabla_row +=1
         tabla_pointer+=1 
         index=0
-        total += int((articulo["precio"]-articulo["descuento"])*int(articulo["cantidad"]))
+        total += int((articulo["total"]))
        
     tabla.cellClicked.connect(celda_click)
     caja.total.setText(formatearDigitos(str(total)))
@@ -414,7 +415,7 @@ async def buscar_clientes():
         almacen.clientes = result['res']
         return almacen.clientes
     except Exception as e:
-        print("error:" ,e)
+        print("error:" ,e, "Linea: 418 inevtario")
         pass
     
 async def generar_facturas(padre,cliente):
@@ -439,7 +440,8 @@ async def generar_facturas(padre,cliente):
         usuario = padre.usuario
         
         factura = padre.articulos[0:]
-        factura.append({"cliente_id":cliente["id"]})
+        print(cliente,"443")
+        factura.append({"cliente_id":cliente["_id"]})
         factura= json.dumps(factura)
         # baseDeDatos = db()
         # conn = baseDeDatos.crearConnexion()
@@ -603,6 +605,7 @@ def click_ok_caja(padre):
     items_almacen = ""
     valor = padre.ventana_cantidad.input_cantidad.text()
     descuento = padre.ventana_cantidad.input_descuento.text()
+
     
     if valor == '':
         return
@@ -645,18 +648,18 @@ def click_ok_caja(padre):
     
     if len(padre.articulos) == 0:
         if descuento > 0 :
-            descuentoAPlicado= math.floor(global_variable.item_global["precio"] - descuento)
+            descuentoAPlicado= math.floor((global_variable.item_global["precio"] * cantidad) - descuento)
             if descuentoAPlicado <= global_variable.item_global["costo"]:
                 msj_rebaja(padre,devuelta)
                 return
             #convierte el obj de string en un obj y esta copia el obj sin que sea el original solo un copia
             item_ = json.loads(json.dumps(global_variable.item_global))
-            item_["total"] = descuentoAPlicado
+            item_["total"] = descuentoAPlicado 
             item_["descuento"] = descuento
             item_["cantidad"] = cantidad
         else:
             item_ = global_variable.item_global  
-            item_["total"] =  global_variable.item_global["precio"] 
+            item_["total"] =  global_variable.item_global["precio"] * cantidad
             item_["descuento"] = descuento
             item_["cantidad"] = cantidad
     
@@ -667,25 +670,25 @@ def click_ok_caja(padre):
         if articulo:
             bandera =False
             if descuento > 0 :
-                descuentoAPlicado= math.floor(articulo["precio"]- (articulo["descuento"] + descuento))
+                descuentoAPlicado= math.floor((articulo["precio"] * cantidad)- (articulo["descuento"] + descuento))
                 if descuentoAPlicado <= articulo["costo"]:
                     msj_rebaja(padre,articulo["descuento"] + descuento)
                     return
                 #usamos el obj original
                 
                 item_ = articulo
-                item_["total"] = descuentoAPlicado
+                item_["total"] = descuentoAPlicado 
                 item_["descuento"] += descuento
                 item_["cantidad"] += cantidad
             else:
                 item_ = articulo 
-                item_["total"] =  articulo["precio"]   
+                item_["total"] =  articulo["precio"]   * cantidad
                 item_["descuento"] += descuento
                 item_["cantidad"] += cantidad
 
         else:
             if descuento > 0 :
-                    descuentoAPlicado= math.floor(global_variable.item_global["precio"]- descuento)
+                    descuentoAPlicado= math.floor((global_variable.item_global["precio"]* cantidad)- descuento)
                     if descuentoAPlicado <= global_variable.item_global["costo"]:
                         msj_rebaja(padre,descuento)
                         return
@@ -694,19 +697,15 @@ def click_ok_caja(padre):
                     item_["descuento"] = descuento
             else:
                 
-                item_["total"] =  global_variable.item_global["precio"] 
+                item_["total"] =  global_variable.item_global["precio"] * cantidad
                 item_["cantidad"] = cantidad
                 item_["descuento"] = descuento
-            
-      
-          
-             
-                
-            
-                   
+                       
     if bandera:
-        padre.articulos.append(item_)  
     
+        padre.articulos.append(item_)  
+  
+    print(len(padre.articulos))
     padre.ventana_cantidad.hide()
     buscar_item(padre.caja,padre,[item_])
 
@@ -720,6 +719,7 @@ def connect_label(label,padre):
     label[0].setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
     label[0].setOpenExternalLinks(False)
     label[0].clicked.connect(lambda:buscar_click(padre,label[1]))
+    
     
     
 def exits_in(array,item_):
@@ -767,7 +767,7 @@ async def crearCliente(padre):
             "nombre":nombre,
             "sector":sector,
             "telefono":telefono,
-            "id":""
+            "_id":""
         }
         try:
             if api.session != "":
@@ -781,10 +781,10 @@ async def crearCliente(padre):
                     print(result['res'])
                     return 
                 id =  result['res']
-                cliente["id"] = id
+                cliente["_id"] = id
                 await generar_facturas(padre,cliente)        
         except Exception as e:
-            print("error:" ,e)
+            print("error linea 785 de caja:" ,e)
             pass
     else:
         await generar_facturas(padre,cliente)   

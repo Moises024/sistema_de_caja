@@ -1,4 +1,4 @@
-import { getCliente,setCliente,updateCliente } from "../funciones/cliente.js"
+import { deleteCliente, getCliente,setCliente,updateCliente } from "../funciones/cliente.js"
 import { cors } from "../funciones/cors.js"
 
 
@@ -14,14 +14,16 @@ export default function handler(req,res){
             
             return setCliente(req,res)
         }
-
+        console.log(parseInt(req.headers["id"]))
         if(parseInt(req.headers["id"]) === 1)
         {
             return updateCliente(req,res)
         }
 
     }
-
+    if(parseInt(req.headers["id"]) === 3){
+        return deleteCliente(req,res)
+    }
     return getCliente(req,res)
 
 }

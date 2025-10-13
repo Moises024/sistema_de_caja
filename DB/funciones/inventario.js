@@ -110,8 +110,6 @@ export const getCurrentFacturaSeq = async () => {
 
     const counter = await conn
         .collection('counters')
-        .find()
-        .pretty()
-    console.log(counter)
+        .findOne({ id: 'no_factura' });
     return counter?.seq ?? 0; // si no existe, devuelve 0
 };

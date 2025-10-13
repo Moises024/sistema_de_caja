@@ -108,47 +108,11 @@
     <string> Teléfono:</string>
    </property>
   </widget>
-  <widget class="QLabel" name="detalle_nombre">
-   <property name="geometry">
-    <rect>
-     <x>520</x>
-     <y>30</y>
-     <width>181</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>11</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLabel" name="detalle_telefono">
-   <property name="geometry">
-    <rect>
-     <x>520</x>
-     <y>60</y>
-     <width>161</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>11</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QPushButton" name="btn_detalle_actualizar">
    <property name="geometry">
     <rect>
-     <x>540</x>
-     <y>100</y>
+     <x>560</x>
+     <y>130</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -164,6 +128,76 @@ background-color: #004cc5;</string>
    </property>
    <property name="text">
     <string>Actualizar</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="telefono_text_2">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>90</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Sector:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="detalle_sector">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>90</y>
+     <width>161</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="detalle_telefono">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>60</y>
+     <width>161</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="detalle_nombre">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>30</y>
+     <width>161</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_copia">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>340</y>
+     <width>121</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+
+color: rgb(255, 255, 255);
+font-size: 17px;
+border-radius: 4px;
+
+background-color: #004cc5;</string>
+   </property>
+   <property name="text">
+    <string>Factura copia</string>
    </property>
   </widget>
  </widget>

@@ -147,8 +147,8 @@
   <widget class="QPushButton" name="btn_detalles_actualizar">
    <property name="geometry">
     <rect>
-     <x>570</x>
-     <y>110</y>
+     <x>550</x>
+     <y>150</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -164,6 +164,42 @@ background-color: #004cc5;</string>
    </property>
    <property name="text">
     <string>Actualizar</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="detalle_sector">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>100</y>
+     <width>161</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="telefono_text_2">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>100</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Sector:</string>
    </property>
   </widget>
  </widget>

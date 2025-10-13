@@ -10,7 +10,7 @@ def printer(data,flags=True):
     no_factura = str(data["no_factura"]).encode()
     vendedor = data["usuario"].encode()
     cliente = data["cliente"].encode()
-    devoluciones = b"No aceptamos devoluciones de pacas ya abiertas!!!"
+    devoluciones = b"No aceptamos devoluciones de pacas ya abiertas"
     printer_name = "POS80 Printer"  # ← cámbialo por el nombre exacto de tu impresora
     CENTER = b'\x1B\x61\x01'
     LEFT = b'\x1B\x61\x00'
@@ -19,8 +19,8 @@ def printer(data,flags=True):
     NORMAL = b'\x1D\x21\x00'  # Texto normal
     ESPACIOS = b"\x1B\x64\x05"
     direccion = b"Calle Padre Fantino Frente al Parque De "
-    direccion_ = b"Las Delicias en Plaza Luna Bonao."
-    telefono = b"829-525-3681"
+    direccion_ = b"Las Delicias en Plaza Luna, Bonao."
+    telefono = b"809-603-8368"
     hora = str(datetime.now().hour).encode()
     min = str(datetime.now().minute).encode()
     fecha = str(datetime.now().date()).encode()
@@ -61,7 +61,7 @@ def printer(data,flags=True):
                        str(cant).encode("utf-8") + b" "*6+
                          b"$" +str(precio).encode("utf-8")+b".00" + b" "*6+
                          b"$" +str(descuento).encode("utf-8")+b".00" +  b" "*6+
-                         b"$" +str(factura["total"]*cant).encode("utf-8")+b".00" + b"\n"
+                         b"$" +str(factura["total"]).encode("utf-8")+b".00" + b"\n"
                          )
             
         except Exception as e:
@@ -83,7 +83,7 @@ def printer(data,flags=True):
         raw_text += (CENTER +b"\n" + b"ORIGINAL" + b"\n"*2 )
     else:
        raw_text += (CENTER +b"\n" + b"COPIA" + b"\n"*2 )
-    raw_text += (b"Gracias por su compra!\n" +
+    raw_text += (b"Gracias por su compra!!\n" +
         b"\x1D\x56\x00")
     
  
@@ -95,15 +95,15 @@ def printer(data,flags=True):
     win32print.EndPagePrinter(hprinter)
     win32print.EndDocPrinter(hprinter)
     win32print.ClosePrinter(hprinter)
-data = {
-    "factura":'[{"nombre":"Picapollo","precio":100,"cantidad":1,"total":100,"descuento":0},{"nombre":"Picapollo","precio":100,"cantidad":1,"total":100,"descuento":0}]',
-    "total":200,
-    "devuelta":300,
-    "recibido":500,
-    "no_factura":23,
-    "usuario":"Deivi",
-    "cliente":"Richie",
-    "sector":"BONAO",
-    "telefono":"8095253681"
-}
+# data = {
+#     "factura":'[{"nombre":"Picapollo","precio":100,"cantidad":1,"total":100,"descuento":0},{"nombre":"Picapollo","precio":100,"cantidad":1,"total":100,"descuento":0}]',
+#     "total":200,
+#     "devuelta":300,
+#     "recibido":500,
+#     "no_factura":23,
+#     "usuario":"Deivi",
+#     "cliente":"Richie",
+#     "sector":"BONAO",
+#     "telefono":"8095253681"
+# }
 # printer(data, True)
