@@ -20,6 +20,7 @@ import { addInventario,getInventario,delInventario, getInventarioUsuario,getInve
 
         return
     }
+    console.log(parseInt(req.headers["id"]))
     if(parseInt(req.headers["id"])=== 1)
     {
         return getInventarioNumber(req,res)

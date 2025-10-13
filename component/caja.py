@@ -11,6 +11,7 @@ import aiohttp
 from dotenv import load_dotenv
 import asyncio
 from component.funciones import formatearDigitos
+from component.printer import printer
 import math
 load_dotenv()
 #convertir el label a aclickebel
@@ -49,6 +50,8 @@ class varibles:
     render=False
     monto_total=0
     mont_pagado=0
+    devuelta=0
+    recibido=0
     row_aliminada =""
     gen_factura = False
 vari = varibles()
@@ -97,6 +100,8 @@ def devuelta(caja,padre):
         padre.sendMsjWarningSingle(padre.tipo_msj)
         vari.render =False
         vari.monto_total=0
+        vari.devuelta =0
+        vari.recibido=0
         caja.devuelta_2.setText("")
         return
    
@@ -110,7 +115,8 @@ def devuelta(caja,padre):
    
    #Calcula el monto a devolver
    monto_devolver = (vari.monto_total - vari.mont_pagado ) * -1
-
+   vari.devuelta =monto_devolver
+   vari.recibido= vari.mont_pagado
    vari.gen_factura = True
 
    if not vari.render:
@@ -411,7 +417,7 @@ async def buscar_clientes():
         print("error:" ,e)
         pass
     
-async def generar_facturas(padre,id):
+async def generar_facturas(padre,cliente):
        # jump
 
     
@@ -433,7 +439,7 @@ async def generar_facturas(padre,id):
         usuario = padre.usuario
         
         factura = padre.articulos[0:]
-        factura.append({"cliente_id":id})
+        factura.append({"cliente_id":cliente["id"]})
         factura= json.dumps(factura)
         # baseDeDatos = db()
         # conn = baseDeDatos.crearConnexion()
@@ -465,7 +471,7 @@ async def generar_facturas(padre,id):
                     padre.sendMsjError(padre.tipo_msj)
                     print(info["res"])
                     return
-              
+               
         except sqlite3.Error as err:
             print(err)
             return
@@ -485,12 +491,16 @@ async def generar_facturas(padre,id):
             data.append(fecha)
             data.append(item["costo"])
             data.append(item["descuento"])
+            data.append(vari.recibido)
+            data.append(vari.devuelta)
+            no_factura=0
             resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps(data),headers=headers)
             info = resp.json()
            
             if not info["ok"]:
                 #msj erro al clienete 
                 return
+            no_factura = info["res"]
             vari.render =False
             vari.mont_pagado=0
             vari.monto_total=0
@@ -502,13 +512,24 @@ async def generar_facturas(padre,id):
             padre.tipo_msj.text = "Factura generada correctamente"
             padre.sendMsjSuccess(padre.tipo_msj)
             
-            limpiar_completo(padre, padre.caja)
             padre.articulos =[]
             contenedor = QWidget()
             padre.caja.sugerencias.setWidget(contenedor)
             padre.caja.detalles.findChild(QLabel,"unidades").setText(str(0))
             asyncio.create_task(buscar_articulos(padre))
-            print("aqui todo bien")
+            data_factura ={
+                "factura":factura,
+                "total":precio_total,
+                "devuelta":vari.devuelta,
+                "recibido":vari.recibido,
+                "no_factura":no_factura,
+                "usuario":padre.usuario.nombre,
+                "cliente":cliente["nombre"],
+                "sector":cliente["sector"],
+                "telefono":cliente['telefono']
+            }
+            printer(data_factura)
+            limpiar_completo(padre, padre.caja)
             # conn.commit()
         except sqlite3.Error as err:
             print(err)
@@ -527,6 +548,10 @@ def limpiar_completo(padre, caja):
     caja.precio_total.setText("")
     caja.total.setText("")
     caja.input_buscar.setText("")
+    vari.monto_total=0
+    vari.devuelta =0
+    vari.recibido=0
+    
    
 
 def sugerencia(texto,padre):
@@ -715,6 +740,7 @@ async def crearCliente(padre):
     URL = os.getenv("URL") + "/api/cliente"
     nombre = padre.ventana_cliente.input_cliente_nombre.text()
     telefono = padre.ventana_cliente.input_cliente_telefono.text()
+    sector = padre.ventana_cliente.input_cliente_sector.text()
     id =""
     cliente = False
     for cliente_ in almacen.clientes:
@@ -732,10 +758,17 @@ async def crearCliente(padre):
     data = []
     data.append(nombre)
     data.append(telefono)
+    data.append(sector)
+    cliente
     padre.ventana_cliente.hide()
 
     if not cliente:
-
+        cliente ={
+            "nombre":nombre,
+            "sector":sector,
+            "telefono":telefono,
+            "id":""
+        }
         try:
             if api.session != "":
                 if not api.session.closed:
@@ -748,12 +781,12 @@ async def crearCliente(padre):
                     print(result['res'])
                     return 
                 id =  result['res']
-                print(id)
-                await generar_facturas(padre,id)        
+                cliente["id"] = id
+                await generar_facturas(padre,cliente)        
         except Exception as e:
             print("error:" ,e)
             pass
     else:
-        await generar_facturas(padre,cliente["_id"])   
+        await generar_facturas(padre,cliente)   
 
         

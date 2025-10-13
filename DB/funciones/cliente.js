@@ -3,7 +3,8 @@ export const setCliente = async (req,res)=>{
     const data = req.body
     const new_cliente = {
         nombre: data[0],
-        telefono :data[1]
+        telefono :data[1],
+        sector:data[2]
     }
     const Cliente = await getClienteModel()
     const cliente = await new Cliente(new_cliente)

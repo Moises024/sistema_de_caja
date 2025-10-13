@@ -13,7 +13,8 @@ const getClienteModel = async () => {
   const clienteSchema = new mongoose.Schema({
     id: Number,
     nombre: { type: String, required: true },
-    telefono: { type: String, required: true }
+    telefono: { type: String, required: true },
+    sector: { type: String, required: true, default:""}
   });
 
   clienteSchema.plugin(AutoIncrement, { inc_field: 'id' });

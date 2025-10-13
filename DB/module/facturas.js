@@ -20,6 +20,8 @@ const getFacturaModel = async () => {
     factura: { type: String, required: true },
     total: { type: Number, required: true },
     fecha: { type: Number,required:true },
+    recibido: { type: Number,required:true,default:0 },
+    devuelta: { type: Number,required:true, default:0},
   });
 
   facturaSchema.plugin(AutoIncrement, { inc_field: 'no_factura' });
