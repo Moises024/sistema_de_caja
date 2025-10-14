@@ -711,7 +711,7 @@ def click_ok_caja(padre):
 
 def msj_rebaja(padre,descuento):
         padre.tipo_msj.titulo = "Error"
-        padre.tipo_msj.text = f"El sistema no permite una rebaja de ${formatearDigitos(descuento)}"
+        padre.tipo_msj.text = "El sistema no te permite esta cantidad de descuento"
         padre.sendMsjError(padre.tipo_msj)
         padre.key_number = False
 def connect_label(label,padre):

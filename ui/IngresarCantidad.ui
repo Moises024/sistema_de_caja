@@ -50,9 +50,18 @@ font-size: 18px;</string>
      <height>41</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Dubai</family>
+     <pointsize>17</pointsize>
+     <weight>9</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="styleSheet">
     <string notr="true">font-size: 15px;
-font: 75 20pt &quot;Dubai&quot;;</string>
+font: 75 17pt &quot;Dubai&quot;;</string>
    </property>
    <property name="text">
     <string>Ingrese la cantidad</string>

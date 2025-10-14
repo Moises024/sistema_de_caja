@@ -24,7 +24,8 @@ def printer(data,flags=True):
     telefono = b"809-603-8368"
     hora = str(datetime.now().hour).encode()
     min = str(datetime.now().minute).encode()
-    fecha = str(datetime.now().date()).encode()
+    fecha = datetime.now().date().strftime("%d/%m/%Y")
+    fecha = str(fecha).encode()
     sector = str(data["sector"]).encode()
     tel = str(format_us(data["telefono"])).encode()
 
