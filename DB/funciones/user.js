@@ -15,7 +15,7 @@ export const register = async (req, res) => {
         await usuario.save()
         res.json({ ok: true, res: "Usuario creado correctamente." })
     } catch (err) {
-        console.log(err)
+        
         res.json({ ok: false, res: "No se pudo crear el usuario." })
     }
 }

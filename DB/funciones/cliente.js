@@ -33,10 +33,10 @@ export const updateCliente = async (req,res)=>{
             const resp = await Cliente.updateOne({_id:id},{
                 $set:cliente
             })
-            console.log("dorga",resp)
+            
             res.json({ok:true,res:"Loque sea"})
         }catch(err){
-             console.log("aquii: ",err)
+            
             res.json({ok:false,res:err})
         }
 

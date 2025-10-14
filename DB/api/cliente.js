@@ -14,7 +14,7 @@ export default function handler(req,res){
             
             return setCliente(req,res)
         }
-        console.log(parseInt(req.headers["id"]))
+        
         if(parseInt(req.headers["id"]) === 1)
         {
             return updateCliente(req,res)

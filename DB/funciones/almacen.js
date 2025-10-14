@@ -28,7 +28,7 @@ export const getAlmacen = async (req, res) => {
         const articulos = await Almacen.find({}).sort({id:-1})
         res.json({ ok: true, res: articulos })
     } catch (err) {
-        console.log(err)
+        
         res.json({ ok: false, res: "No se pudieron conseguir los artículos. ", error: err,path:path.resolve() })
     }
 }
@@ -40,7 +40,7 @@ export const delArticulo = async (req, res) => {
         await Almacen.findOneAndDelete({id:data._id})
         res.json({ ok: true, res: "Artículo eliminado correctamente." })
     } catch (err) {
-        console.log(err)
+        
         res.json({ ok: false, res: "No se pudo eliminar el artículo." })
     }
 

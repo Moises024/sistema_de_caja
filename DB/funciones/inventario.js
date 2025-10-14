@@ -42,7 +42,7 @@ export const getInventario = async (req, res) => {
 
         res.json({ ok: true, res: data })
     } catch (error) {
-        console.log(error)
+       
 
         res.json({ ok: true, res: "No se pudo encontrar dicha factura.", error })
     }
@@ -76,7 +76,7 @@ export const getInventarioUsuario = async (req, res) => {
 
         res.json({ ok: true, res: datos })
     } catch (error) {
-        console.log(error)
+        
 
         res.json({ ok: false, res: "No se pudo encontrar dicha factura.", error })
     }
@@ -98,7 +98,7 @@ export const getInventarioNumber = async (req, res) => {
         res.json({ ok: true, res: datos.no_factura })
 
     } catch (error) {
-        console.log(error)
+        
         res.json({ ok: false, res: "No se pudo encontrar dicha factura.", error })
     }
 }
