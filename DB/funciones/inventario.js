@@ -17,7 +17,7 @@ export const addInventario = async (req, res) => {
             devuelta: data[7]
         }
         const factura = await new Facturas(data_factura)
-        console.log(factura)
+        
         await factura.save()
         req.headers["_id"] = factura._id
         await getInventarioNumber(req, res)

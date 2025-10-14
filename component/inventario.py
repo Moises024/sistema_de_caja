@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import QTableWidgetItem,QListWidgetItem,QTableWidget,QSizePolicy,QHeaderView,QLabel,QWidget,QVBoxLayout,QFrame
-from component.db import db
 from PyQt6.QtGui import QCursor,QColor
 from PyQt6.QtCore import Qt
 import sqlite3
@@ -12,6 +11,7 @@ import aiohttp
 from dotenv import load_dotenv
 from component.funciones import formatearDigitos ,format_us
 from component.caja import buscar_clientes
+from component.printer import printer
 import asyncio
 load_dotenv()
 
@@ -26,7 +26,7 @@ class Almacen:
 almacen= Almacen()
 
 class Item:
-    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles,costo):   
+    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles,costo,devuelta,recibido):   
         self.usuario=usuario
         self.no_factura=no_factura
         self.total=total
@@ -34,30 +34,42 @@ class Item:
         self.usuario_id = usuario_id  
         self.detalles = detalles
         self.costo = costo
+        self.devuelta =devuelta
+        self.recibido = recibido
 
 async def agrear_lista_elimar(row,c,padre):
     if c == 5 :
         if  padre.pantalla_detalles.isVisible():
             padre.pantalla_detalles.hide()
         detalles = json.loads(almacen.facturas[row].detalles)
-        print(almacen.facturas[row])
+        
         clean_cliente(padre)
         ventanita = QWidget()
-        data =[]
+        facturas =[]
         layout = QVBoxLayout(ventanita)
 
         padre.pantalla_detalles.no_factura.setText(str(almacen.facturas[row].no_factura))
-        #######locqueerrs
+        total = almacen.facturas[row].total
+        devuelta = almacen.facturas[row].devuelta
+        recibido = almacen.facturas[row].recibido
+        vendedor = almacen.facturas[row].usuario
+        no_factura = almacen.facturas[row].no_factura
+        descuento =0
+        facturas = almacen.facturas[row].detalles
+        print("Entrando..")
+        nombre=""
+        telefono=""
+        sector=""
         for detalle in detalles:
             try:
-                data.append({"factura":detalle})
+                print("detalles..")
                 detalle["nombre"]
                 label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
                 label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
                 label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
                 label_4  = QLabel("Descuento: " + formatearDigitos(str(detalle["descuento"])))
                 label_5  = QLabel("Total: " + formatearDigitos(str(detalle["total"])))
-
+                descuento += float(detalle["descuento"])
                 linea = QFrame()
                 linea.setFrameShape(QFrame.Shape.HLine)
                 linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
@@ -69,6 +81,7 @@ async def agrear_lista_elimar(row,c,padre):
                 layout.addWidget(label_5)
                 layout.addWidget(linea)
             except :
+                print("execion..")
                 clientes = await buscar_clientes()
                 
                 data_cliente =""
@@ -82,14 +95,35 @@ async def agrear_lista_elimar(row,c,padre):
                     padre.pantalla_detalles.detalle_telefono.setText(format_us(data_cliente["telefono"]))
                     padre.pantalla_detalles.detalle_sector.setText(data_cliente["sector"])
                 padre.cliente_id = detalle["cliente_id"]
-                
-                # data_ = {
-                #     "facturas":data,
-                #     "total":
-                # }
-                    
-                # padre.pantalla_detalles.detalle_copia.clicked.connect(print())
 
+               
+
+                if data_cliente["nombre"]:
+                    nombre= data_cliente["nombre"]
+
+                if data_cliente["telefono"]:
+                    telefono= data_cliente["telefono"]
+
+                if data_cliente["sector"]:
+                    sector= data_cliente["sector"]
+
+            data = {
+                "factura":facturas,
+                "total":total,
+                "devuelta":devuelta,
+                "recibido":recibido,
+                "no_factura":no_factura,
+                "usuario":vendedor.split(" ")[0],
+                "cliente":nombre,
+                "sector":sector,
+                "telefono":telefono
+            }
+                
+            if padre.connect_printer:
+                padre.pantalla_detalles.btn_copia.clicked.disconnect(padre.copia_)
+                padre.connect_printer = False
+            padre.copia_ = padre.pantalla_detalles.btn_copia.clicked.connect(lambda:printer(data,False))
+            padre.connect_printer = True
                 
 
                 
@@ -110,7 +144,6 @@ async def agrear_lista_elimar(row,c,padre):
         
         #aqui
         padre.pantalla_detalles.show()
-        print("show")
         return
     if almacen.item :
         almacen.eliminadas = almacen.item 
@@ -341,10 +374,17 @@ async def buscar_facturas(padre):
              resultado = await resp.json()
              
              for fila in resultado["res"]:
+                devuelta=0
+                recibido =0
+                if fila["devuelta"]:
+                    devuelta = fila["devuelta"]
+                if fila["recibido"]:
+                    recibido =fila["recibido"]
+
                 fecha = datetime.datetime.fromtimestamp(fila["fecha"])
                 fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
                 usuario_id = fila["usuario_id"]["id"]
-                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"],0)
+                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"],0,devuelta,recibido)
                 facturas.append(factura)
              almacen.facturas = facturas
              await api.session.close()

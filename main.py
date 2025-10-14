@@ -178,6 +178,8 @@ class Ventana(QMainWindow):
         self.active = False
         self.btn_salir = None
         self.cliente_id=""
+        self.copia_ =""
+        self.connect_printer =False
         #pantalla clientes 
         self.ventana_cliente = loadUi("./ui/cliente.ui")
         self.ventana_cliente.btn_ok.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -235,7 +237,7 @@ class Ventana(QMainWindow):
         
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
-        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura,self.pantalla_detalles.btn_detalle_actualizar,self.pantalla_detalles.detalle_copia]
+        botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura,self.pantalla_detalles.btn_detalle_actualizar,self.pantalla_detalles.btn_copia]
         conectar_botones_inventario(botones_inventario,self.inventario,self)
 
         #cagar regitsro ui
