@@ -56,13 +56,12 @@ async def agrear_lista_elimar(row,c,padre):
         no_factura = almacen.facturas[row].no_factura
         descuento =0
         facturas = almacen.facturas[row].detalles
-        print("Entrando..")
         nombre=""
         telefono=""
         sector=""
         for detalle in detalles:
             try:
-                print("detalles..")
+                
                 detalle["nombre"]
                 label_1  = QLabel("Nombre: " +str(detalle["nombre"]))
                 label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
@@ -81,7 +80,7 @@ async def agrear_lista_elimar(row,c,padre):
                 layout.addWidget(label_5)
                 layout.addWidget(linea)
             except :
-                print("execion..")
+                
                 clientes = await buscar_clientes()
                 
                 data_cliente =""

@@ -5,7 +5,7 @@ import { cors } from "../funciones/cors.js"
 
 export default function handler(req,res){
     cors(req,res)
-    
+   
     if(req.method === "POST"){
 
         if(parseInt(req.headers["id"]) === 0)
