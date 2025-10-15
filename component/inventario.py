@@ -303,8 +303,12 @@ def hacer_inventario(padre):
         if fecha_int  >= fecha_int_inicio and fecha_int  <= fecha_int_final:
             inventario += int(item.total)
             facturas = json.loads(item.detalles)
+           
             for factura_ in facturas:
-                compra += int(int(factura_["costo"]) * int(factura_["cantidad"]))
+                try:
+                      compra += int(int(factura_["costo"]) * int(factura_["cantidad"]))
+                except:
+                    pass
    #Jump 
     ganancia = inventario - compra
    
