@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
-    <height>456</height>
+    <width>462</width>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,9 +23,9 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>60</y>
-     <width>211</width>
+     <x>140</x>
+     <y>40</y>
+     <width>201</width>
      <height>41</height>
     </rect>
    </property>
@@ -41,7 +41,7 @@ font: 75 20pt &quot;Dubai&quot;;</string>
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>150</y>
+     <y>130</y>
      <width>241</width>
      <height>41</height>
     </rect>
@@ -65,7 +65,7 @@ font-size: 18px;</string>
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>210</y>
+     <y>190</y>
      <width>241</width>
      <height>41</height>
     </rect>
@@ -89,7 +89,7 @@ font-size: 18px;</string>
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>270</y>
+     <y>250</y>
      <width>241</width>
      <height>41</height>
     </rect>
@@ -113,7 +113,7 @@ font-size: 18px;</string>
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>370</y>
+     <y>390</y>
      <width>161</width>
      <height>51</height>
     </rect>
@@ -132,7 +132,7 @@ border-radius: 10px;</string>
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>270</y>
+     <y>250</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -149,7 +149,7 @@ font: 75 20pt &quot;Dubai&quot;;</string>
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>210</y>
+     <y>190</y>
      <width>91</width>
      <height>41</height>
     </rect>
@@ -165,9 +165,9 @@ font: 75 20pt &quot;Dubai&quot;;</string>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>150</y>
-     <width>111</width>
+     <x>50</x>
+     <y>130</y>
+     <width>101</width>
      <height>41</height>
     </rect>
    </property>
@@ -177,6 +177,47 @@ font: 75 20pt &quot;Dubai&quot;;</string>
    </property>
    <property name="text">
     <string>Teléfono:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>310</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font-size: 15px;
+font: 75 20pt &quot;Dubai&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Envío:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="input_cliente_emvio">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>310</y>
+     <width>241</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 1px solid #999;
+border-radius: 8px;
+font-size: 18px;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="placeholderText">
+    <string>Envío</string>
    </property>
   </widget>
  </widget>

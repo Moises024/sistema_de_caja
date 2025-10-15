@@ -530,7 +530,7 @@ async def generar_facturas(padre,cliente):
                 "sector":cliente["sector"],
                 "telefono":cliente['telefono']
             }
-            printer(data_factura)
+           
             limpiar_completo(padre, padre.caja)
             # conn.commit()
         except sqlite3.Error as err:
@@ -705,9 +705,11 @@ def click_ok_caja(padre):
     
         padre.articulos.append(item_)  
   
-    print(len(padre.articulos))
+    
     padre.ventana_cantidad.hide()
     buscar_item(padre.caja,padre,[item_])
+
+   
 
 def msj_rebaja(padre,descuento):
         padre.tipo_msj.titulo = "Error"
@@ -762,6 +764,8 @@ async def crearCliente(padre):
     cliente
     padre.ventana_cliente.hide()
 
+    
+
     if not cliente:
         cliente ={
             "nombre":nombre,
@@ -787,6 +791,12 @@ async def crearCliente(padre):
             print("error linea 785 de caja:" ,e)
             pass
     else:
-        await generar_facturas(padre,cliente)   
+        await generar_facturas(padre,cliente) 
 
-        
+    limpiar_completo(padre, padre.caja)
+    limpiarcliente(padre)
+
+def limpiarcliente(padre):
+    padre.ventana_cliente.input_cliente_nombre.setText("")
+    padre.ventana_cliente.input_cliente_telefono.setText("")
+    padre.ventana_cliente.input_cliente_sector.setText("")

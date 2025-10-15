@@ -537,6 +537,10 @@
    'C:\\Users\\Cristopher Bueno\\Desktop\\sistema de '
    'caja\\sistema_de_caja\\component\\main_window.py',
    'PYMODULE'),
+  ('component.printer',
+   'C:\\Users\\Cristopher Bueno\\Desktop\\sistema de '
+   'caja\\sistema_de_caja\\component\\printer.py',
+   'PYMODULE'),
   ('component.registrar',
    'C:\\Users\\Cristopher Bueno\\Desktop\\sistema de '
    'caja\\sistema_de_caja\\component\\registrar.py',
