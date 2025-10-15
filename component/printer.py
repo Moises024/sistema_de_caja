@@ -4,7 +4,7 @@ import json
 from component.funciones import format_us
 
 def printer(data,flags=True):
-    print("imprimiendo..")
+    # print("imprimiendo..")
     facturas = json.loads(data["factura"])
     devuelta = str(data["devuelta"]).encode()
     recibido = str(data["recibido"]).encode()
@@ -74,12 +74,12 @@ def printer(data,flags=True):
 
     raw_text +=(
         b"\n" * 3 +
+        LEFT + b"Envio:  " + b"$" + envio + b".00" + b"\n"+
         LEFT + b"Total: "+ b"$"+ total + b".00" + b"\n"+
         LEFT+
                 b"----------------------"  * 2 + b"\n" +
                 b"Recibido:  " + b"$" + recibido + b".00"                 + b"\n" +
                 b"Devuelta:  " + b"$" + devuelta + b".00"              + b"\n" +
-                str("Envío:  ").encode("utf-8") + b"$" + envio + b".00"              + b"\n" +
                 b"----------------------"  * 2 + b"\n" 
                 
                 )

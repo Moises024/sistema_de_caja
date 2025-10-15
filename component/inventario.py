@@ -91,7 +91,7 @@ async def agrear_lista_elimar(row,c,padre):
                         data_cliente = cliente
                         break
                 if data_cliente :
-                    print(data_cliente)
+                    # print(data_cliente)
                     padre.pantalla_detalles.detalle_nombre.setText(data_cliente["nombre"])
                     padre.pantalla_detalles.detalle_telefono.setText(format_us(data_cliente["telefono"]))
                     padre.pantalla_detalles.detalle_sector.setText(data_cliente["sector"])
