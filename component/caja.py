@@ -52,6 +52,7 @@ class varibles:
     mont_pagado=0
     devuelta=0
     recibido=0
+    envio=0
     row_aliminada =""
     gen_factura = False
 vari = varibles()
@@ -88,7 +89,7 @@ def devuelta(caja,padre):
    #Calcula el monto total a cobrar
    for articulo in padre.articulos:
         vari.monto_total+= int(articulo["total"])
-       
+   vari.monto_total +=vari.envio
    vari.mont_pagado = int(vari.mont_pagado)
    keys.valor =""
 
@@ -255,9 +256,10 @@ def render_table(padre,tabla,numero_articulo,caja,item,tabla_row):
         total += int((articulo["total"]))
        
     tabla.cellClicked.connect(celda_click)
-    caja.total.setText(formatearDigitos(str(total)))
+
+    caja.total.setText(formatearDigitos(str(total+vari.envio)))
     padre.caja.detalles.findChild(QLabel,"unidades").setText(str(unidades))
-    padre.inputs[2].setText(formatearDigitos(str(total)))
+    padre.inputs[2].setText(formatearDigitos(str(total+vari.envio)))
 
     # Limpia la lista si hay artículos
     if(tabla_pointer >= 1 and padre.cola_item_caja):
@@ -435,7 +437,7 @@ async def generar_facturas(padre,cliente):
             padre.sendMsjWarningSingle(padre.tipo_msj)
             return
         
-        precio_total = int(vari.monto_total)
+        precio_total = int(vari.monto_total) 
         fecha = int(time.time())
         usuario = padre.usuario
         
@@ -495,6 +497,8 @@ async def generar_facturas(padre,cliente):
             data.append(item["descuento"])
             data.append(vari.recibido)
             data.append(vari.devuelta)
+            data.append(vari.envio)
+            
             no_factura=0
             resp = requests.post(os.getenv("URL")+"/api/inventario",data=json.dumps(data),headers=headers)
             info = resp.json()
@@ -528,9 +532,10 @@ async def generar_facturas(padre,cliente):
                 "usuario":padre.usuario.nombre,
                 "cliente":cliente["nombre"],
                 "sector":cliente["sector"],
-                "telefono":cliente['telefono']
+                "telefono":cliente['telefono'],
+                "envio":vari.envio
             }
-           
+            printer(data_factura)
             limpiar_completo(padre, padre.caja)
             # conn.commit()
         except sqlite3.Error as err:
@@ -605,6 +610,7 @@ def click_ok_caja(padre):
     items_almacen = ""
     valor = padre.ventana_cantidad.input_cantidad.text()
     descuento = padre.ventana_cantidad.input_descuento.text()
+    envio = padre.ventana_cantidad.input_envio.text()
 
     
     if valor == '':
@@ -613,10 +619,13 @@ def click_ok_caja(padre):
         descuento=0
     padre.ventana_cantidad.input_cantidad.setText("")
     padre.ventana_cantidad.input_descuento.setText("")
+    padre.ventana_cantidad.input_envio.setText("")
     cantidad =False 
     try:
         cantidad = int(valor)
         descuento = int(descuento)
+        envio =int(envio)
+        vari.envio =envio
     except:
         padre.tipo_msj.titulo = "Error"
         padre.tipo_msj.text = "Solo se permiten números"
@@ -702,7 +711,7 @@ def click_ok_caja(padre):
                 item_["descuento"] = descuento
                        
     if bandera:
-    
+        
         padre.articulos.append(item_)  
   
     
@@ -761,6 +770,7 @@ async def crearCliente(padre):
     data.append(nombre)
     data.append(telefono)
     data.append(sector)
+    
     cliente
     padre.ventana_cliente.hide()
 

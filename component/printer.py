@@ -8,6 +8,8 @@ def printer(data,flags=True):
     facturas = json.loads(data["factura"])
     devuelta = str(data["devuelta"]).encode()
     recibido = str(data["recibido"]).encode()
+    envio= str(data["envio"]).encode()
+    
     no_factura = str(data["no_factura"]).encode()
     vendedor = data["usuario"].encode()
     cliente = data["cliente"].encode()
@@ -77,6 +79,7 @@ def printer(data,flags=True):
                 b"----------------------"  * 2 + b"\n" +
                 b"Recibido:  " + b"$" + recibido + b".00"                 + b"\n" +
                 b"Devuelta:  " + b"$" + devuelta + b".00"              + b"\n" +
+                str("Envío:  ").encode("utf-8") + b"$" + envio + b".00"              + b"\n" +
                 b"----------------------"  * 2 + b"\n" 
                 
                 )

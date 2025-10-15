@@ -1,3 +1,4 @@
+
 import getFacturaModel from "../module/facturas.js"
 import getUsuarioModel from "../module/usuarios.js"
 import mongoose from 'mongoose';
@@ -14,7 +15,8 @@ export const addInventario = async (req, res) => {
             total: data[2],
             fecha: data[3],
             recibido: data[6],
-            devuelta: data[7]
+            devuelta: data[7],
+            envio:data[8]
         }
         const factura = await new Facturas(data_factura)
         
@@ -104,7 +106,23 @@ export const getInventarioNumber = async (req, res) => {
 }
 
 
+export const actualizarEnvio = async (data)=>{
+     const Facturas = await getFacturaModel()
+     try {
+        const factura = await Facturas.findOne({_id:data[0]})
+        
+        const envio = factura.envio
+        const total = factura.total
+        const new_total = (total - envio)+ parseInt(data[1])
 
+         await Facturas.updateOne({_id:data[0]},{$set:{envio:data[1],total:new_total}})
+         return true
+     } catch (error) {
+        console.log(error)
+
+        return error
+     }
+}
 export const getCurrentFacturaSeq = async () => {
     const conn = mongoose.connection;
 

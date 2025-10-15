@@ -26,7 +26,7 @@ class Almacen:
 almacen= Almacen()
 
 class Item:
-    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles,costo,devuelta,recibido):   
+    def __init__(self,usuario,no_factura,total,fecha,usuario_id,detalles,costo,devuelta,recibido,envio,_id):   
         self.usuario=usuario
         self.no_factura=no_factura
         self.total=total
@@ -36,6 +36,8 @@ class Item:
         self.costo = costo
         self.devuelta =devuelta
         self.recibido = recibido
+        self.envio = envio
+        self._id = _id
 
 async def agrear_lista_elimar(row,c,padre):
     if c == 5 :
@@ -49,16 +51,19 @@ async def agrear_lista_elimar(row,c,padre):
         layout = QVBoxLayout(ventanita)
 
         padre.pantalla_detalles.no_factura.setText(str(almacen.facturas[row].no_factura))
+        padre.pantalla_detalles.detalle_envio.setText(str(almacen.facturas[row].envio))
         total = almacen.facturas[row].total
         devuelta = almacen.facturas[row].devuelta
         recibido = almacen.facturas[row].recibido
         vendedor = almacen.facturas[row].usuario
         no_factura = almacen.facturas[row].no_factura
+        padre.factura_detalle_id = almacen.facturas[row]._id
         descuento =0
         facturas = almacen.facturas[row].detalles
         nombre=""
         telefono=""
         sector=""
+        envio=almacen.facturas[row].envio
         for detalle in detalles:
             try:
                 
@@ -67,18 +72,14 @@ async def agrear_lista_elimar(row,c,padre):
                 label_2  = QLabel("Cantidad: " +str(detalle["cantidad"]))
                 label_3  = QLabel("Precio: " + formatearDigitos(str(detalle["precio"])))
                 label_4  = QLabel("Descuento: " + formatearDigitos(str(detalle["descuento"])))
-                label_5  = QLabel("Total: " + formatearDigitos(str(detalle["total"])))
+                
                 descuento += float(detalle["descuento"])
-                linea = QFrame()
-                linea.setFrameShape(QFrame.Shape.HLine)
-                linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
-                linea.setStyleSheet("color: gray;")
+                
                 layout.addWidget(label_1)
                 layout.addWidget(label_2)
                 layout.addWidget(label_3)
                 layout.addWidget(label_4)
-                layout.addWidget(label_5)
-                layout.addWidget(linea)
+                
             except :
                 
                 clientes = await buscar_clientes()
@@ -90,9 +91,11 @@ async def agrear_lista_elimar(row,c,padre):
                         data_cliente = cliente
                         break
                 if data_cliente :
+                    print(data_cliente)
                     padre.pantalla_detalles.detalle_nombre.setText(data_cliente["nombre"])
                     padre.pantalla_detalles.detalle_telefono.setText(format_us(data_cliente["telefono"]))
                     padre.pantalla_detalles.detalle_sector.setText(data_cliente["sector"])
+                    # padre.pantalla_detalles.detalle_envio.setText(data_cliente["envio"])
                 padre.cliente_id = detalle["cliente_id"]
 
                
@@ -106,6 +109,8 @@ async def agrear_lista_elimar(row,c,padre):
                 if data_cliente["sector"]:
                     sector= data_cliente["sector"]
 
+                
+
             data = {
                 "factura":facturas,
                 "total":total,
@@ -115,9 +120,10 @@ async def agrear_lista_elimar(row,c,padre):
                 "usuario":vendedor.split(" ")[0],
                 "cliente":nombre,
                 "sector":sector,
-                "telefono":telefono
+                "telefono":telefono,
+                "envio":envio
             }
-                
+            
             if padre.connect_printer:
                 padre.pantalla_detalles.btn_copia.clicked.disconnect(padre.copia_)
                 padre.connect_printer = False
@@ -125,7 +131,13 @@ async def agrear_lista_elimar(row,c,padre):
             padre.connect_printer = True
                 
 
-                
+        linea = QFrame()
+        linea.setFrameShape(QFrame.Shape.HLine)
+        linea.setFrameShadow(QFrame.Shadow.Sunken)  # opcional
+        linea.setStyleSheet("color: gray;")
+        label_5  = QLabel("Total: " + formatearDigitos(str(total)))
+        layout.addWidget(label_5)
+        layout.addWidget(linea)  
           
             
         padre.pantalla_detalles.detalles.setWidget(ventanita) 
@@ -311,8 +323,6 @@ def hacer_inventario(padre):
                     pass
    #Jump 
     ganancia = inventario - compra
-   
-
 
     padre.inventario.msj_1.setText(f"El inventario desde el { mes}")
     padre.inventario.msj_2.setText(f"hasta el {ano} es de:")
@@ -379,15 +389,21 @@ async def buscar_facturas(padre):
              for fila in resultado["res"]:
                 devuelta=0
                 recibido =0
+                envio =0
                 if fila["devuelta"]:
                     devuelta = fila["devuelta"]
+
                 if fila["recibido"]:
                     recibido =fila["recibido"]
+
+                if fila["envio"]:
+                    envio =fila["envio"]
+              
 
                 fecha = datetime.datetime.fromtimestamp(fila["fecha"])
                 fecha_formateada = fecha.strftime('%d/%m/%Y %H:%M:%S')
                 usuario_id = fila["usuario_id"]["id"]
-                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"],0,devuelta,recibido)
+                factura = Item(fila["usuario_id"]["nombre"] +" "+fila["usuario_id"]["apellido"], fila["no_factura"], fila["total"],fecha_formateada,usuario_id,fila["factura"],0,devuelta,recibido,envio,fila["_id"])
                 facturas.append(factura)
              almacen.facturas = facturas
              await api.session.close()
@@ -424,7 +440,8 @@ async def actulizar_CLientes(padre):
         nombre = padre.pantalla_detalles.detalle_nombre.text()
         telefono = padre.pantalla_detalles.detalle_telefono.text()
         sector = padre.pantalla_detalles.detalle_sector.text()
-        if nombre == "" or telefono =="" or sector =="":
+        envio = padre.pantalla_detalles.detalle_envio.text()
+        if nombre == "" or telefono =="" or sector =="" or envio == "":
             padre.main_window.cargando.hide()
             #msj
             return
@@ -433,6 +450,8 @@ async def actulizar_CLientes(padre):
         data.append(re.sub(r'\D', '', telefono))
         data.append(sector)
         data.append(padre.cliente_id)
+        data.append(envio)
+        data.append(padre.factura_detalle_id)
         headers ={
             "Content-Type":"Application/json",
             "id":"1"
@@ -450,7 +469,8 @@ async def actulizar_CLientes(padre):
                     #msj error
                     return
                 print(resultado["res"])
-                padre.main_window.cargando.hide()
+                
+                await buscar_facturas(padre)
         except Exception as e:
             print("errror: ",e)
             padre.main_window.cargando.hide()

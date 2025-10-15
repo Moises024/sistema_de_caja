@@ -180,6 +180,7 @@ class Ventana(QMainWindow):
         self.cliente_id=""
         self.copia_ =""
         self.connect_printer =False
+        self.factura_detalle_id=""
         #pantalla clientes 
         self.ventana_cliente = loadUi("./ui/cliente.ui")
         self.ventana_cliente.btn_ok.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
