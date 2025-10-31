@@ -265,7 +265,7 @@ def render_table(padre,cantida,item=False):
     padre.almacen.tabla_articulo.setItemWidget(Item_,tabla)
     padre.cola_item_almacen = Item_
     
-#Función para agregar un nuevo artículo al inventario    
+#Función para agregar un nuevo artículo al almacén    
 async def agregar(padre,propiedades=False):
     from component.main_window import cargando
     await cargando(padre)
@@ -287,8 +287,29 @@ async def agregar(padre,propiedades=False):
     cantidad = cantidad.strip()
     nombre = nombre.strip()
 
+   
+    
+    try:
+        precio = int(precio) 
+        cantidad = int(cantidad) 
+        costo = int(costo)
+        pass
+    except Exception as err:
+        padre.main_window.cargando.hide()
+        padre.tipo_msj.titulo = "Aviso"
+        padre.tipo_msj.text = "Solo se aceptan números."
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        return
+
+    #verificar que no haya números negativos ni sea 0
+    if precio <=0 or cantidad <=0 or costo <=0:
+        padre.main_window.cargando.hide()
+        padre.tipo_msj.titulo = "Aviso"
+        padre.tipo_msj.text = "Solo se aceptan números positivos mayor que 0."
+        padre.sendMsjWarningSingle(padre.tipo_msj)
+        return 
     #Verifica si los campos están vacíos
-    if nombre == '' or precio.strip() == "" or cantidad ==""or costo == "":
+    if nombre == '':
 
         padre.main_window.cargando.hide()
         padre.tipo_msj.titulo = "Aviso"
