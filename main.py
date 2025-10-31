@@ -235,7 +235,7 @@ class Ventana(QMainWindow):
         self.main_window = loadUi("./ui/mainWindow.ui")
        
         self.botones_main_window = [self.main_window.nav_1,self.main_window.nav_2,self.main_window.nav_3,self.main_window.nav_4]
-        
+        self.main_window.destroyed.connect(self.salir)
         #cagar inventario 
         self.inventario = loadUi("./ui/inventario.ui")
         botones_inventario = [self.inventario.btn_inventario,self.inventario.btn_actualizar_factura,self.inventario.btn_eliminar_factura,self.pantalla_detalles.btn_detalle_actualizar,self.pantalla_detalles.btn_copia]
@@ -641,7 +641,7 @@ async def main():
      tecla_listener = TeclaListener(ventana)
      app.installEventFilter(tecla_listener)
      ventana.hide()
-
+   
     # Corre el event loop de Qt con asyncio integrado
      await asyncio.Future()
 
